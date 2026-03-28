@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPARK Lab Bali — The Physical Apex | Hanzo OS × Elevate Wellbeing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500;700;800&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest:#1B3A2D;--forest2:#243D30;--forest3:#0E1F18;
+  --sand:#C8B89A;--sand2:#E8DDD0;--sand3:#F5F0E8;
+  --gold:#C9A227;--gold2:#E8BE3F;--gold3:#FFD700;
+  --stone:#3A3530;--stone2:#282420;
+  --blk:#0A0C0B;--wht:#F8F5EF;
+  --d1:#D4CEC4;--d2:#A09890;--d3:#605850;
+  --mono:'JetBrains Mono',monospace;
+  --disp:'Barlow Condensed',sans-serif;
+  --serif:'Cormorant Garamond',serif;
+  --bod:'Barlow',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--blk);color:var(--wht);font-family:var(--bod);overflow-x:hidden}
+
+/* ── TEXTURE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.35;
+}
+
+/* ── SUBBRAND BAR ── */
+.sb{
+  position:relative;z-index:10;
+  height:30px;background:rgba(27,58,45,0.6);
+  border-bottom:1px solid rgba(201,162,39,0.15);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;
+}
+.sb-l,.sb-r{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.sb-l{color:var(--gold);display:flex;align-items:center;gap:14px}
+.sb-l span{color:rgba(255,255,255,.3)}
+.sb-r{color:rgba(255,255,255,.2)}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:30px;left:0;right:0;z-index:100;
+  height:52px;
+  background:rgba(10,12,11,.92);
+  border-bottom:1px solid rgba(201,162,39,.12);
+  backdrop-filter:blur(16px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;
+}
+.nav-brand{display:flex;align-items:center;gap:14px}
+.nav-hex{
+  width:26px;height:26px;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+}
+.nav-hex::after{
+  content:'';width:9px;height:9px;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:var(--blk);
+}
+.nav-title{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--wht)}
+.nav-title span{color:var(--gold)}
+.nav-center{display:flex;gap:6px}
+.nav-pill{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--d3);border:1px solid rgba(255,255,255,.07);
+  background:none;padding:5px 12px;cursor:pointer;transition:all .2s;
+}
+.nav-pill:hover{color:var(--gold);border-color:rgba(201,162,39,.3)}
+.nav-cta{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--blk);background:var(--gold);border:none;padding:9px 20px;
+  text-decoration:none;cursor:pointer;transition:background .2s;
+}
+.nav-cta:hover{background:var(--gold3)}
+
+/* ── HERO ── */
+.hero{
+  position:relative;min-height:100vh;
+  padding-top:82px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  overflow:hidden;
+}
+/* Deep forest gradient BG */
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 40%, rgba(27,58,45,.7) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(201,162,39,.08) 0%, transparent 60%),
+    linear-gradient(160deg, var(--forest3) 0%, var(--blk) 60%, var(--stone2) 100%);
+}
+/* Geometric grid overlay */
+.hero-bg::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(201,162,39,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,162,39,.04) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+/* Organic line art — Bali topography suggestion */
+.hero-topo{
+  position:absolute;right:-100px;top:0;bottom:0;width:55%;
+  opacity:.06;
+  background-image:
+    repeating-linear-gradient(12deg, transparent, transparent 28px, rgba(200,184,154,.8) 29px),
+    repeating-linear-gradient(-12deg, transparent, transparent 48px, rgba(200,184,154,.4) 49px);
+}
+
+.hero-inner{
+  position:relative;z-index:2;
+  max-width:1180px;margin:0 auto;width:100%;
+  padding:0 48px 80px;
+}
+
+/* Overline */
+.hero-overline{
+  display:flex;align-items:center;gap:14px;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:28px;
+}
+.hero-overline::before{content:'';width:20px;height:1px;background:var(--gold);display:block}
+.hero-overline .sep{color:rgba(255,255,255,.2);font-weight:400}
+
+/* Main title — editorial serif + condensed collision */
+.hero-title{
+  margin-bottom:24px;
+}
+.hero-title .line1{
+  display:block;
+  font-family:var(--serif);font-size:clamp(52px,7vw,100px);
+  font-weight:300;font-style:italic;
+  color:var(--sand2);line-height:.95;letter-spacing:-.01em;
+}
+.hero-title .line2{
+  display:block;
+  font-family:var(--disp);font-size:clamp(68px,9.5vw,140px);
+  font-weight:900;text-transform:uppercase;
+  color:var(--wht);line-height:.88;letter-spacing:-.02em;
+}
+.hero-title .line3{
+  display:block;
+  font-family:var(--disp);font-size:clamp(68px,9.5vw,140px);
+  font-weight:900;text-transform:uppercase;
+  -webkit-text-stroke:1.5px rgba(255,255,255,.25);color:transparent;
+  line-height:.88;letter-spacing:-.02em;
+}
+.hero-title .gold{color:var(--gold)}
+
+.hero-sub{
+  font-family:var(--mono);font-size:13px;color:var(--d2);line-height:1.8;
+  max-width:500px;margin-bottom:48px;
+}
+.hero-sub strong{color:var(--wht);font-weight:500}
+
+/* Outcome chips */
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:44px}
+.chip{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(201,162,39,.25);
+  padding:5px 12px;display:flex;align-items:center;gap:6px;
+}
+.chip::before{content:'';width:4px;height:4px;background:var(--gold);flex-shrink:0}
+
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
+.btn-gold{
+  font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--blk);background:var(--gold);border:2px solid var(--gold);
+  padding:16px 32px;text-decoration:none;
+  display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:all .2s;
+}
+.btn-gold:hover{background:var(--gold3);border-color:var(--gold3)}
+.btn-outline{
+  font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);
+  padding:16px 26px;text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s;background:transparent;
+}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Scroll indicator */
+.scroll-hint{
+  position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--d3);
+}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,transparent,var(--gold));animation:scrollpulse 2s ease-in-out infinite}
+@keyframes scrollpulse{0%,100%{opacity:.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.1)}}
+
+/* ── EARNED ACCESS SECTION ── */
+.access-sec{background:var(--forest3);position:relative;overflow:hidden}
+.access-sec::before{
+  content:'EARNED ACCESS';
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--disp);font-size:clamp(60px,12vw,160px);font-weight:900;
+  text-transform:uppercase;letter-spacing:.1em;
+  color:rgba(255,255,255,.02);white-space:nowrap;pointer-events:none;
+}
+.si{max-width:1180px;margin:0 auto;padding:88px 48px}
+.sk{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:18px;
+}
+.sk::before{content:'';width:18px;height:1px;background:var(--gold);display:block}
+.st{
+  font-family:var(--disp);font-size:clamp(34px,4.5vw,58px);
+  font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:-.01em;
+  margin-bottom:14px;color:var(--wht);
+}
+.st .serif{font-family:var(--serif);font-weight:300;font-style:italic;text-transform:none;color:var(--sand)}
+
+.access-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:2px;
+  background:rgba(255,255,255,.04);
+  margin-top:52px;border:1px solid rgba(255,255,255,.04);
+}
+.access-col{background:var(--forest3);padding:44px 40px}
+.access-col:first-child{border-right:1px solid rgba(255,255,255,.06)}
+
+/* Ladder steps */
+.ladder{display:flex;flex-direction:column;gap:0}
+.ladder-step{
+  display:flex;gap:20px;align-items:flex-start;
+  padding:22px 0;border-bottom:1px solid rgba(255,255,255,.05);
+  position:relative;
+}
+.ladder-step:last-child{border-bottom:none}
+.ls-num{
+  font-family:var(--disp);font-size:48px;font-weight:900;
+  color:rgba(201,162,39,.12);line-height:1;flex-shrink:0;width:48px;
+}
+.ls-tag{
+  display:inline-block;font-family:var(--mono);font-size:9px;font-weight:800;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--blk);background:var(--gold);padding:3px 9px;margin-bottom:8px;
+}
+.ls-title{
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--wht);margin-bottom:5px;
+}
+.ls-price{
+  font-family:var(--disp);font-size:22px;font-weight:900;
+  color:var(--gold);line-height:1;
+}
+.ls-desc{
+  font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.6;margin-top:4px;
+}
+.ls-gate{
+  position:absolute;right:0;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(201,162,39,.25);padding:3px 8px;
+  background:rgba(201,162,39,.06);
+}
+
+/* Journey diagram right col */
+.journey-flow{display:flex;flex-direction:column;gap:0}
+.jf-step{
+  display:flex;gap:16px;padding:18px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  align-items:flex-start;
+}
+.jf-step:last-child{border-bottom:none}
+.jf-icon{
+  width:36px;height:36px;flex-shrink:0;
+  background:rgba(201,162,39,.08);
+  border:1px solid rgba(201,162,39,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:800;color:var(--gold);
+}
+.jf-body h4{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--wht);margin-bottom:3px;
+}
+.jf-body p{
+  font-family:var(--mono);font-size:10px;color:var(--d2);line-height:1.5;
+}
+.jf-arrow{
+  margin-left:18px;font-family:var(--mono);font-size:14px;color:rgba(201,162,39,.3);
+  padding:2px 0;
+}
+
+/* ── VIKTOR SECTION ── */
+.viktor-sec{
+  background:var(--stone2);
+  border-top:1px solid rgba(201,162,39,.1);
+  border-bottom:1px solid rgba(201,162,39,.1);
+}
+.viktor-inner{
+  max-width:1180px;margin:0 auto;padding:72px 48px;
+  display:grid;grid-template-columns:280px 1fr;gap:64px;align-items:center;
+}
+.viktor-photo{
+  width:100%;aspect-ratio:3/4;
+  background:linear-gradient(145deg,var(--forest) 0%,var(--forest3) 100%);
+  border:1px solid rgba(201,162,39,.15);
+  position:relative;overflow:hidden;
+  display:flex;align-items:flex-end;
+}
+.viktor-photo-placeholder{
+  width:100%;padding:24px;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.12);
+}
+.viktor-photo::before{
+  content:'VIKTOR ZAMAN';
+  position:absolute;bottom:20px;left:20px;right:20px;
+  font-family:var(--disp);font-size:32px;font-weight:900;text-transform:uppercase;
+  color:rgba(255,255,255,.08);
+}
+.viktor-badge{
+  position:absolute;top:16px;right:16px;
+  background:var(--gold);padding:8px 12px;
+  font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--blk);
+}
+.viktor-content{}
+.viktor-kicker{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px;
+}
+.viktor-kicker::before{content:'';width:16px;height:1px;background:var(--gold);display:block}
+.viktor-name{
+  font-family:var(--disp);font-size:clamp(36px,5vw,64px);font-weight:900;
+  text-transform:uppercase;line-height:.9;color:var(--wht);margin-bottom:6px;
+}
+.viktor-role{
+  font-family:var(--serif);font-size:22px;font-weight:300;font-style:italic;
+  color:var(--sand);margin-bottom:28px;
+}
+.viktor-bio{
+  font-family:var(--mono);font-size:12px;color:var(--d2);line-height:1.8;
+  max-width:520px;margin-bottom:28px;
+}
+.viktor-stats{
+  display:flex;gap:0;border:1px solid rgba(201,162,39,.15);
+  width:fit-content;
+}
+.vs{padding:16px 24px;border-right:1px solid rgba(201,162,39,.1)}
+.vs:last-child{border-right:none}
+.vs-n{font-family:var(--disp);font-size:30px;font-weight:900;color:var(--gold);line-height:1;margin-bottom:2px}
+.vs-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--d3)}
+
+/* ── PROGRAMS ── */
+.programs-sec{background:var(--blk)}
+.programs-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:2px;background:rgba(201,162,39,.07);
+  margin-top:52px;
+}
+.program{
+  background:var(--blk);padding:0;overflow:hidden;
+  position:relative;
+}
+.program-header{
+  padding:36px 36px 28px;
+  position:relative;
+}
+.program.seminyak .program-header{
+  background:linear-gradient(135deg,var(--forest) 0%,var(--forest3) 100%);
+}
+.program.uluwatu .program-header{
+  background:linear-gradient(135deg,var(--stone) 0%,var(--stone2) 100%);
+}
+.program-num{
+  font-family:var(--disp);font-size:80px;font-weight:900;
+  color:rgba(255,255,255,.05);line-height:1;
+  position:absolute;right:24px;top:16px;
+}
+.program-kicker{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:12px;
+}
+.program-name{
+  font-family:var(--disp);font-size:clamp(28px,3.5vw,44px);font-weight:900;
+  text-transform:uppercase;line-height:.9;color:var(--wht);margin-bottom:6px;
+}
+.program-sub{
+  font-family:var(--serif);font-size:18px;font-weight:300;font-style:italic;
+  color:var(--sand);margin-bottom:16px;
+}
+.program-meta{
+  display:flex;gap:12px;flex-wrap:wrap;
+}
+.pmeta{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--d2);border:1px solid rgba(255,255,255,.1);padding:4px 10px;
+}
+
+/* Day timeline */
+.day-timeline{padding:0 36px 36px;background:var(--blk)}
+.dt-row{
+  display:grid;grid-template-columns:56px 1fr;
+  gap:0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.dt-row:last-child{border-bottom:none}
+.dt-day{
+  padding:18px 16px 18px 0;
+  border-right:1px solid rgba(201,162,39,.12);
+}
+.dt-day-num{
+  font-family:var(--disp);font-size:28px;font-weight:900;
+  color:rgba(201,162,39,.3);line-height:1;
+}
+.dt-day-label{
+  font-family:var(--mono);font-size:7px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--d3);
+}
+.dt-content{padding:18px 0 18px 20px}
+.dt-title{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--wht);margin-bottom:4px;
+}
+.dt-items{
+  display:flex;flex-direction:column;gap:3px;
+}
+.dt-item{
+  font-family:var(--mono);font-size:10px;color:var(--d2);
+  display:flex;gap:8px;line-height:1.4;
+}
+.dt-item::before{content:'·';color:var(--gold);flex-shrink:0}
+.dt-include{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(201,162,39,.5);margin-top:5px;
+}
+
+/* Program footer pricing */
+.program-footer{
+  padding:24px 36px;
+  background:rgba(201,162,39,.05);
+  border-top:1px solid rgba(201,162,39,.12);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.pf-price{
+  font-family:var(--disp);font-size:42px;font-weight:900;
+  line-height:1;color:var(--gold);
+}
+.pf-note{
+  font-family:var(--mono);font-size:10px;color:var(--d3);letter-spacing:.06em;
+}
+.pf-cta{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--blk);background:var(--gold);border:none;padding:12px 20px;
+  cursor:pointer;text-decoration:none;transition:background .2s;
+}
+.pf-cta:hover{background:var(--gold3)}
+
+/* Extension callout */
+.extension-banner{
+  background:var(--forest);padding:28px 36px;
+  border-top:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+}
+.eb-title{
+  font-family:var(--disp);font-size:22px;font-weight:900;text-transform:uppercase;
+  color:var(--wht);
+}
+.eb-sub{font-family:var(--mono);font-size:11px;color:var(--d2)}
+.eb-price{font-family:var(--disp);font-size:32px;font-weight:900;color:var(--gold)}
+.eb-note{font-family:var(--mono);font-size:9px;color:var(--d3);letter-spacing:.08em}
+
+/* ── TELEGRAM ONBOARDING FLOW ── */
+.telegram-sec{background:var(--forest3);position:relative;overflow:hidden}
+.telegram-grid{
+  display:grid;grid-template-columns:1fr 380px;
+  gap:64px;margin-top:52px;align-items:start;
+}
+.tg-phases{display:flex;flex-direction:column;gap:0}
+.tg-phase{
+  display:flex;gap:20px;padding:28px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.tg-phase:last-child{border-bottom:none}
+.tg-phase-num{
+  font-family:var(--disp);font-size:44px;font-weight:900;
+  color:rgba(201,162,39,.12);line-height:1;flex-shrink:0;width:52px;
+}
+.tg-phase-tag{
+  display:inline-block;font-family:var(--mono);font-size:9px;font-weight:800;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--blk);background:var(--gold);padding:3px 9px;margin-bottom:8px;
+}
+.tg-phase-title{
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--wht);margin-bottom:5px;
+}
+.tg-phase-desc{
+  font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.6;
+}
+
+/* Mock Telegram chat */
+.tg-chat{
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(201,162,39,.2);
+  overflow:hidden;
+}
+.tg-chat-top{
+  background:rgba(27,58,45,.8);
+  padding:12px 16px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.tg-avatar{
+  width:32px;height:32px;flex-shrink:0;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:var(--gold);display:flex;align-items:center;justify-content:center;
+}
+.tg-avatar::after{content:'H';font-family:var(--mono);font-size:11px;font-weight:800;color:var(--blk)}
+.tg-chat-name{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--wht)}
+.tg-chat-status{font-family:var(--mono);font-size:9px;color:var(--gold);display:flex;align-items:center;gap:5px}
+.tg-status-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:tgpulse 2s ease-in-out infinite}
+@keyframes tgpulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tg-messages{padding:16px;display:flex;flex-direction:column;gap:10px}
+.tg-msg{display:flex;gap:8px;align-items:flex-start}
+.tg-msg.user{flex-direction:row-reverse}
+.tg-av{
+  width:22px;height:22px;flex-shrink:0;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:8px;font-weight:800;
+}
+.tg-av.bot{
+  background:var(--gold);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  color:var(--blk);
+}
+.tg-av.u{background:rgba(255,255,255,.08);color:var(--d2)}
+.tg-bubble{padding:10px 13px;max-width:calc(100% - 32px)}
+.tg-bubble.bot{
+  background:rgba(27,58,45,.8);
+  border:1px solid rgba(201,162,39,.15);
+}
+.tg-bubble.u{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.06);
+}
+.tg-bubble p{font-family:var(--mono);font-size:10px;color:var(--d1);line-height:1.6}
+.tg-bubble .bold{font-weight:700;color:var(--wht)}
+.tg-btns{padding:0 16px 16px;display:flex;flex-direction:column;gap:6px}
+.tg-btn{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);background:rgba(201,162,39,.08);
+  border:1px solid rgba(201,162,39,.2);
+  padding:8px 14px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.tg-btn:hover{background:rgba(201,162,39,.15);color:var(--gold3)}
+
+/* ── EXIT DELIVERABLES ── */
+.exit-sec{background:var(--stone2)}
+.exit-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:2px;background:rgba(255,255,255,.04);
+  margin-top:48px;
+}
+.exit-card{
+  background:var(--stone2);padding:32px 28px;
+  position:relative;transition:background .2s;
+}
+.exit-card:hover{background:rgba(201,162,39,.05)}
+.exit-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gold);transform:scaleX(0);transform-origin:left;
+  transition:transform .3s;
+}
+.exit-card:hover::before{transform:scaleX(1)}
+.ec-num{
+  font-family:var(--disp);font-size:48px;font-weight:900;
+  color:rgba(201,162,39,.1);line-height:1;margin-bottom:10px;
+}
+.ec-title{
+  font-family:var(--mono);font-size:12px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--wht);margin-bottom:6px;
+}
+.ec-desc{font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.6}
+
+/* ── APPLICATION ── */
+.apply-sec{background:var(--forest3);position:relative;overflow:hidden}
+.apply-sec::before{
+  content:'';position:absolute;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(201,162,39,.06) 0%,transparent 70%);
+  top:50%;right:-100px;transform:translateY(-50%);
+  pointer-events:none;
+}
+.apply-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:64px;margin-top:52px;align-items:start;
+  position:relative;z-index:2;
+}
+.apply-left{}
+.apply-manifesto{
+  font-family:var(--serif);font-size:clamp(24px,3vw,38px);font-weight:300;font-style:italic;
+  color:var(--sand2);line-height:1.3;margin-bottom:28px;max-width:440px;
+}
+.apply-why{display:flex;flex-direction:column;gap:0}
+.aw-item{
+  display:flex;gap:16px;padding:20px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.aw-item:last-child{border-bottom:none}
+.aw-glyph{
+  font-family:var(--mono);font-size:11px;font-weight:800;
+  color:var(--gold);width:20px;flex-shrink:0;padding-top:1px;
+}
+.aw-body h4{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--wht);margin-bottom:3px;
+}
+.aw-body p{font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.5}
+
+/* Form */
+.app-form{
+  background:rgba(0,0,0,.4);border:1px solid rgba(201,162,39,.18);
+  padding:40px;
+}
+.form-header{
+  border-bottom:1px solid rgba(201,162,39,.15);
+  padding-bottom:20px;margin-bottom:28px;
+}
+.form-header h3{
+  font-family:var(--disp);font-size:24px;font-weight:900;
+  text-transform:uppercase;color:var(--wht);letter-spacing:.04em;margin-bottom:4px;
+}
+.form-header p{font-family:var(--mono);font-size:11px;color:var(--d3)}
+.form-fields{display:flex;flex-direction:column;gap:16px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fl-label{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+}
+.fi,.fs,.fta{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--wht);font-family:var(--mono);font-size:12px;
+  padding:12px 14px;outline:none;transition:border-color .2s;
+  -webkit-appearance:none;
+}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--gold)}
+.fs{cursor:pointer}
+.fs option{background:var(--stone2);color:var(--wht)}
+.fta{resize:vertical;min-height:88px;line-height:1.5}
+.fi::placeholder,.fta::placeholder{color:var(--d3)}
+.form-submit{
+  width:100%;font-family:var(--mono);font-size:12px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--blk);background:var(--gold);border:none;padding:18px;
+  cursor:pointer;transition:background .2s;position:relative;margin-top:8px;
+}
+.form-submit::after{content:'→';position:absolute;right:20px;top:50%;transform:translateY(-50%)}
+.form-submit:hover{background:var(--gold3)}
+.form-note{font-family:var(--mono);font-size:9px;color:var(--d3);margin-top:8px;text-align:center;letter-spacing:.06em}
+
+/* ── FINAL CTA ── */
+.final-sec{
+  background:var(--blk);
+  position:relative;overflow:hidden;
+  text-align:center;
+}
+.final-sec::before{
+  content:'BALI';
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--disp);font-size:clamp(100px,20vw,260px);font-weight:900;text-transform:uppercase;
+  color:rgba(255,255,255,.02);pointer-events:none;white-space:nowrap;
+}
+.final-inner{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:100px 48px}
+.final-overline{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:12px;
+}
+.final-overline::before,.final-overline::after{content:'';width:24px;height:1px;background:var(--gold);display:block}
+.final-title{
+  font-family:var(--serif);font-size:clamp(36px,5.5vw,72px);
+  font-weight:300;font-style:italic;color:var(--sand2);line-height:1.1;margin-bottom:16px;
+}
+.final-title strong{font-family:var(--disp);font-style:normal;font-weight:900;text-transform:uppercase;font-size:1.2em;color:var(--wht);display:block;line-height:.85}
+.final-sub{font-family:var(--mono);font-size:13px;color:var(--d2);max-width:440px;margin:0 auto 40px;line-height:1.8}
+.final-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--forest3);border-top:1px solid rgba(201,162,39,.1);
+  padding:28px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+}
+.fi-id{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+.fl-nav{display:flex;gap:20px;list-style:none}
+.fl-nav a{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.15);text-decoration:none;transition:color .2s}
+.fl-nav a:hover{color:var(--gold)}
+.viktor-contact{font-family:var(--mono);font-size:10px;color:var(--d3)}
+.viktor-contact strong{color:var(--gold)}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .sb,.nav-center,footer{display:none}
+  nav{padding:0 24px;top:0}
+  .hero{padding-top:60px}
+  .hero-inner,.si{padding-left:24px;padding-right:24px}
+  .access-grid,.programs-grid,.telegram-grid,.apply-grid{grid-template-columns:1fr}
+  .viktor-inner{grid-template-columns:1fr}
+  .viktor-photo{aspect-ratio:16/9}
+  .exit-grid{grid-template-columns:1fr 1fr}
+  .hero-title .line1{font-size:40px}
+  .hero-title .line2,.hero-title .line3{font-size:54px}
+}
+@media(max-width:600px){
+  .exit-grid{grid-template-columns:1fr}
+  .programs-grid{grid-template-columns:1fr}
+}
+
+/* Scroll animations */
+.fu{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.fu.vis{opacity:1;transform:translateY(0)}
+.fu2{opacity:0;transform:translateY(24px);transition:opacity .7s ease .1s,transform .7s ease .1s}
+.fu2.vis{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- SUBBRAND BAR -->
+<div class="sb">
+  <div class="sb-l">
+    <span>Hanzo OS × Elevate Wellbeing</span>
+    <span>SPARK Lab — Physical Apex</span>
+  </div>
+  <div class="sb-r">Earned Access · Bali, Indonesia</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-hex"></div>
+    <div class="nav-title"><span>SPARK</span> Lab — Bali</div>
+  </div>
+  <div class="nav-center">
+    <button class="nav-pill" onclick="document.getElementById('programs').scrollIntoView({behavior:'smooth'})">Programs</button>
+    <button class="nav-pill" onclick="document.getElementById('flow').scrollIntoView({behavior:'smooth'})">The Flow</button>
+    <button class="nav-pill" onclick="document.getElementById('apply').scrollIntoView({behavior:'smooth'})">Apply</button>
+  </div>
+  <a href="#apply" class="nav-cta">Apply Now</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-topo"></div>
+
+  <div class="hero-inner">
+    <div class="hero-overline">
+      Hanzo OS · Physical Layer
+      <span class="sep">/</span>
+      Elevate Wellbeing × Viktor Zaman
+      <span class="sep">/</span>
+      Bali, Indonesia
+    </div>
+
+    <h1 class="hero-title">
+      <span class="line1">The physical apex of</span>
+      <span class="line2">SPARK <span class="gold">Lab</span></span>
+      <span class="line3">BALI</span>
+    </h1>
+
+    <p class="hero-sub">
+      Not a retreat. Not a workshop.<br>
+      <strong>A system reset in the most powerful environment on earth.</strong><br><br>
+      4 days. Complete transformation. You leave with a new operating system installed —
+      in your body, your mind, and your brand.
+    </p>
+
+    <div class="hero-chips">
+      <div class="chip">Earned Access Only</div>
+      <div class="chip">Seminyak Program</div>
+      <div class="chip">Uluwatu Program</div>
+      <div class="chip">8-Day Full Sequence</div>
+      <div class="chip">Viktor Zaman — Lead</div>
+      <div class="chip">Telegram OS Included</div>
+      <div class="chip">$5K–$15K+</div>
+    </div>
+
+    <div class="hero-ctas">
+      <a href="#apply" class="btn-gold">
+        Apply for Access
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#programs" class="btn-outline">View Both Programs ↓</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- EARNED ACCESS -->
+<section class="access-sec">
+  <div class="si">
+    <div class="sk">The Earned Access Model</div>
+    <h2 class="st">You Don't Buy <span class="serif">This.</span><br>You Earn It.</h2>
+    <p style="font-family:var(--mono);font-size:13px;color:var(--d2);max-width:500px;line-height:1.7;margin-top:12px">
+      The SPARK Lab Bali is the physical apex of the Hanzo OS. It is not available to purchase directly.
+      You earn access by moving through the system first.
+    </p>
+
+    <div class="access-grid fu">
+      <!-- Ladder -->
+      <div class="access-col">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:24px">The Ascension Ladder</div>
+        <div class="ladder">
+          <div class="ladder-step">
+            <div class="ls-num">01</div>
+            <div>
+              <div class="ls-tag">Entry · Free</div>
+              <div class="ls-title">SPARK Lab Digital (7 Days)</div>
+              <div class="ls-price">$0</div>
+              <div class="ls-desc">Creator or NIL 7-day sprint. Complete the lab and prove you can execute. This is where eligibility begins.</div>
+            </div>
+            <div class="ls-gate">Open</div>
+          </div>
+          <div class="ladder-step">
+            <div class="ls-num">02</div>
+            <div>
+              <div class="ls-tag">Core · Monthly</div>
+              <div class="ls-title">Content System or NIL Command</div>
+              <div class="ls-price">$97–$197<span style="font-size:16px;font-family:var(--mono);font-weight:400;color:var(--d3)">/mo</span></div>
+              <div class="ls-desc">Full system access. Telegram onboarding. Prompt library. Monthly live sessions. SPARK Lab invite unlocks here.</div>
+            </div>
+            <div class="ls-gate">Invite</div>
+          </div>
+          <div class="ladder-step">
+            <div class="ls-num">03</div>
+            <div>
+              <div class="ls-tag">Done-With-You</div>
+              <div class="ls-title">Creator OS or Sovereignty Pro</div>
+              <div class="ls-price">$297–$497<span style="font-size:16px;font-family:var(--mono);font-weight:400;color:var(--d3)">/mo</span></div>
+              <div class="ls-desc">1:1 strategy sessions, custom builds, direct async access. Priority SPARK Lab placement.</div>
+            </div>
+            <div class="ls-gate">Priority</div>
+          </div>
+          <div class="ladder-step">
+            <div class="ls-num">04</div>
+            <div>
+              <div class="ls-tag">Physical Apex 🔥</div>
+              <div class="ls-title">SPARK Lab Bali</div>
+              <div class="ls-price">$5K–$15K+</div>
+              <div class="ls-desc">4 or 8 days in Bali with Viktor Zaman. Full system installation. Network. Transformation. This is where identity upgrades.</div>
+            </div>
+            <div class="ls-gate" style="background:rgba(201,162,39,.15);color:var(--gold3)">Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Journey flow -->
+      <div class="access-col">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:24px">Your Journey Through The System</div>
+        <div class="journey-flow">
+          <div class="jf-step">
+            <div class="jf-icon">S</div>
+            <div class="jf-body">
+              <h4>Signal — Content finds you</h4>
+              <p>Creator or Athlete content, Telegram outreach, or DM. You discover the system exists.</p>
+            </div>
+          </div>
+          <div class="jf-arrow">↓</div>
+          <div class="jf-step">
+            <div class="jf-icon">E</div>
+            <div class="jf-body">
+              <h4>Entry — Free SPARK Lab</h4>
+              <p>7-day digital sprint. You build something real. Ask Hanzo coaches you. You prove you execute.</p>
+            </div>
+          </div>
+          <div class="jf-arrow">↓</div>
+          <div class="jf-step">
+            <div class="jf-icon">P</div>
+            <div class="jf-body">
+              <h4>Payment — System access</h4>
+              <p>Telegram bot triggers. Onboarding begins. You receive your personal AI workflow and community.</p>
+            </div>
+          </div>
+          <div class="jf-arrow">↓</div>
+          <div class="jf-step">
+            <div class="jf-icon">I</div>
+            <div class="jf-body">
+              <h4>Invite — SPARK Lab gate opens</h4>
+              <p>Top performers in the system receive an invitation. The gate is performance, not just payment.</p>
+            </div>
+          </div>
+          <div class="jf-arrow">↓</div>
+          <div class="jf-step">
+            <div class="jf-icon" style="background:rgba(201,162,39,.2);border-color:var(--gold)">B</div>
+            <div class="jf-body">
+              <h4>Bali — The transformation</h4>
+              <p>4 or 8 days. Full reset. You leave with renewed energy, mental clarity, and your next operating system installed.</p>
+            </div>
+          </div>
+          <div class="jf-arrow">↓</div>
+          <div class="jf-step">
+            <div class="jf-icon">A</div>
+            <div class="jf-body">
+              <h4>Ascension — High ticket opens</h4>
+              <p>Post-Bali is when the high-ticket conversation happens naturally. You're now a proven operator with a network.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIKTOR -->
+<section class="viktor-sec">
+  <div class="viktor-inner fu2">
+    <div class="viktor-photo">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px">
+        <div class="nav-hex" style="width:48px;height:48px"></div>
+        <div style="font-family:var(--disp);font-size:64px;font-weight:900;text-transform:uppercase;color:rgba(255,255,255,.12);text-align:center;line-height:.9">Viktor Zaman</div>
+      </div>
+      <div class="viktor-badge">Experience Lead</div>
+    </div>
+    <div class="viktor-content">
+      <div class="viktor-kicker">The Lead · Elevate Wellbeing</div>
+      <div class="viktor-name">Viktor<br>Zaman</div>
+      <div class="viktor-role">Experience Lead · Movement & Recovery Expert</div>
+      <p class="viktor-bio">
+        Viktor Zaman brings 20+ years of excellence in sport and fitness to the SPARK Lab experience.
+        His method combines high-performance movement, biohacking, nervous system regulation, and Balinese
+        sacred ritual into a single coherent transformation protocol. He has guided athletes,
+        executives, and creators through resets that change how they operate — permanently.
+      </p>
+      <p class="viktor-bio" style="margin-top:-12px">
+        Contact: <strong style="color:var(--gold)">+971 50 686 9496</strong>
+      </p>
+      <div class="viktor-stats">
+        <div class="vs"><div class="vs-n">20+</div><div class="vs-l">Years Experience</div></div>
+        <div class="vs"><div class="vs-n">2</div><div class="vs-l">Bali Programs</div></div>
+        <div class="vs"><div class="vs-n">8</div><div class="vs-l">Days Full Sequence</div></div>
+        <div class="vs"><div class="vs-n">∞</div><div class="vs-l">Post-Experience ROI</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section id="programs" class="programs-sec">
+  <div class="si">
+    <div class="sk">The Programs</div>
+    <h2 class="st">Two Locations.<br><span class="serif">One Transformation Arc.</span></h2>
+    <p style="font-family:var(--mono);font-size:13px;color:var(--d2);max-width:500px;line-height:1.7;margin-top:12px">
+      Start with Seminyak — regulation, reset, cultural immersion. Extend into Uluwatu —
+      performance, sacred cliffs, brainwave activation. Together: 8 days that change how you operate.
+    </p>
+
+    <div class="programs-grid fu">
+
+      <!-- SEMINYAK -->
+      <div class="program seminyak">
+        <div class="program-header">
+          <div class="program-num">01</div>
+          <div class="program-kicker">Program One · Entry</div>
+          <div class="program-name">Elevate Escape<br>Seminyak</div>
+          <div class="program-sub">Movement, recovery & cultural reset</div>
+          <div class="program-meta">
+            <div class="pmeta">4 Days · 3 Nights</div>
+            <div class="pmeta">TS Suites Hotel</div>
+            <div class="pmeta">No1 Wellness</div>
+            <div class="pmeta">Ubud Experience</div>
+          </div>
+        </div>
+
+        <div class="day-timeline">
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">01</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Arrival & No1 Wellness Evening</div>
+              <div class="dt-items">
+                <div class="dt-item">Check in at TS Suites Hotel Seminyak</div>
+                <div class="dt-item">Signature massage at No1 Wellness</div>
+                <div class="dt-item">Hot & cold therapy experience</div>
+                <div class="dt-item">Healthy nutrition-focused dinner</div>
+              </div>
+              <div class="dt-include">Dinner included</div>
+            </div>
+          </div>
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">02</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Regulate & Reset</div>
+              <div class="dt-items">
+                <div class="dt-item">Guided breathwork session at No1 Wellness</div>
+                <div class="dt-item">Biohacking workshop — energy, recovery, nervous system regulation</div>
+                <div class="dt-item">Nutrition-focused lunch</div>
+                <div class="dt-item">Sunset beach movement at Double Six Beach</div>
+                <div class="dt-item">Recovery spa experience</div>
+              </div>
+              <div class="dt-include">Breakfast & Lunch included</div>
+            </div>
+          </div>
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">03</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Ubud Experience</div>
+              <div class="dt-items">
+                <div class="dt-item">Day journey to Ubud — the cultural heart of Bali</div>
+                <div class="dt-item">Water purification ceremony at Pura Taman Pecampuhan</div>
+                <div class="dt-item">Sacred Balinese ritual for mental clarity & inner balance</div>
+                <div class="dt-item">Lunch at Tis Café overlooking Ubud's rice fields</div>
+              </div>
+              <div class="dt-include">Breakfast & Lunch included</div>
+            </div>
+          </div>
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">04</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Integration & Continuation</div>
+              <div class="dt-items">
+                <div class="dt-item">Final massage + hot & cold therapy integration</div>
+                <div class="dt-item">Guests leave with renewed energy, vitality, and mental clarity</div>
+                <div class="dt-item">Optional extension: Elevate Escape Uluwatu</div>
+              </div>
+              <div class="dt-include">Breakfast included</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="program-footer">
+          <div>
+            <div class="pf-price">$5,000+</div>
+            <div class="pf-note">Earned access · accommodation + program included</div>
+          </div>
+          <a href="#apply" class="pf-cta">Apply to Attend</a>
+        </div>
+      </div>
+
+      <!-- ULUWATU -->
+      <div class="program uluwatu">
+        <div class="program-header">
+          <div class="program-num">02</div>
+          <div class="program-kicker">Program Two · Advanced</div>
+          <div class="program-name">Elevate Escape<br>Uluwatu</div>
+          <div class="program-sub">Performance, sacred cliffs & brainwave activation</div>
+          <div class="program-meta">
+            <div class="pmeta">4 Days · 3 Nights</div>
+            <div class="pmeta">Blue Point Resort</div>
+            <div class="pmeta">ULU Active</div>
+            <div class="pmeta">Sacred Cliffs</div>
+          </div>
+        </div>
+
+        <div class="day-timeline">
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">01</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Activation & Unwind</div>
+              <div class="dt-items">
+                <div class="dt-item">Check in at Blue Point Resort, Uluwatu</div>
+                <div class="dt-item">Opening movement, mobility & recovery at ULU Active</div>
+                <div class="dt-item">Signature Uluwatu sunset dinner at Single Fin</div>
+              </div>
+              <div class="dt-include">Dinner included</div>
+            </div>
+          </div>
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">02</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Lifestyle & Recovery</div>
+              <div class="dt-items">
+                <div class="dt-item">Morning strength, mobility & recovery at ULU Active</div>
+                <div class="dt-item">Beginner-friendly surfing at Padang Padang Beach</div>
+                <div class="dt-item">Body & mind recovery experience</div>
+                <div class="dt-item">Nutrition-focused dinner at ATMOS Social Steam Club</div>
+              </div>
+              <div class="dt-include">Breakfast & Dinner included</div>
+            </div>
+          </div>
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">03</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Sacred Cliffs, Regulate & Reset</div>
+              <div class="dt-items">
+                <div class="dt-item">Morning session at ULU Active</div>
+                <div class="dt-item">Visit Uluwatu Temple — active cliff hike</div>
+                <div class="dt-item">Paragliding + swim at Nyang Nyang Beach</div>
+                <div class="dt-item">Brainwave frequency activation — nervous system regulation</div>
+              </div>
+              <div class="dt-include">Breakfast & Dinner included</div>
+            </div>
+          </div>
+          <div class="dt-row">
+            <div class="dt-day"><div class="dt-day-num">04</div><div class="dt-day-label">Day</div></div>
+            <div class="dt-content">
+              <div class="dt-title">Movement & Beyond</div>
+              <div class="dt-items">
+                <div class="dt-item">Final movement + hot & cold therapy at ULU Active</div>
+                <div class="dt-item">Leave with renewed energy, mental clarity & stronger self-connection</div>
+                <div class="dt-item">Option: Guided ancestral live music meditation ceremony</div>
+              </div>
+              <div class="dt-include">Breakfast included</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="program-footer">
+          <div>
+            <div class="pf-price">$6,000+</div>
+            <div class="pf-note">Earned access · accommodation + program included</div>
+          </div>
+          <a href="#apply" class="pf-cta">Apply to Attend</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8-DAY EXTENSION BANNER -->
+    <div class="extension-banner fu2" style="margin-top:2px">
+      <div>
+        <div class="eb-title">The Full 8-Day Sequence</div>
+        <div class="eb-sub">Seminyak → Uluwatu. The complete transformation arc. Maximum results.</div>
+      </div>
+      <div style="text-align:right">
+        <div class="eb-price">$10,000+</div>
+        <div class="eb-note">Both programs · 8 days · 7 nights · full network access</div>
+      </div>
+      <a href="#apply" class="btn-gold" style="flex-shrink:0">Apply for Full Sequence →</a>
+    </div>
+  </div>
+</section>
+
+<!-- TELEGRAM ONBOARDING FLOW -->
+<section id="flow" class="telegram-sec">
+  <div class="si">
+    <div class="sk">The Full Flow</div>
+    <h2 class="st">From Signal<br><span class="serif">to Transformation</span></h2>
+    <p style="font-family:var(--mono);font-size:13px;color:var(--d2);max-width:500px;line-height:1.7;margin-top:12px">
+      Every step is connected. Content finds the right person.
+      Telegram guides them. The system qualifies them. Bali transforms them.
+    </p>
+
+    <div class="telegram-grid fu">
+      <div class="tg-phases">
+        <div class="tg-phase">
+          <div class="tg-phase-num">01</div>
+          <div>
+            <div class="tg-phase-tag">Signal</div>
+            <div class="tg-phase-title">Content attracts the right person</div>
+            <div class="tg-phase-desc">A post, a DM, a hook. Creator or Athlete content hits someone who recognizes their own situation in it. They follow. They reach out. Scout identifies them.</div>
+          </div>
+        </div>
+        <div class="tg-phase">
+          <div class="tg-phase-num">02</div>
+          <div>
+            <div class="tg-phase-tag">Initiation</div>
+            <div class="tg-phase-title">Payment triggers MajorPrimeBot</div>
+            <div class="tg-phase-desc">Stripe or Gumroad confirms payment. Bot sends the Telegram invite immediately. No manual intervention. No delay. The system handles it.</div>
+          </div>
+        </div>
+        <div class="tg-phase">
+          <div class="tg-phase-num">03</div>
+          <div>
+            <div class="tg-phase-tag">Calibration</div>
+            <div class="tg-phase-title">4-day pre-arrival protocol (for Bali invitees)</div>
+            <div class="tg-phase-desc">Days 1–4 before Bali: Identity Audit → Output Audit → Vision Lock → Commitment. The reset begins before they land. Viktor reviews responses before arrival.</div>
+          </div>
+        </div>
+        <div class="tg-phase">
+          <div class="tg-phase-num">04</div>
+          <div>
+            <div class="tg-phase-tag">Alignment</div>
+            <div class="tg-phase-title">Arrival ritual + opening circle</div>
+            <div class="tg-phase-desc">First words on arrival are not "welcome" — they're "you made it, now we begin." Physical anchor given. Each person states what they're leaving behind and what they're stepping into.</div>
+          </div>
+        </div>
+        <div class="tg-phase">
+          <div class="tg-phase-num">05</div>
+          <div>
+            <div class="tg-phase-tag">Activation</div>
+            <div class="tg-phase-title">Experience + agent access during Bali</div>
+            <div class="tg-phase-desc">Each attendee gets personal agent access during the experience. Creators get Orator + Growth agents. Athletes get Performance + Brand agents. The OS installs alongside the physical reset.</div>
+          </div>
+        </div>
+        <div class="tg-phase">
+          <div class="tg-phase-num">06</div>
+          <div>
+            <div class="tg-phase-tag">Ascension</div>
+            <div class="tg-phase-title">Exit stack + natural upsell</div>
+            <div class="tg-phase-desc">They leave with Telegram system access, personal AI workflow, 30-60 day plan, content direction, and network. High-ticket conversation opens naturally — never forced.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telegram mock -->
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">MajorPrimeBot — Onboarding Preview</div>
+        <div class="tg-chat">
+          <div class="tg-chat-top">
+            <div class="tg-avatar"></div>
+            <div>
+              <div class="tg-chat-name">MajorPrimeBot</div>
+              <div class="tg-chat-status"><div class="tg-status-dot"></div>Online · Hanzo OS</div>
+            </div>
+          </div>
+          <div class="tg-messages">
+            <div class="tg-msg">
+              <div class="tg-av bot">H</div>
+              <div class="tg-bubble bot">
+                <p><span class="bold">Welcome to SPARK Lab.</span><br><br>You weren't invited here by accident.<br><br>Over the next few days, we prepare you for something most people never experience: a full system reset.<br><br>Before Bali… before the environment changes… we start with you.<br><br><span class="bold">Let's begin.</span></p>
+              </div>
+            </div>
+            <div class="tg-msg">
+              <div class="tg-av bot">H</div>
+              <div class="tg-bubble bot">
+                <p>→ What are you stepping into this for?</p>
+              </div>
+            </div>
+            <div class="tg-msg user">
+              <div class="tg-av u">U</div>
+              <div class="tg-bubble u">
+                <p>I want to reset my content strategy and finally build something that works without me being online 24/7</p>
+              </div>
+            </div>
+            <div class="tg-msg">
+              <div class="tg-av bot">H</div>
+              <div class="tg-bubble bot">
+                <p>Good. That's the right reason.<br><br><span class="bold">Day 1 — Identity Audit begins now.</span><br><br>Answer honestly:</p>
+              </div>
+            </div>
+            <div class="tg-msg">
+              <div class="tg-av bot">H</div>
+              <div class="tg-bubble bot">
+                <p>1. What do you do today?<br>2. What do people know you for?<br>3. What do you WANT to be known for?<br>4. What's currently not working?</p>
+              </div>
+            </div>
+          </div>
+          <div class="tg-btns">
+            <div class="tg-btn">Creator Track → Content Machine</div>
+            <div class="tg-btn">Athlete Track → NIL Sovereignty</div>
+            <div class="tg-btn">Asset Owner → Knowledge to Product</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding:16px;background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.15)">
+          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Access the OS</div>
+          <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--wht)">t.me/MAJORHANZOBOT</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--d3);margin-top:4px">Telegram · MajorPrimeBot · Major Prime OS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXIT DELIVERABLES -->
+<section class="exit-sec">
+  <div class="si">
+    <div class="sk">What You Leave With</div>
+    <h2 class="st">Installed. <span class="serif">Not Remembered.</span></h2>
+    <p style="font-family:var(--mono);font-size:13px;color:var(--d2);max-width:500px;line-height:1.7;margin-top:12px">
+      Most programs end with a certificate. This one ends with a running system.
+      Everything below is operational before you board your flight home.
+    </p>
+    <div class="exit-grid fu">
+      <div class="exit-card">
+        <div class="ec-num">01</div>
+        <div class="ec-title">Personal AI Workflow</div>
+        <div class="ec-desc">Your own Telegram agent stack. Prompt library tailored to your track. Content or NIL system operational and producing output immediately.</div>
+      </div>
+      <div class="exit-card">
+        <div class="ec-num">02</div>
+        <div class="ec-title">Brand System Defined</div>
+        <div class="ec-desc">Niche, voice, content pillars, and monetization path. Not theory — documented, tested on a real piece of content, and ready to scale.</div>
+      </div>
+      <div class="exit-card">
+        <div class="ec-num">03</div>
+        <div class="ec-title">30–60 Day Action Plan</div>
+        <div class="ec-desc">Specific. Daily habits. Content schedule. Deal outreach cadence. What you do in the first week after Bali determines whether the experience compounded or faded.</div>
+      </div>
+      <div class="exit-card">
+        <div class="ec-num">04</div>
+        <div class="ec-title">Real Network</div>
+        <div class="ec-desc">The people in the room with you are operators — creators, athletes, builders. Not an audience. Not followers. People building real things in the same system.</div>
+      </div>
+      <div class="exit-card">
+        <div class="ec-num">05</div>
+        <div class="ec-title">Physical Reset Complete</div>
+        <div class="ec-desc">Renewed energy. Regulated nervous system. Hot/cold therapy integrated. Breathwork practice established. A body that runs the new system efficiently.</div>
+      </div>
+      <div class="exit-card">
+        <div class="ec-num">06</div>
+        <div class="ec-title">High-Ticket Door Open</div>
+        <div class="ec-desc">Post-Bali is when the Tokenization, NIL infrastructure, and Architect conversations happen naturally. You've earned them. They're not pitched — they emerge.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APPLICATION -->
+<section id="apply" class="apply-sec">
+  <div class="si">
+    <div class="sk">Apply for Access</div>
+    <h2 class="st">This Starts<br><span class="serif">with a question.</span></h2>
+
+    <div class="apply-grid fu">
+      <div class="apply-left">
+        <div class="apply-manifesto">
+          "The environment you're in<br>
+          determines the version of yourself<br>
+          you can access."
+        </div>
+        <p style="font-family:var(--mono);font-size:13px;color:var(--d2);line-height:1.7;margin-bottom:32px;max-width:420px">
+          SPARK Lab Bali is not open enrollment. Applications are reviewed by hand.
+          We accept operators who are ready to use the experience — not collect it.
+        </p>
+        <div class="apply-why">
+          <div class="aw-item">
+            <div class="aw-glyph">01</div>
+            <div class="aw-body">
+              <h4>Earned access — not just purchased</h4>
+              <p>You must have completed a SPARK Lab digital sprint or be enrolled in a core system tier. The gate is performance, not budget.</p>
+            </div>
+          </div>
+          <div class="aw-item">
+            <div class="aw-glyph">02</div>
+            <div class="aw-body">
+              <h4>Maximum 12 attendees per program</h4>
+              <p>Seminyak and Uluwatu each run with a maximum of 12 people. The constraint is the quality guarantee.</p>
+            </div>
+          </div>
+          <div class="aw-item">
+            <div class="aw-glyph">03</div>
+            <div class="aw-body">
+              <h4>Response within 48 hours</h4>
+              <p>Applications reviewed by Viktor Zaman and the Hanzo OS team. You'll receive placement confirmation or waitlist status.</p>
+            </div>
+          </div>
+          <div class="aw-item">
+            <div class="aw-glyph">04</div>
+            <div class="aw-body">
+              <h4>Not in the system yet?</h4>
+              <p>Start with the free Creator or NIL SPARK Lab. Complete the 7-day sprint. That's your entry to everything above it.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form class="app-form" onsubmit="handleApply(event)">
+        <div class="form-header">
+          <h3>SPARK Lab Application</h3>
+          <p>Hanzo OS × Elevate Wellbeing · Bali</p>
+        </div>
+        <div class="form-fields">
+          <div class="fg"><label class="fl-label">Full Name</label><input class="fi" type="text" placeholder="Your name" required></div>
+          <div class="fg"><label class="fl-label">Email Address</label><input class="fi" type="email" placeholder="you@domain.com" required></div>
+          <div class="fg"><label class="fl-label">I am a...</label>
+            <select class="fs">
+              <option value="" disabled selected>Select your track</option>
+              <option>Creator / Content Operator</option>
+              <option>Athlete (College or Pro)</option>
+              <option>Post-Career Athlete</option>
+              <option>Entrepreneur / Asset Owner</option>
+              <option>Business Builder / Operator</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl-label">Program Preference</label>
+            <select class="fs">
+              <option value="" disabled selected>Which program(s)?</option>
+              <option>Seminyak only (4 days)</option>
+              <option>Uluwatu only (4 days)</option>
+              <option>Full 8-Day Sequence (both)</option>
+              <option>Not sure — advise me</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl-label">Current Hanzo OS Status</label>
+            <select class="fs">
+              <option value="" disabled selected>Where are you in the system?</option>
+              <option>Just discovered this — not yet in system</option>
+              <option>Completed a SPARK Lab digital sprint</option>
+              <option>Creator Content System or NIL Command member</option>
+              <option>Creator OS or Sovereignty Pro member</option>
+              <option>Referred by Viktor Zaman directly</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl-label">What are you resetting? What's the version of yourself you're leaving behind?</label>
+            <textarea class="fta" placeholder="Be specific. Viktor reads every application personally..."></textarea>
+          </div>
+          <button type="submit" class="form-submit">Submit Application</button>
+          <p class="form-note">Reviewed personally within 48 hours. Not in the system? Start at creator_spark_lab.html or nil_spark_lab.html first.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-sec">
+  <div class="final-inner">
+    <div class="final-overline">Elevate Escape · Hanzo OS · Bali</div>
+    <div class="final-title">
+      "Elevate Escape is where
+      <strong>MOVEMENT, RECOVERY,<br>EXPERIENCE AND CLARITY</strong>
+      meet."
+    </div>
+    <p class="final-sub">
+      See you in Bali.<br>
+      — Viktor Zaman, Experience Lead
+    </p>
+    <div class="final-btns">
+      <a href="#apply" class="btn-gold">
+        Apply for SPARK Lab
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="creator_spark_lab.html" class="btn-outline">Start Free Digital Lab →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fi-id">Hanzo OS × Elevate Wellbeing · SPARK Lab Bali · Major AI Mindset</div>
+  <ul class="fl-nav">
+    <li><a href="#programs">Programs</a></li>
+    <li><a href="#flow">The Flow</a></li>
+    <li><a href="#apply">Apply</a></li>
+    <li><a href="hanzo_os.html">Hanzo OS</a></li>
+    <li><a href="creator_spark_lab.html">Creator Lab</a></li>
+    <li><a href="nil_spark_lab.html">NIL Lab</a></li>
+  </ul>
+  <div class="viktor-contact">Viktor Zaman: <strong>+971 50 686 9496</strong> · t.me/MAJORHANZOBOT</div>
+</footer>
+
+<script>
+// Scroll observer
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fu, .fu2').forEach(el => obs.observe(el));
+
+// Form
+function handleApply(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  btn.textContent = 'Application Received — Viktor Will Be In Touch';
+  btn.style.background = 'var(--forest)';
+  btn.style.color = 'var(--gold)';
+  btn.style.letterSpacing = '.06em';
+  btn.disabled = true;
+  btn.style.removeProperty('position');
+}
+</script>
+</body>
+</html>

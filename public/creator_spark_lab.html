@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator SPARK Lab — 7-Day Content Machine Sprint | MAIM × Hanzo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g:#00E87A;--g2:#1A8A5C;--g3:rgba(0,232,122,0.08);
+  --blk:#05080A;--blk2:#0C1210;--blk3:#101A14;
+  --wht:#EFF4F1;--d1:#E2E8E4;--d2:#B0BDB4;--d3:#728078;--d4:#384440;
+  --mono:'JetBrains Mono',monospace;--disp:'Barlow Condensed',sans-serif;--bod:'Barlow',sans-serif;
+  --grid:rgba(0,232,122,0.04);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--blk);color:var(--wht);font-family:var(--bod);overflow-x:hidden}
+.gb{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+
+/* ── SUBBRAND ── */
+.sb{height:32px;background:var(--blk2);border-bottom:1px solid rgba(0,232,122,0.12);display:flex;align-items:center;justify-content:space-between;padding:0 44px}
+.sb-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--d3);display:flex;align-items:center;gap:14px}
+.sb-l span{color:var(--g2)}
+.sb-r{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--d4)}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;height:50px;background:rgba(5,8,10,.97);border-bottom:1px solid rgba(0,232,122,.15);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;padding:0 44px}
+.nb{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.nhx{width:20px;height:20px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--g2);display:flex;align-items:center;justify-content:center}
+.nhx::after{content:'';width:7px;height:7px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--g)}
+.nprog{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;color:var(--d3)}
+.npb{width:120px;height:3px;background:rgba(255,255,255,.08)}
+.npbf{height:100%;background:var(--g);transition:width .5s ease}
+.ncta{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blk);background:var(--g);border:none;padding:7px 16px;cursor:pointer;text-decoration:none;transition:background .2s}
+.ncta:hover{background:#fff}
+
+/* ── HERO ── */
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;width:600px;height:400px;background:radial-gradient(ellipse,rgba(0,232,122,.1) 0%,transparent 68%);top:50%;right:0;transform:translateY(-50%);pointer-events:none}
+.hi{position:relative;z-index:2;max-width:1160px;margin:0 auto;padding:72px 44px 52px;width:100%}
+.hk{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--g);margin-bottom:24px}
+.hk::before{content:'';width:16px;height:1px;background:var(--g)}
+.htitle{font-family:var(--disp);font-size:clamp(58px,8vw,110px);font-weight:900;line-height:.88;letter-spacing:-.02em;text-transform:uppercase;margin-bottom:24px}
+.htitle .gr{color:var(--g)}
+.htitle .out{-webkit-text-stroke:2px rgba(255,255,255,.18);color:transparent}
+.hsub{font-family:var(--mono);font-size:13px;color:var(--d3);line-height:1.8;max-width:460px;margin-bottom:36px}
+.hsub strong{color:var(--wht);font-weight:500}
+
+/* Outcome chips */
+.outcomes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px}
+.oc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g);border:1px solid rgba(0,232,122,.25);padding:6px 12px;display:flex;align-items:center;gap:6px}
+.oc::before{content:'';width:5px;height:5px;background:var(--g);flex-shrink:0}
+
+.hctas{display:flex;gap:12px;flex-wrap:wrap}
+.bp{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blk);background:var(--g);border:2px solid var(--g);padding:14px 28px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s}
+.bp:hover{background:#fff;border-color:#fff}
+.bg{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);padding:14px 24px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s;background:transparent}
+.bg:hover{border-color:var(--g);color:var(--g)}
+
+/* ── OVERVIEW STRIP ── */
+.ostrip{background:var(--blk2);border-top:1px solid rgba(0,232,122,.1);border-bottom:1px solid rgba(0,232,122,.1);display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.osi{padding:24px 32px;border-right:1px solid rgba(0,232,122,.08)}
+.osi:last-child{border-right:none}
+.osi-n{font-family:var(--disp);font-size:36px;font-weight:900;color:var(--g);line-height:1;margin-bottom:2px}
+.osi-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--d3)}
+
+/* ── SECTION ── */
+.si{max-width:1160px;margin:0 auto;padding:80px 44px}
+.sk{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--g);display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sk::before{content:'';width:16px;height:1px;background:var(--g);display:block}
+.st{font-family:var(--disp);font-size:clamp(32px,4vw,54px);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:-.01em;margin-bottom:12px;color:var(--wht)}
+.sd{font-family:var(--mono);font-size:12px;color:var(--d3);max-width:480px;line-height:1.7;margin-top:8px}
+
+/* ── DAY TRACKER ── */
+.tracker-sec{background:var(--blk)}
+.day-nav{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:40px;background:rgba(0,232,122,.07);border:1px solid rgba(0,232,122,.1)}
+.dn-btn{background:var(--blk);padding:16px 8px;text-align:center;cursor:pointer;transition:background .2s;border:none;color:inherit;width:100%}
+.dn-btn:hover{background:rgba(0,232,122,.06)}
+.dn-btn.active{background:var(--g);color:var(--blk)}
+.dn-num{font-family:var(--disp);font-size:32px;font-weight:900;line-height:1;margin-bottom:4px;transition:color .2s}
+.dn-btn.active .dn-num{color:var(--blk)}
+.dn-btn:not(.active) .dn-num{color:rgba(255,255,255,.12)}
+.dn-btn.done .dn-num{color:var(--g)}
+.dn-label{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:inherit;opacity:.7;line-height:1.3}
+.dn-check{font-size:10px;margin-top:4px;opacity:0;transition:opacity .2s}
+.dn-btn.done .dn-check{opacity:1;color:var(--g)}
+
+/* Day panel */
+.day-panel{margin-top:2px;border:1px solid rgba(0,232,122,.1);display:none}
+.day-panel.active{display:block}
+.dp-head{background:var(--blk2);padding:28px 36px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.dp-meta{flex:1}
+.dp-phase{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--g);margin-bottom:8px}
+.dp-title{font-family:var(--disp);font-size:clamp(28px,4vw,44px);font-weight:900;text-transform:uppercase;line-height:.95;color:var(--wht)}
+.dp-tagline{font-family:var(--mono);font-size:12px;color:var(--d3);margin-top:8px;max-width:500px;line-height:1.6}
+.dp-badge{flex-shrink:0;background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);padding:16px 20px;text-align:center;min-width:120px}
+.dp-badge-day{font-family:var(--disp);font-size:48px;font-weight:900;line-height:1;color:var(--g)}
+.dp-badge-of{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--d3)}
+
+.dp-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(0,232,122,.05)}
+.dp-col{background:var(--blk);padding:28px 32px}
+
+/* Objective */
+.dp-section-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--g);margin-bottom:14px}
+.dp-objective{font-family:var(--mono);font-size:13px;color:var(--d1);line-height:1.7;padding:16px 20px;background:rgba(0,232,122,.05);border-left:3px solid var(--g);margin-bottom:20px}
+
+/* Checklist */
+.checklist{display:flex;flex-direction:column;gap:8px}
+.cl-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:10px 12px;border:1px solid rgba(255,255,255,.04);transition:border-color .2s}
+.cl-item:hover{border-color:rgba(0,232,122,.2)}
+.cl-item.checked{opacity:.6}
+.cl-box{width:18px;height:18px;flex-shrink:0;border:1px solid rgba(0,232,122,.35);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .2s}
+.cl-item.checked .cl-box{background:var(--g);border-color:var(--g)}
+.cl-check{color:var(--blk);font-size:10px;font-weight:800;opacity:0;transition:opacity .15s}
+.cl-item.checked .cl-check{opacity:1}
+.cl-text{font-family:var(--mono);font-size:11px;color:var(--d1);line-height:1.5}
+.cl-item.checked .cl-text{text-decoration:line-through;color:var(--d3)}
+
+/* Prompt stack */
+.prompt-stack{display:flex;flex-direction:column;gap:10px}
+.prompt-card{background:rgba(0,232,122,.04);border:1px solid rgba(0,232,122,.1);overflow:hidden}
+.pc-head{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .2s}
+.pc-head:hover{background:rgba(0,232,122,.06)}
+.pc-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--g)}
+.pc-toggle{font-family:var(--mono);font-size:12px;color:var(--g);transition:transform .25s}
+.pc-toggle.open{transform:rotate(45deg)}
+.pc-body{padding:0 14px;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
+.pc-body.open{max-height:400px;padding:0 14px 14px}
+.pc-text{font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.7;background:rgba(0,0,0,.3);padding:12px;border-left:2px solid var(--g);white-space:pre-wrap}
+.pc-copy{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g);background:none;border:1px solid rgba(0,232,122,.25);padding:5px 10px;cursor:pointer;margin-top:8px;transition:all .2s}
+.pc-copy:hover{background:var(--g);color:var(--blk)}
+
+/* Output target */
+.output-target{background:rgba(0,0,0,.4);border:1px solid rgba(0,232,122,.15);padding:16px 20px;margin-top:16px}
+.ot-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--g);margin-bottom:8px}
+.ot-items{display:flex;flex-direction:column;gap:6px}
+.ot-item{font-family:var(--mono);font-size:11px;color:var(--d2);display:flex;gap:8px}
+.ot-item::before{content:'→';color:var(--g);flex-shrink:0}
+
+/* Complete day btn */
+.complete-day{width:100%;margin-top:0;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blk);background:var(--g);border:none;padding:16px;cursor:pointer;transition:all .2s;position:relative}
+.complete-day::after{content:'→';position:absolute;right:20px;top:50%;transform:translateY(-50%)}
+.complete-day:hover{background:#fff}
+.complete-day.done{background:rgba(0,232,122,.12);color:var(--g);cursor:default}
+.complete-day.done::after{content:'✓'}
+
+/* ── PROGRESS OVERVIEW ── */
+.prog-sec{background:var(--blk2)}
+.prog-bar-outer{height:6px;background:rgba(255,255,255,.06);margin:32px 0 8px;overflow:hidden}
+.prog-bar-inner{height:100%;background:var(--g);transition:width .6s ease}
+.prog-label{font-family:var(--mono);font-size:10px;color:var(--d3);display:flex;justify-content:space-between}
+
+/* Output gallery */
+.outputs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:28px}
+.og-card{border:1px solid rgba(255,255,255,.05);padding:18px;transition:border-color .2s}
+.og-card.unlocked{border-color:rgba(0,232,122,.2)}
+.og-card.locked{opacity:.3}
+.ogc-day{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--g);margin-bottom:6px}
+.ogc-name{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--wht);margin-bottom:4px}
+.ogc-desc{font-family:var(--mono);font-size:10px;color:var(--d3);line-height:1.4}
+
+/* ── WHAT YOU BUILD ── */
+.build-sec{background:var(--blk)}
+.build-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(0,232,122,.06);margin-top:40px}
+.bg-card{background:var(--blk);padding:28px 24px;position:relative;transition:background .2s}
+.bg-card:hover{background:rgba(0,232,122,.04)}
+.bg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.bg-card:hover::before{transform:scaleX(1)}
+.bgc-n{font-family:var(--disp);font-size:44px;font-weight:900;color:rgba(0,232,122,.08);line-height:1;margin-bottom:8px}
+.bgc-tag{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blk);background:var(--g);padding:3px 9px;margin-bottom:10px}
+.bgc-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--wht);margin-bottom:6px}
+.bgc-desc{font-family:var(--mono);font-size:11px;color:var(--d3);line-height:1.6}
+
+/* ── APPLY CTA ── */
+.apply-cta-sec{background:var(--blk2);text-align:center}
+.act-title{font-family:var(--disp);font-size:clamp(36px,5.5vw,70px);font-weight:900;text-transform:uppercase;line-height:.9;color:var(--wht);max-width:700px;margin:0 auto 16px}
+.act-title .g{color:var(--g)}
+.act-sub{font-family:var(--mono);font-size:12px;color:var(--d3);max-width:380px;margin:0 auto 32px;line-height:1.8}
+.act-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* Footer */
+footer{background:var(--blk);border-top:1px solid rgba(0,232,122,.08);padding:22px 44px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.fi{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.15)}
+.fl{display:flex;gap:18px;list-style:none}
+.fl a{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.12);text-decoration:none;transition:color .2s}
+.fl a:hover{color:var(--g)}
+
+@media(max-width:900px){
+  .sb,.nav,.ostrip{padding-left:20px;padding-right:20px}
+  nav{padding:0 20px}
+  .si{padding:60px 24px}
+  .hi{padding:60px 24px 44px}
+  .day-nav{grid-template-columns:repeat(4,1fr)}
+  .dp-body{grid-template-columns:1fr}
+  .outputs-grid{grid-template-columns:repeat(2,1fr)}
+  .build-grid{grid-template-columns:1fr}
+  .ostrip{grid-template-columns:repeat(2,1fr)}
+  footer{padding:20px 24px}
+}
+.fu{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.fu.vis{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body class="gb">
+
+<!-- SUBBRAND -->
+<div class="sb">
+  <div class="sb-l"><span>MAIM × Hanzo AI</span> / <span style="color:var(--d3)">Creator SPARK Lab</span></div>
+  <div class="sb-r">A Sub-Brand of Major AI Mindset</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nb"><div class="nhx"></div>Creator SPARK Lab</div>
+  <div class="nprog">
+    <span id="nav-progress-label" style="min-width:80px">Day 0 / 7</span>
+    <div class="npb"><div class="npbf" id="nav-prog-bar" style="width:0%"></div></div>
+  </div>
+  <a href="creator_content_system.html" class="ncta">Full System →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero gb">
+  <div class="hi">
+    <div class="hk">Creator Intelligence Series · MAIM × Hanzo AI</div>
+    <h1 class="htitle">7-DAY<br><span class="gr">CONTENT</span><br><span class="out">MACHINE</span><br>SPRINT</h1>
+    <p class="hsub">
+      Zero experience required.<br>
+      <strong>One content machine built in 7 days.</strong><br><br>
+      Daily prompts, daily outputs, daily momentum.<br>
+      By Day 7 you have a live piece and 30 days of scheduled content.
+    </p>
+    <div class="outcomes">
+      <div class="oc">Voice Captured</div>
+      <div class="oc">30 Content Angles</div>
+      <div class="oc">5 Platform Formats</div>
+      <div class="oc">30-Day Calendar</div>
+      <div class="oc">Live Offer Bridge</div>
+      <div class="oc">Published Day 7</div>
+    </div>
+    <div class="hctas">
+      <a href="#tracker" class="bp">Start Day 1 <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a href="creator_content_system.html" class="bg">Full System Access →</a>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW STRIP -->
+<div class="ostrip">
+  <div class="osi"><div class="osi-n">7</div><div class="osi-l">Days</div></div>
+  <div class="osi"><div class="osi-n">30+</div><div class="osi-l">Content Pieces</div></div>
+  <div class="osi"><div class="osi-n">5</div><div class="osi-l">Platforms Fed</div></div>
+  <div class="osi"><div class="osi-n">$0</div><div class="osi-l">Upfront Cost</div></div>
+</div>
+
+<!-- DAY TRACKER -->
+<section id="tracker" class="tracker-sec" style="background:var(--blk)">
+  <div class="si">
+    <div class="sk">Interactive Lab Tracker</div>
+    <h2 class="st">Your 7-Day<br>Sprint Board</h2>
+    <p class="sd">Click a day to open it. Check off tasks as you complete them. Progress saves automatically in your browser.</p>
+
+    <!-- Day Navigation -->
+    <div class="day-nav" id="day-nav">
+      <button class="dn-btn active" onclick="openDay(1)" id="dn1">
+        <div class="dn-num">01</div>
+        <div class="dn-label">Voice Capture</div>
+        <div class="dn-check">✓</div>
+      </button>
+      <button class="dn-btn" onclick="openDay(2)" id="dn2">
+        <div class="dn-num">02</div>
+        <div class="dn-label">Idea Mining</div>
+        <div class="dn-check">✓</div>
+      </button>
+      <button class="dn-btn" onclick="openDay(3)" id="dn3">
+        <div class="dn-num">03</div>
+        <div class="dn-label">Hook Factory</div>
+        <div class="dn-check">✓</div>
+      </button>
+      <button class="dn-btn" onclick="openDay(4)" id="dn4">
+        <div class="dn-num">04</div>
+        <div class="dn-label">Multiplier</div>
+        <div class="dn-check">✓</div>
+      </button>
+      <button class="dn-btn" onclick="openDay(5)" id="dn5">
+        <div class="dn-num">05</div>
+        <div class="dn-label">Offer Bridge</div>
+        <div class="dn-check">✓</div>
+      </button>
+      <button class="dn-btn" onclick="openDay(6)" id="dn6">
+        <div class="dn-num">06</div>
+        <div class="dn-label">Calendar</div>
+        <div class="dn-check">✓</div>
+      </button>
+      <button class="dn-btn" onclick="openDay(7)" id="dn7">
+        <div class="dn-num">07</div>
+        <div class="dn-label">Publish</div>
+        <div class="dn-check">✓</div>
+      </button>
+    </div>
+
+    <!-- DAY 1 -->
+    <div class="day-panel active" id="panel1">
+      <div class="dp-head">
+        <div class="dp-meta">
+          <div class="dp-phase">Phase 1 · Foundation</div>
+          <div class="dp-title">Voice Capture</div>
+          <div class="dp-tagline">Define who you are, who you serve, and the three pillars your entire content machine will run on. This session takes 45 minutes and anchors every other day.</div>
+        </div>
+        <div class="dp-badge"><div class="dp-badge-day">01</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Objective</div>
+          <div class="dp-objective">Leave this session with your Creator Identity Card: niche, audience, transformation promise, and 3 content pillars written and locked.</div>
+          <div class="dp-section-label">Daily Checklist</div>
+          <div class="checklist" id="cl1">
+            <div class="cl-item" onclick="toggleCheck(this,'c1_1')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Write your niche statement: "I help [audience] do [transformation] without [pain point]"</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c1_2')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Define your audience in one sentence (job, problem, aspiration)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c1_3')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">List 3 content pillars (topics you can talk about for years)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c1_4')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Run the Voice Capture prompt and save output</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c1_5')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Review output — does it sound like YOU? Edit until it does</div></div>
+          </div>
+          <div class="output-target" style="margin-top:16px">
+            <div class="ot-label">Day 1 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">Creator Identity Card (saved doc)</div>
+              <div class="ot-item">3 named content pillars</div>
+              <div class="ot-item">Niche statement (1 sentence)</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 1</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 1 · Niche Extractor</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">You are a brand strategist helping a creator define their niche. Ask me 5 rapid-fire questions about my background, skills, and the problems I've solved for others. After I answer, synthesize my responses into a niche statement in this format:
+
+"I help [specific audience] achieve [specific outcome] through [unique method/lens]."
+
+Then give me 3 alternative versions. Keep each under 20 words.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 2 · Pillar Builder</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Based on my niche statement: [PASTE YOUR NICHE HERE]
+
+Generate 5 potential content pillars for my brand. Each pillar should:
+- Be a topic I can create 50+ pieces on
+- Directly serve my target audience
+- Be distinct from the other pillars
+- Connect to a monetization angle
+
+Format: Pillar Name · One sentence description · Example content angle</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 3 · Voice Encoder</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">I'm going to paste 3 examples of my writing below. Analyze my voice and give me:
+1. 5 words that describe my tone
+2. 3 things I should NEVER sound like
+3. A "voice rulebook" — 5 rules for how I write
+
+I'll use this to train AI to write in my voice.
+
+[PASTE 3 WRITING SAMPLES]</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd1" onclick="completeDay(1)">Mark Day 1 Complete — Unlock Day 2</button>
+    </div>
+
+    <!-- DAY 2 -->
+    <div class="day-panel" id="panel2">
+      <div class="dp-head">
+        <div class="dp-meta">
+          <div class="dp-phase">Phase 1 · Foundation</div>
+          <div class="dp-title">Idea Mining</div>
+          <div class="dp-tagline">Run the Hanzo Topic Mining Stack and extract 30 content angles from a single 20-minute conversation. You will never face a blank page again.</div>
+        </div>
+        <div class="dp-badge"><div class="dp-badge-day">02</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Objective</div>
+          <div class="dp-objective">Leave with a bank of 30 content angles categorized by pillar, format suitability, and urgency. This is your content backlog for the next 90 days.</div>
+          <div class="dp-section-label">Daily Checklist</div>
+          <div class="checklist" id="cl2">
+            <div class="cl-item" onclick="toggleCheck(this,'c2_1')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Run the Topic Mining prompt with each of your 3 pillars</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c2_2')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Collect minimum 30 angles (aim for 40)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c2_3')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Tag each angle: Pillar / Format (short, long, email) / Urgency (now, soon, evergreen)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c2_4')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Star your top 7 angles — one per day for the next week</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c2_5')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Save your angle bank in a doc or Notion database</div></div>
+          </div>
+          <div class="output-target" style="margin-top:16px">
+            <div class="ot-label">Day 2 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">30+ tagged content angles</div>
+              <div class="ot-item">7 starred priority angles</div>
+              <div class="ot-item">Content angle bank (saved)</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 2</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 1 · Topic Mining Stack</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">You are a content strategist. My content pillar is: [PILLAR NAME]
+My audience is: [AUDIENCE]
+My niche: [NICHE STATEMENT]
+
+Generate 15 content angles on this pillar. For each angle provide:
+- A specific title/angle
+- One-line description of the value
+- Best format (short video / long-form / email / thread)
+- Urgency (trending now / evergreen / seasonal)
+
+Make these specific, not generic. Think "What does my audience Google at 2am?"</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 2 · Experience Miner</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">I'm going to describe a personal experience or lesson I've learned. Your job is to extract 10 unique content angles from it.
+
+For each angle, tell me:
+- The angle title
+- Why this would resonate with [MY AUDIENCE]
+- Which emotion it triggers (fear, curiosity, aspiration, validation)
+
+My experience: [DESCRIBE A STORY, LESSON, OR MISTAKE]</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 3 · Urgency Sorter</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Here are my 30 content angles: [PASTE LIST]
+
+Sort them into 3 buckets:
+1. POST NOW — timely, high relevance, trending adjacent
+2. POST SOON — valuable but not urgent
+3. EVERGREEN — will be relevant 2 years from now
+
+Then select the top 7 for me to use this week, one per day, ordered for maximum audience momentum (start with trust-building, end with conversion).</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd2" onclick="completeDay(2)">Mark Day 2 Complete — Unlock Day 3</button>
+    </div>
+
+    <!-- DAY 3 -->
+    <div class="day-panel" id="panel3">
+      <div class="dp-head">
+        <div class="dp-meta">
+          <div class="dp-phase">Phase 2 · Build</div>
+          <div class="dp-title">Hook Factory</div>
+          <div class="dp-tagline">The first 3 seconds win or lose the scroll. Generate 10 opening hooks for your best angle, pick the top 3, then write your first full content piece from scratch.</div>
+        </div>
+        <div class="dp-badge"><div class="dp-badge-day">03</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Objective</div>
+          <div class="dp-objective">Leave with one complete, polished long-form piece built on your best angle, backed by 3 tested hooks. This becomes the "source content" for Day 4's multiplier.</div>
+          <div class="dp-section-label">Daily Checklist</div>
+          <div class="checklist" id="cl3">
+            <div class="cl-item" onclick="toggleCheck(this,'c3_1')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Pick your #1 starred angle from Day 2</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c3_2')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Run the Hook Generator — get 10 opening lines</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c3_3')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Pick your top 3 hooks and edit them into your voice</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c3_4')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Write the full content piece (800–1200 words for long-form)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c3_5')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Run the Voice Check prompt — does it sound like you?</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c3_6')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Save the final draft as "Source Content — Week 1"</div></div>
+          </div>
+          <div class="output-target" style="margin-top:16px">
+            <div class="ot-label">Day 3 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">10 hooks (document 3 best)</div>
+              <div class="ot-item">1 full long-form piece (800–1200 words)</div>
+              <div class="ot-item">Source Content doc saved</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 3</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 1 · Hook Generator (10x)</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Write 10 different opening hooks for this content angle: [YOUR ANGLE]
+Audience: [AUDIENCE]
+
+Use these 10 hook frameworks (one each):
+1. Bold claim
+2. Counterintuitive statement
+3. Specific number promise
+4. "Most people think X, but..." contrast
+5. Personal failure story opener
+6. Question that creates immediate curiosity
+7. "Here's what nobody tells you about X"
+8. The before/after
+9. Controversial opinion
+10. Vivid scene-setting
+
+Make each hook under 2 sentences. Write in my voice: [PASTE YOUR VOICE RULES FROM DAY 1]</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 2 · Long-Form Drafter</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Write a long-form content piece on this topic: [ANGLE]
+
+Hook to use: [YOUR CHOSEN HOOK]
+Audience: [AUDIENCE]
+Voice rules: [PASTE YOUR VOICE RULES]
+Word count: 900–1100 words
+
+Structure:
+- Hook (2–3 sentences)
+- The problem (why this matters)
+- The insight (your unique perspective)
+- The framework or steps (the meat)
+- The story or proof (makes it real)
+- The call to reflection or action
+
+Do NOT make it sound like a blog post template. Make it sound like I'm talking to one specific person.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 3 · Voice Check</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Read this content piece: [PASTE DRAFT]
+
+Check it against my voice rules: [PASTE VOICE RULES]
+
+Tell me:
+1. Which sentences sound the MOST like me
+2. Which sentences sound generic or AI-written
+3. 3 specific edits to make it sound more authentic
+
+Then give me a "Voice Score" out of 10 and one sentence on what would push it to a 10.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd3" onclick="completeDay(3)">Mark Day 3 Complete — Unlock Day 4</button>
+    </div>
+
+    <!-- DAY 4 -->
+    <div class="day-panel" id="panel4">
+      <div class="dp-head">
+        <div class="dp-meta">
+          <div class="dp-phase">Phase 2 · Build</div>
+          <div class="dp-title">Content Multiplier</div>
+          <div class="dp-tagline">Take the Day 3 source piece and explode it into 5 platform-ready formats. One idea becomes a LinkedIn post, TikTok script, email, carousel, and tweet thread — today.</div>
+        </div>
+        <div class="dp-badge"><div class="dp-badge-day">04</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Objective</div>
+          <div class="dp-objective">Leave with 5 platform-ready pieces, all derived from your Day 3 source content. You now have a week of content from one piece of thinking.</div>
+          <div class="dp-section-label">Daily Checklist</div>
+          <div class="checklist" id="cl4">
+            <div class="cl-item" onclick="toggleCheck(this,'c4_1')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">LinkedIn post (300–400 words, personal + value-driven)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c4_2')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Short-form video script (60–90 sec, hook + 3 points + CTA)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c4_3')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Email newsletter version (conversational, single insight)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c4_4')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Carousel outline (6–8 slides, title + key point each)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c4_5')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">10-tweet thread (opener + 8 value tweets + CTA close)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c4_6')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Save all 5 in your "Content Week 1" folder</div></div>
+          </div>
+          <div class="output-target" style="margin-top:16px">
+            <div class="ot-label">Day 4 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">5 platform-ready pieces from 1 source</div>
+              <div class="ot-item">LinkedIn, Video Script, Email, Carousel, Thread</div>
+              <div class="ot-item">Content Week 1 folder complete</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 4</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 1 · Platform Repurposer</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Here is my source content piece: [PASTE DAY 3 PIECE]
+
+Repurpose this into a LinkedIn post using these rules:
+- 300–400 words
+- Hook in line 1 that stops the scroll
+- Short sentences and white space (LinkedIn formatting)
+- Personal tone, first-person
+- End with a question to drive comments
+- Subtle CTA in last line
+- Voice: [PASTE VOICE RULES]
+
+Do not summarize — reimagine it for LinkedIn's audience and format.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 2 · Video Script Converter</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Convert this piece into a 75-second video script: [PASTE SOURCE CONTENT]
+
+Format:
+HOOK (0–5 sec): One sentence that creates immediate curiosity or controversy
+SETUP (5–15 sec): The problem or context in 1–2 sentences
+POINTS (15–60 sec): 3 punchy points, 10–15 sec each
+CTA (60–75 sec): One clear action for the viewer
+
+Write in spoken language — contractions, short sentences, natural pauses. Add [PAUSE] and [EMPHASIS] where relevant. Voice: [VOICE RULES]</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 3 · Thread + Email Splitter</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">From this source content: [PASTE]
+
+Task A — Twitter/X Thread:
+Write a 10-tweet thread. Tweet 1 = hook. Tweets 2–9 = one insight each (under 240 chars). Tweet 10 = CTA + what's coming next. Number each tweet.
+
+Task B — Email Newsletter:
+Write a 200-word email version. Subject line options: give me 3. Opening: a personal observation, not a summary. Body: one key insight expanded. Close: conversational sign-off + CTA.
+
+Voice for both: [VOICE RULES]</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd4" onclick="completeDay(4)">Mark Day 4 Complete — Unlock Day 5</button>
+    </div>
+
+    <!-- DAY 5 -->
+    <div class="day-panel" id="panel5">
+      <div class="dp-head">
+        <div class="dp-meta">
+          <div class="dp-phase">Phase 2 · Build</div>
+          <div class="dp-title">Offer Bridge</div>
+          <div class="dp-tagline">Wire every piece of content to a conversion point — naturally, not forcefully. The Offer Bridge is the architecture that turns attention into income without a single hard sell.</div>
+        </div>
+        <div class="dp-badge"><div class="dp-badge-day">05</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Objective</div>
+          <div class="dp-objective">Leave with a defined offer, a written Offer Bridge statement, and every Day 4 piece updated with a natural conversion CTA embedded in the content — not bolted on the end.</div>
+          <div class="dp-section-label">Daily Checklist</div>
+          <div class="checklist" id="cl5">
+            <div class="cl-item" onclick="toggleCheck(this,'c5_1')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Define your core offer in one sentence (what, who, result)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c5_2')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Write your Offer Bridge statement (connects content topic to offer)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c5_3')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Generate 5 CTA variations (direct, soft, curiosity, proof, invitation)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c5_4')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Update each Day 4 piece with the appropriate CTA style</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c5_5')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Confirm your link destination exists (Gumroad, landing page, DM prompt)</div></div>
+          </div>
+          <div class="output-target" style="margin-top:16px">
+            <div class="ot-label">Day 5 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">Offer definition (1 sentence)</div>
+              <div class="ot-item">5 CTA variations written</div>
+              <div class="ot-item">All 5 pieces CTA-updated</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 5</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 1 · Offer Bridge Builder</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">I create content about: [CONTENT TOPIC / PILLAR]
+My offer is: [YOUR OFFER — product, service, program, consultation]
+
+Write an Offer Bridge statement — a 1–2 sentence connection between my content and my offer that feels NATURAL, not salesy. The reader should feel like the offer is the obvious next step after reading my content.
+
+Then write 5 CTA variations in these styles:
+1. Direct ("Work with me here: [link]")
+2. Soft ("If this resonated, there's more at: [link]")
+3. Curiosity ("What I didn't mention here is in: [link]")
+4. Proof-based ("The people who hired me got X — details: [link]")
+5. Invitation ("I'm taking 5 people through this live — apply: [link]")</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 2 · CTA Embedder</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Here is my content piece: [PASTE PIECE]
+Here is my offer: [OFFER]
+Here is my preferred CTA style for this piece: [DIRECT / SOFT / CURIOSITY / PROOF / INVITATION]
+
+Rewrite the closing 2–3 paragraphs to naturally lead into this CTA. The offer should feel like it emerged from the content — not like an ad appended to the end. The transition should be invisible.
+
+Keep my voice: [VOICE RULES]</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd5" onclick="completeDay(5)">Mark Day 5 Complete — Unlock Day 6</button>
+    </div>
+
+    <!-- DAY 6 -->
+    <div class="day-panel" id="panel6">
+      <div class="dp-head">
+        <div class="dp-meta">
+          <div class="dp-phase">Phase 3 · Launch</div>
+          <div class="dp-title">Calendar Build</div>
+          <div class="dp-tagline">Turn your 30 angles into a structured 30-day content calendar with themes, CTAs, and posting cadence mapped for each platform. Your next month is planned before Day 7.</div>
+        </div>
+        <div class="dp-badge"><div class="dp-badge-day">06</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Objective</div>
+          <div class="dp-objective">Leave with a complete 30-day content calendar: week themes defined, daily topics assigned, platform matched, CTA type mapped for every post.</div>
+          <div class="dp-section-label">Daily Checklist</div>
+          <div class="checklist" id="cl6">
+            <div class="cl-item" onclick="toggleCheck(this,'c6_1')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Assign weekly themes (4 weeks × 1 theme per week from your pillars)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c6_2')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Run the Calendar Generator prompt — 30 topics assigned to 30 days</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c6_3')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Assign CTA type to each piece (awareness / engagement / conversion)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c6_4')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Match platform to each day based on format</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c6_5')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Export calendar to your scheduling tool or doc</div></div>
+          </div>
+          <div class="output-target" style="margin-top:16px">
+            <div class="ot-label">Day 6 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">30-day content calendar (complete)</div>
+              <div class="ot-item">4 weekly themes defined</div>
+              <div class="ot-item">CTA type mapped per day</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 6</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 1 · 30-Day Calendar Generator</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Build me a 30-day content calendar using these inputs:
+
+Pillars: [PILLAR 1], [PILLAR 2], [PILLAR 3]
+Angle bank: [PASTE YOUR 30 ANGLES]
+Posting frequency: [X posts per week]
+Primary platform: [PLATFORM]
+
+Rules:
+- Week 1: Trust-building content (introduce who I am, share stories)
+- Week 2: Value and education (teach, tips, frameworks)
+- Week 3: Social proof and results (case studies, transformations)
+- Week 4: Conversion content (offer-adjacent, CTA-heavy)
+
+Format each day as: Day # | Topic | Pillar | Format | CTA Type (Awareness / Engagement / Conversion)</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 2 · Momentum Sequencer</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Here is my 30-day calendar draft: [PASTE CALENDAR]
+
+Analyze this calendar and tell me:
+1. Does the CTA distribution follow the trust → value → conversion arc? If not, fix it.
+2. Are there any "content gaps" — days where the topic doesn't connect to the week theme?
+3. What's the best piece to lead with on Day 1 to set the tone for the whole month?
+4. Suggest 3 "connection pieces" — posts that explicitly reference previous posts to create narrative continuity.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd6" onclick="completeDay(6)">Mark Day 6 Complete — Unlock Day 7</button>
+    </div>
+
+    <!-- DAY 7 -->
+    <div class="day-panel" id="panel7">
+      <div class="dp-head">
+        <div class="dp-meta">
+          <div class="dp-phase">Phase 3 · Launch</div>
+          <div class="dp-title">Publish Day</div>
+          <div class="dp-tagline">Not perfect — functional. Today you publish your Day 3/4 piece live, activate your calendar, and run your first monthly content audit setup. The machine is now running.</div>
+        </div>
+        <div class="dp-badge"><div class="dp-badge-day">07</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Objective</div>
+          <div class="dp-objective">Leave with at least one live piece published, your 30-day calendar active, and your analytics baseline documented. The sprint is complete when content is live — not drafted.</div>
+          <div class="dp-section-label">Daily Checklist</div>
+          <div class="checklist" id="cl7">
+            <div class="cl-item" onclick="toggleCheck(this,'c7_1')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Publish your primary piece on your main platform (LinkedIn, newsletter, etc.)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c7_2')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Schedule or stage your Week 1 content from the Day 6 calendar</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c7_3')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Document your baseline analytics (current followers, avg reach, email list size)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c7_4')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Set a 30-day analytics review reminder</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c7_5')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Run the System Review prompt — capture what worked and what to improve</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'c7_6')"><div class="cl-box"><div class="cl-check">✓</div></div><div class="cl-text">Apply for Content System full access to continue the momentum</div></div>
+          </div>
+          <div class="output-target" style="margin-top:16px">
+            <div class="ot-label">Sprint Complete — What You Built</div>
+            <div class="ot-items">
+              <div class="ot-item">Creator Identity Card + Voice Rulebook</div>
+              <div class="ot-item">30+ tagged content angles</div>
+              <div class="ot-item">1 source piece × 5 platform formats</div>
+              <div class="ot-item">30-day content calendar</div>
+              <div class="ot-item">Live published piece with offer bridge</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 7</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 1 · Publishing Checklist</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">Review my content piece before I publish: [PASTE FINAL PIECE]
+Platform: [PLATFORM]
+
+Run this checklist and give me a pass/fail + fix for each:
+1. Hook — does it stop the scroll in under 5 seconds?
+2. Value — is there one clear insight the reader takes away?
+3. Voice — does it sound like a person, not a template?
+4. CTA — is the next step clear and friction-free?
+5. Formatting — does it work on mobile? (short paragraphs, white space)
+6. Platform fit — is the length and tone right for [PLATFORM]?
+
+If anything fails, rewrite that section and show me the fix.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)">
+                <div class="pc-label">Prompt 2 · Sprint Debrief</div>
+                <div class="pc-toggle">+</div>
+              </div>
+              <div class="pc-body">
+                <div class="pc-text">I just completed a 7-day content sprint. Here's what I built:
+- Niche: [YOUR NICHE]
+- Pillars: [PILLARS]
+- Pieces created: [LIST WHAT YOU MADE]
+- Biggest challenge: [WHAT WAS HARD]
+- What surprised me: [WHAT WORKED UNEXPECTEDLY]
+
+Based on this, give me:
+1. My #1 content machine bottleneck to fix next month
+2. The platform I should double down on
+3. The content format that will grow my audience fastest
+4. 3 actions to take in the next 7 days to keep momentum</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding:20px;background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.25)">
+            <div class="dp-section-label" style="margin-bottom:10px">Sprint Complete — What's Next</div>
+            <p style="font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.7;margin-bottom:14px">You've built the machine. The Content System gives you 6 full modules, monthly live sessions, and the full Hanzo prompt library (49 prompts) to keep it running.</p>
+            <a href="creator_content_system.html#apply" class="bp" style="display:inline-flex;font-size:11px;padding:12px 20px">Apply for Full Access →</a>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day done" id="cd7" onclick="completeDay(7)">Sprint Complete ✓</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROGRESS -->
+<section class="prog-sec">
+  <div class="si">
+    <div class="sk">Sprint Progress</div>
+    <h2 class="st">What You're Building</h2>
+    <div class="prog-bar-outer"><div class="prog-bar-inner" id="main-prog-bar" style="width:0%"></div></div>
+    <div class="prog-label"><span id="prog-text">0 of 7 days complete</span><span id="prog-pct">0%</span></div>
+    <div class="outputs-grid" id="outputs-grid" style="margin-top:28px">
+      <div class="og-card locked" id="og1"><div class="ogc-day">Day 1</div><div class="ogc-name">Creator Identity Card</div><div class="ogc-desc">Niche + voice + 3 content pillars</div></div>
+      <div class="og-card locked" id="og2"><div class="ogc-day">Day 2</div><div class="ogc-name">Content Angle Bank</div><div class="ogc-desc">30+ tagged angles across pillars</div></div>
+      <div class="og-card locked" id="og3"><div class="ogc-day">Day 3</div><div class="ogc-name">Source Content Piece</div><div class="ogc-desc">1 long-form, 3 hooks documented</div></div>
+      <div class="og-card locked" id="og4"><div class="ogc-day">Day 4</div><div class="ogc-name">5-Platform Content Set</div><div class="ogc-desc">LinkedIn · Video · Email · Carousel · Thread</div></div>
+      <div class="og-card locked" id="og5"><div class="ogc-day">Day 5</div><div class="ogc-name">Offer Bridge System</div><div class="ogc-desc">Offer defined + 5 CTA variations</div></div>
+      <div class="og-card locked" id="og6"><div class="ogc-day">Day 6</div><div class="ogc-name">30-Day Calendar</div><div class="ogc-desc">Themed, CTA-mapped, platform-matched</div></div>
+      <div class="og-card locked" id="og7" style="grid-column:span 2"><div class="ogc-day">Day 7</div><div class="ogc-name">Live Published Machine</div><div class="ogc-desc">Content live + calendar active + analytics baseline documented</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT YOU BUILD -->
+<section class="build-sec fu">
+  <div class="si">
+    <div class="sk">Full System Access</div>
+    <h2 class="st">From Sprint to<br>Permanent Machine</h2>
+    <p class="sd">The SPARK Lab is your entry point. The Creator Content System is the infrastructure you run every month.</p>
+    <div class="build-grid">
+      <div class="bg-card"><div class="bgc-n">01</div><div class="bgc-tag">Month 1</div><div class="bgc-title">Content Machine Active</div><div class="bgc-desc">Your SPARK output is live. 30-day calendar running. Now you add the full Hanzo prompt library and live build session.</div></div>
+      <div class="bg-card"><div class="bgc-n">02</div><div class="bgc-tag">Month 2</div><div class="bgc-title">Monetization Layer</div><div class="bgc-desc">Offer Bridge fully engineered. Email list growing. Content consistently converts to discovery calls, sales, or digital product downloads.</div></div>
+      <div class="bg-card"><div class="bgc-n">03</div><div class="bgc-tag">Month 3</div><div class="bgc-title">System Autonomy</div><div class="bgc-desc">The system runs with minimal input. Repurposing is automatic. Analytics tell you what to scale. You've graduated to Operator status.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- APPLY CTA -->
+<section class="apply-cta-sec">
+  <div class="si" style="text-align:center">
+    <div class="sk" style="justify-content:center;margin-bottom:20px">Next Step</div>
+    <div class="act-title">Your Machine<br><span class="g">Needs Fuel.</span></div>
+    <p class="act-sub">The SPARK Lab builds the engine.<br>The Creator Content System keeps it running.<br>Apply for full access and never<br>face a blank page again.</p>
+    <div class="act-btns">
+      <a href="creator_content_system.html#apply" class="bp">Apply for Full System <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a href="nil_spark_lab.html" class="bg">NIL SPARK Lab →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fi">MAIM × Hanzo AI · Creator SPARK Lab · A Sub-Brand of Major AI Mindset</div>
+  <ul class="fl">
+    <li><a href="#tracker">Lab Tracker</a></li>
+    <li><a href="creator_content_system.html">Full System</a></li>
+    <li><a href="nil_spark_lab.html">NIL Lab</a></li>
+    <li><a href="digital_asset_lab.html">Asset Lab</a></li>
+  </ul>
+</footer>
+
+<script>
+// State
+const STATE_KEY='creator_spark_v1';
+function loadState(){try{return JSON.parse(localStorage.getItem(STATE_KEY))||{completed:[],checks:{}}}catch(e){return{completed:[],checks:{}}}}
+function saveState(s){try{localStorage.setItem(STATE_KEY,JSON.stringify(s))}catch(e){}}
+let state=loadState();
+
+// Init
+function init(){
+  // Restore checks
+  Object.keys(state.checks).forEach(k=>{
+    if(state.checks[k]){
+      const el=document.querySelector(`[onclick*="${k}"]`);
+      if(el) el.classList.add('checked');
+    }
+  });
+  // Restore completed days
+  state.completed.forEach(d=>{
+    const btn=document.getElementById(`dn${d}`);
+    if(btn){btn.classList.remove('active');btn.classList.add('done')}
+    const cd=document.getElementById(`cd${d}`);
+    if(cd){cd.textContent=`Day ${d} Complete ✓`;cd.classList.add('done')}
+    const og=document.getElementById(`og${d}`);
+    if(og){og.classList.remove('locked');og.classList.add('unlocked')}
+  });
+  updateProgress();
+  // Open first incomplete day
+  const nextDay=getNextDay();
+  if(nextDay) openDay(nextDay);
+}
+
+function getNextDay(){
+  for(let i=1;i<=7;i++){
+    if(!state.completed.includes(i)) return i;
+  }
+  return 7;
+}
+
+function openDay(n){
+  document.querySelectorAll('.day-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.dn-btn').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById(`panel${n}`);
+  const btn=document.getElementById(`dn${n}`);
+  if(panel) panel.classList.add('active');
+  if(btn) btn.classList.add('active');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleCheck(el,key){
+  el.classList.toggle('checked');
+  state.checks[key]=el.classList.contains('checked');
+  saveState(state);
+}
+
+function completeDay(n){
+  const cd=document.getElementById(`cd${n}`);
+  if(cd.classList.contains('done')) return;
+  if(!state.completed.includes(n)) state.completed.push(n);
+  saveState(state);
+  cd.textContent=`Day ${n} Complete ✓`;
+  cd.classList.add('done');
+  const btn=document.getElementById(`dn${n}`);
+  if(btn){btn.classList.remove('active');btn.classList.add('done')}
+  const og=document.getElementById(`og${n}`);
+  if(og){og.classList.remove('locked');og.classList.add('unlocked')}
+  updateProgress();
+  if(n<7) setTimeout(()=>openDay(n+1),500);
+}
+
+function updateProgress(){
+  const pct=Math.round(state.completed.length/7*100);
+  document.getElementById('main-prog-bar').style.width=pct+'%';
+  document.getElementById('nav-prog-bar').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=`${state.completed.length} of 7 days complete`;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('nav-progress-label').textContent=`Day ${state.completed.length} / 7`;
+}
+
+function togglePrompt(head){
+  const body=head.nextElementSibling;
+  const tog=head.querySelector('.pc-toggle');
+  body.classList.toggle('open');
+  tog.classList.toggle('open');
+}
+
+function copyPrompt(btn){
+  const text=btn.previousElementSibling.textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig=btn.textContent;btn.textContent='Copied ✓';
+    setTimeout(()=>btn.textContent=orig,2000);
+  });
+}
+
+// Scroll observer
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')});
+},{threshold:.1});
+document.querySelectorAll('.fu').forEach(el=>obs.observe(el));
+
+init();
+</script>
+</body>
+</html>

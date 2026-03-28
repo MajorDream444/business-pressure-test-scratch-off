@@ -15,8 +15,6 @@ import {
   Mail, 
   Phone, 
   User, 
-  Briefcase, 
-  MessageSquare,
   Trophy,
   Zap,
   Target,
@@ -191,19 +189,33 @@ const ScratchCanvas = ({ onScratch }: { onScratch: (percent: number) => void }) 
   return <canvas ref={canvasRef} className="absolute inset-0 z-10 cursor-crosshair scratch-canvas" />;
 };
 
-const QuizScreen = ({ onComplete }: { onComplete: (score: number) => void }) => {
+const QuizScreen = ({
+  onComplete,
+}: {
+  onComplete: (quizData: { totalScore: number; answers: string[]; answerScores: number[] }) => void;
+}) => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [answerScores, setAnswerScores] = useState<number[]>([]);
   const question = QUESTIONS[currentIdx];
   const progress = ((currentIdx + 1) / QUESTIONS.length) * 100;
 
-  const handleAnswer = (score: number) => {
+  const handleAnswer = (label: string, score: number) => {
     const newScore = totalScore + score;
+    const newAnswers = [...answers, label];
+    const newAnswerScores = [...answerScores, Math.round(score)];
     if (currentIdx < QUESTIONS.length - 1) {
       setTotalScore(newScore);
+      setAnswers(newAnswers);
+      setAnswerScores(newAnswerScores);
       setCurrentIdx(currentIdx + 1);
     } else {
-      onComplete(newScore);
+      onComplete({
+        totalScore: Math.round(newScore),
+        answers: newAnswers,
+        answerScores: newAnswerScores,
+      });
     }
   };
 
@@ -243,7 +255,7 @@ const QuizScreen = ({ onComplete }: { onComplete: (score: number) => void }) => 
               {question.options.map((opt, i) => (
                 <button
                   key={i}
-                  onClick={() => handleAnswer(opt.score)}
+                  onClick={() => handleAnswer(opt.label, opt.score)}
                   className="w-full p-5 text-left transition-all border rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 hover:border-accent/50 group"
                 >
                   <div className="flex items-center justify-between">
@@ -409,19 +421,25 @@ const ResultsScreen = ({ score, onNext }: { score: number, onNext: () => void })
 const LeadCaptureScreen = ({
   score,
   band,
+  quizAnswers,
+  quizAnswerScores,
   onComplete,
 }: {
   score: number;
   band: Band;
+  quizAnswers: string[];
+  quizAnswerScores: number[];
   onComplete: (data: LeadData) => void;
 }) => {
   const [formData, setFormData] = useState<LeadData>({
-    first_name: '',
+    emailAddress: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    telegram_or_phone: '',
-    business_type: '',
-    revenue_range: '',
-    biggest_issue: '',
+    telegramOrPhone: '',
+    businessType: '',
+    monthlyRevenue: '',
+    biggestIssue: '',
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -431,19 +449,47 @@ const LeadCaptureScreen = ({
     e.preventDefault();
     setSubmitting(true);
     setError('');
+    const leadEndpoint = import.meta.env.VITE_LEAD_ENDPOINT;
+
+    if (!leadEndpoint) {
+      setError('Lead endpoint is not configured. Please contact support.');
+      setSubmitting(false);
+      return;
+    }
 
     const payload: LeadPayload = {
       ...formData,
-      score,
-      band_key: band.key,
-      band_title: band.title,
-      priority: score <= 30 ? 'HOT' : 'NORMAL',
-      source: 'business_pressure_test_app',
+      q1: quizAnswers[0] || '',
+      q2: quizAnswers[1] || '',
+      q3: quizAnswers[2] || '',
+      q4: quizAnswers[3] || '',
+      q5: quizAnswers[4] || '',
+      q6: quizAnswers[5] || '',
+      q7: quizAnswers[6] || '',
+      q8: quizAnswers[7] || '',
+      q9: quizAnswers[8] || '',
+      q10: quizAnswers[9] || '',
+      q1Score: quizAnswerScores[0] ?? 0,
+      q2Score: quizAnswerScores[1] ?? 0,
+      q3Score: quizAnswerScores[2] ?? 0,
+      q4Score: quizAnswerScores[3] ?? 0,
+      q5Score: quizAnswerScores[4] ?? 0,
+      q6Score: quizAnswerScores[5] ?? 0,
+      q7Score: quizAnswerScores[6] ?? 0,
+      q8Score: quizAnswerScores[7] ?? 0,
+      q9Score: quizAnswerScores[8] ?? 0,
+      q10Score: quizAnswerScores[9] ?? 0,
+      totalScore: Math.round(score),
+      scoreBand: band.title,
+      credit: Math.round(score) < 18 ? 'Warm' : 'Standard',
+      priority: Math.round(score) < 18 ? 'High' : 'Normal',
+      source: 'Business Pressure Test',
+      nextStep: Math.round(score) < 18 ? 'Book call' : 'Get full diagnosis',
       timestamp: new Date().toISOString(),
     };
 
     try {
-      const res = await fetch('/api/lead', {
+      const res = await fetch(leadEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -485,8 +531,8 @@ const LeadCaptureScreen = ({
             <input
               required
               type="text"
-              value={formData.first_name}
-              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              value={formData.firstName}
+              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
               placeholder="Your name"
               className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
             />
@@ -494,13 +540,29 @@ const LeadCaptureScreen = ({
 
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Mail size={14} /> Email
+              <User size={14} /> Last Name
+            </label>
+            <input
+              required
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+              placeholder="Your last name"
+              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
+              <Mail size={14} /> Email Address
             </label>
             <input
               required
               type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              value={formData.emailAddress}
+              onChange={(e) =>
+                setFormData({ ...formData, emailAddress: e.target.value, email: e.target.value })
+              }
               placeholder="name@company.com"
               className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
             />
@@ -512,8 +574,8 @@ const LeadCaptureScreen = ({
             </label>
             <input
               type="text"
-              value={formData.telegram_or_phone}
-              onChange={(e) => setFormData({ ...formData, telegram_or_phone: e.target.value })}
+              value={formData.telegramOrPhone}
+              onChange={(e) => setFormData({ ...formData, telegramOrPhone: e.target.value })}
               placeholder="@yourhandle or phone"
               className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
             />
@@ -521,54 +583,42 @@ const LeadCaptureScreen = ({
 
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Briefcase size={14} /> Business Type
+              <Target size={14} /> Business Type
             </label>
-            <select
+            <input
               required
-              value={formData.business_type}
-              onChange={(e) => setFormData({ ...formData, business_type: e.target.value })}
+              type="text"
+              value={formData.businessType}
+              onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
+              placeholder="Consulting, agency, ecom, etc."
               className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            >
-              <option value="">Select one</option>
-              <option>Coach / Consultant</option>
-              <option>Agency / Service Business</option>
-              <option>Financial Advisor / Money Manager</option>
-              <option>Real Estate</option>
-              <option>Medical / Private Practice</option>
-              <option>Creator / Personal Brand</option>
-              <option>Other</option>
-            </select>
+            />
           </div>
 
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Target size={14} /> Revenue Range
+              <Target size={14} /> Monthly Revenue
             </label>
-            <select
+            <input
               required
-              value={formData.revenue_range}
-              onChange={(e) => setFormData({ ...formData, revenue_range: e.target.value })}
+              type="text"
+              value={formData.monthlyRevenue}
+              onChange={(e) => setFormData({ ...formData, monthlyRevenue: e.target.value })}
+              placeholder="$5k-$10k"
               className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            >
-              <option value="">Select one</option>
-              <option>Under $50K</option>
-              <option>$50K–$100K</option>
-              <option>$100K–$250K</option>
-              <option>$250K–$1M</option>
-              <option>$1M+</option>
-            </select>
+            />
           </div>
 
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <MessageSquare size={14} /> Biggest Issue
+              <Target size={14} /> Biggest Issue
             </label>
             <textarea
               required
-              rows={4}
-              value={formData.biggest_issue}
-              onChange={(e) => setFormData({ ...formData, biggest_issue: e.target.value })}
-              placeholder="What feels most broken right now?"
+              rows={3}
+              value={formData.biggestIssue}
+              onChange={(e) => setFormData({ ...formData, biggestIssue: e.target.value })}
+              placeholder="Lead flow, backend, follow-up, etc."
               className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
             />
           </div>
@@ -660,6 +710,8 @@ const CTAScreen = ({ leadData }: { leadData: LeadData | null }) => {
 export default function App() {
   const [screen, setScreen] = useState<Screen>('landing');
   const [score, setScore] = useState(0);
+  const [quizAnswers, setQuizAnswers] = useState<string[]>([]);
+  const [quizAnswerScores, setQuizAnswerScores] = useState<number[]>([]);
   const [leadData, setLeadData] = useState<LeadData | null>(null);
 
   const currentBand =
@@ -705,8 +757,10 @@ export default function App() {
             className="h-full"
           >
             <QuizScreen
-              onComplete={(finalScore) => {
-                setScore(finalScore);
+              onComplete={({ totalScore, answers, answerScores }) => {
+                setScore(totalScore);
+                setQuizAnswers(answers);
+                setQuizAnswerScores(answerScores);
                 setScreen('results');
               }}
             />
@@ -739,6 +793,8 @@ export default function App() {
             <LeadCaptureScreen
               score={score}
               band={currentBand}
+              quizAnswers={quizAnswers}
+              quizAnswerScores={quizAnswerScores}
               onComplete={(data) => {
                 setLeadData(data);
                 setScreen('cta');

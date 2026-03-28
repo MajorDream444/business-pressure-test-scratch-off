@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The SPARK Manifesto — M.A.I.M.</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C8962A;
+    --gold-light: #E8B84B;
+    --gold-pale: #F5E6C0;
+    --ink: #0E0C08;
+    --ash: #1A1814;
+    --bone: #F2EDE4;
+    --muted: #7A7060;
+    --rule: rgba(200,150,42,0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--bone);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 40px;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(200,150,42,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .hero-title {
+    font-size: clamp(56px, 10vw, 120px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--bone);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.5s forwards;
+  }
+
+  .hero-title span {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .hero-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-top: 32px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.7s forwards;
+  }
+
+  .hero-rule {
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    margin: 48px auto 0;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.9s forwards;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 100px 0;
+    border-bottom: 1px solid var(--rule);
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-marker {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-marker::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  h2 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--bone);
+    margin-bottom: 32px;
+  }
+
+  h2 strong {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  p {
+    color: rgba(242,237,228,0.8);
+    margin-bottom: 24px;
+    font-size: 19px;
+  }
+
+  p:last-child { margin-bottom: 0; }
+
+  /* ── PULL QUOTE ── */
+  .pull {
+    font-size: clamp(26px, 4vw, 42px);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.3;
+    color: var(--bone);
+    border-left: 2px solid var(--gold);
+    padding: 8px 0 8px 32px;
+    margin: 56px 0;
+  }
+
+  /* ── DAYS GRID ── */
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 48px 0;
+  }
+
+  .day-cell {
+    background: var(--ash);
+    padding: 28px 24px;
+    transition: background 0.3s ease;
+  }
+
+  .day-cell:hover {
+    background: rgba(200,150,42,0.06);
+  }
+
+  .day-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .day-theme {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bone);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .day-anchor {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  /* ── GEOGRAPHY STRIP ── */
+  .geo-strip {
+    display: flex;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 48px 0;
+  }
+
+  .geo-item {
+    flex: 1;
+    padding: 32px 24px;
+    background: var(--ash);
+    text-align: center;
+  }
+
+  .geo-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .geo-desc {
+    font-size: 15px;
+    color: rgba(242,237,228,0.6);
+    font-style: italic;
+  }
+
+  /* ── TIER STACK ── */
+  .tier-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 48px 0;
+  }
+
+  .tier-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px;
+    background: var(--ash);
+    transition: background 0.3s;
+  }
+
+  .tier-row:hover { background: rgba(200,150,42,0.05); }
+
+  .tier-name {
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--bone);
+  }
+
+  .tier-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+  }
+
+  /* ── CLOSING ── */
+  .closing {
+    padding: 120px 0 80px;
+    text-align: center;
+    border-bottom: none;
+  }
+
+  .closing-title {
+    font-size: clamp(40px, 7vw, 80px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--bone);
+    margin-bottom: 40px;
+  }
+
+  .closing-title strong {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  .sig {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    margin-top: 64px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .geo-strip { flex-direction: column; }
+    .container { padding: 0 24px; }
+    .hero { padding: 60px 24px; }
+    section { padding: 72px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="eyebrow">M.A.I.M. — Major AI Mindset &nbsp;·&nbsp; A SPARK Manifesto</p>
+  <h1 class="hero-title">This Isn't<br><span>New.</span><br>This Is Yours.</h1>
+  <p class="hero-sub">A declaration for every young Black and Brown mind<br>who was told the future wasn't built for them.</p>
+  <div class="hero-rule"></div>
+</div>
+
+<!-- SECTION 1: THE LIE -->
+<section>
+  <div class="container">
+    <p class="section-marker">I — The Story They Told You</p>
+    <h2>They said <strong>AI was invented.</strong><br>They were wrong.</h2>
+    <p>The official story goes like this: artificial intelligence appeared sometime after World War II, born fully formed in white rooms filled with humming machines and men in lab coats. It is Western. It is new. It belongs to Silicon Valley, to Stanford, to the future.</p>
+    <p>That story is a myth. And myths are not accidents. They are choices — choices about who gets to be remembered, who gets to feel at home in the future, and who gets to arrive as a stranger.</p>
+    <div class="pull">"They erased the names but not the work. They buried the lineage but not the logic."</div>
+    <p>The mathematics of decision-making under uncertainty — the skeleton of every AI system alive today — was formalized by David Blackwell, a Black mathematician who was denied membership to the Institute for Mathematical Statistics because of his race. The spatial intelligence behind GPS, the system that gives machines their sense of place in the world, was built by Gladys West, a Black woman working quietly at a naval base in Virginia.</p>
+    <p>They are not exceptions. They are proof. And their story points to something older and deeper than any institution.</p>
+  </div>
+</section>
+
+<!-- SECTION 2: THE LINEAGE -->
+<section>
+  <div class="container">
+    <p class="section-marker">II — The Deeper Root</p>
+    <h2>Before code, there was<br><strong>pattern.</strong></h2>
+    <p>Long before silicon, African civilizations were already solving the same problems artificial intelligence attempts to solve today. How do you choose when the outcome is uncertain? How do you act without full information? How do you encode memory so it can be retrieved across generations?</p>
+    <p>The Ifa divination system of the Yoruba — sixteen primary signs unfolding into 256 possible states, each associated with narratives, probabilities, ethical constraints, and prescribed actions — is a decision tree. It is a probabilistic reasoning system. It does not claim omniscience. It assumes uncertainty and offers structured guidance. That is the same problem every AI system attempts to solve.</p>
+    <p>The Lukasa memory boards of central Africa were external cognition — physical interfaces for encoding and retrieving vast amounts of historical, social, and procedural knowledge nonlinearly. Modern AI researchers call this embodied cognition and external memory systems. Africans were doing it centuries ago.</p>
+    <div class="pull">"Intelligence in these traditions was measured by alignment, timing, memory, and restraint — not speed, not domination."</div>
+    <p>This is not folklore. This is not coincidence. This is lineage. And it lives in you.</p>
+  </div>
+</section>
+
+<!-- SECTION 3: THE SPARK -->
+<section>
+  <div class="container">
+    <p class="section-marker">III — What SPARK Is</p>
+    <h2>A 7-day lab.<br>A <strong>lifetime</strong> of recognition.</h2>
+    <p>SPARK is not a coding bootcamp. It is not a technology course. It is a structured process of remembering — a seven-day experience that gives young Black and Brown minds the tools, the language, and the identity to take their rightful place in the AI era.</p>
+    <p>In seven days, a student with zero technical experience will produce a 60-second cinematic video and a functioning AI-powered application. But that is not the point. The point is what happens on the inside. Every day begins with a lineage anchor — a moment of recognition that connects the technical work to an intellectual tradition that predates Silicon Valley by centuries.</p>
+
+    <div class="days-grid">
+      <div class="day-cell">
+        <span class="day-num">Day 01</span>
+        <span class="day-theme">Pattern</span>
+        <span class="day-anchor">Ifa → Algorithm</span>
+      </div>
+      <div class="day-cell">
+        <span class="day-num">Day 02</span>
+        <span class="day-theme">Story</span>
+        <span class="day-anchor">Griot → Database</span>
+      </div>
+      <div class="day-cell">
+        <span class="day-num">Day 03</span>
+        <span class="day-theme">Movement</span>
+        <span class="day-anchor">Ritual → Camera</span>
+      </div>
+      <div class="day-cell">
+        <span class="day-num">Day 04</span>
+        <span class="day-theme">Assembly</span>
+        <span class="day-anchor">Incantation → Prompt</span>
+      </div>
+      <div class="day-cell">
+        <span class="day-num">Day 05</span>
+        <span class="day-theme">Export</span>
+        <span class="day-anchor">Lukasa → File</span>
+      </div>
+      <div class="day-cell">
+        <span class="day-num">Day 06</span>
+        <span class="day-theme">Presence</span>
+        <span class="day-anchor">Stage → Screen</span>
+      </div>
+      <div class="day-cell" style="grid-column: 1 / -1; background: rgba(200,150,42,0.07);">
+        <span class="day-num">Day 07</span>
+        <span class="day-theme">Sovereignty</span>
+        <span class="day-anchor">Archive → Deploy</span>
+      </div>
+    </div>
+
+    <p>Each lineage anchor is not a metaphor. It is a structural parallel — the same logic, expressed in a different era. When students understand that they are not learning something foreign but formalizing something ancient, the relationship to the work changes completely. It moves from adoption to reclamation.</p>
+  </div>
+</section>
+
+<!-- SECTION 4: THE REACH -->
+<section>
+  <div class="container">
+    <p class="section-marker">IV — Where We Build</p>
+    <h2>Three territories.<br>One <strong>identity.</strong></h2>
+    <p>SPARK deploys across three geographies, each grounded in the same curriculum, the same philosophy, and the same commitment to cultural sovereignty.</p>
+
+    <div class="geo-strip">
+      <div class="geo-item">
+        <span class="geo-name">Mauritania</span>
+        <span class="geo-desc">West Africa hub.<br>HEKA × Hanzo anchor.</span>
+      </div>
+      <div class="geo-item">
+        <span class="geo-name">South Africa</span>
+        <span class="geo-desc">New frontier.<br>Youth + diaspora.</span>
+      </div>
+      <div class="geo-item">
+        <span class="geo-name">Diaspora</span>
+        <span class="geo-desc">US · UK · Europe.<br>Online-first.</span>
+      </div>
+    </div>
+
+    <p>The physical labs create community. The online labs create scale. Together they create a generation that moves differently — not because they were exceptional, but because they were told the truth about who they are.</p>
+  </div>
+</section>
+
+<!-- SECTION 5: THE SYSTEM -->
+<section>
+  <div class="container">
+    <p class="section-marker">V — The Ascension Path</p>
+    <h2>SPARK is the door.<br><strong>M.A.I.M.</strong> is the house.</h2>
+    <p>Major AI Mindset is a sovereign AI education ecosystem. SPARK is its entry point — a seven-day lab designed to be accessible to anyone, anywhere, regardless of prior experience or financial means.</p>
+    <p>For those who are ready to go deeper, the path continues.</p>
+
+    <div class="tier-stack">
+      <div class="tier-row">
+        <span class="tier-name">The Spark &mdash; 7-Day Lab</span>
+        <span class="tier-price">$27 &nbsp;/&nbsp; 1,500 MRO</span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-name">The Forge &mdash; Full Build</span>
+        <span class="tier-price">$497 &nbsp;/&nbsp; 25,000 MRO</span>
+      </div>
+      <div class="tier-row" style="border-left: 2px solid var(--gold);">
+        <span class="tier-name">The Architect &mdash; By Application</span>
+        <span class="tier-price">$1,997</span>
+      </div>
+    </div>
+
+    <p>Scholarship access is built into the model. Every Forge and Architect enrollment funds a Spark seat for a student who cannot afford one. Sovereignty is not a privilege. It is the premise.</p>
+  </div>
+</section>
+
+<!-- SECTION 6: THE COMMUNITY -->
+<section>
+  <div class="container">
+    <p class="section-marker">VI — The Identity</p>
+    <h2>They are not graduates.<br>They are <strong>The Coded.</strong></h2>
+    <p>Every student who completes a SPARK Lab joins something larger than a course. They join a community of people who know where this technology came from — and who understand their place in its future.</p>
+    <div class="pull">"The Coded: those who know where this came from, and what they carry."</div>
+    <p>The Coded is not a badge. It is not a LinkedIn credential. It is an identity — the recognition that you were never behind. You were always the source. And now you have the language, the tools, and the community to prove it.</p>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing">
+  <div class="container">
+    <p class="section-marker" style="justify-content: center; text-align: center;">The Declaration</p>
+    <h2 class="closing-title">The future is not<br>being <strong>invented.</strong><br>It is being<br><strong>remembered.</strong></h2>
+    <p style="max-width: 520px; margin: 0 auto; text-align: center; font-size: 20px;">There is nothing artificial about reclaiming what was always yours. SPARK exists so that every young Black and Brown mind can walk into the AI era not as a newcomer — but as a descendant of its architects.</p>
+    <p class="sig">M.A.I.M. — Major AI Mindset &nbsp;·&nbsp; Hanzo AI &nbsp;·&nbsp; HEKA × Lux Partners<br>Bali · Mauritania · South Africa · The World</p>
+  </div>
+</section>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

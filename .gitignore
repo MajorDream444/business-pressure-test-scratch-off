@@ -4,3 +4,5 @@ data
 .env
 .env.local
 .DS_Store
+.herenow/
+*.code-workspace

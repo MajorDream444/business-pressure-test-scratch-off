@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIL SPARK Lab — 7-Day Brand Command Sprint | MAIM × Hanzo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gd:#C9A227;--gd2:#E8BE3F;--gd3:#FFD700;--gdim:rgba(201,162,39,0.09);
+  --blk:#050508;--blk2:#0D0D11;--blk3:#121217;
+  --wht:#F8F6F0;--d1:#E8E6E0;--d2:#C0BEB6;--d3:#7A7870;--d4:#3A3830;
+  --mono:'JetBrains Mono',monospace;--disp:'Barlow Condensed',sans-serif;--bod:'Barlow',sans-serif;
+  --grid:rgba(201,162,39,0.04);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--blk);color:var(--wht);font-family:var(--bod);overflow-x:hidden}
+.gb{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px}
+
+/* ── SUBBRAND ── */
+.sb{height:32px;background:var(--blk2);border-bottom:1px solid rgba(201,162,39,0.12);display:flex;align-items:center;justify-content:space-between;padding:0 44px}
+.sb-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--d3);display:flex;align-items:center;gap:14px}
+.sb-l span{color:var(--gd)}
+.sb-r{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--d4)}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;height:50px;background:rgba(5,5,8,.97);border-bottom:1px solid rgba(201,162,39,.15);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 44px}
+.nb{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.nhx{width:20px;height:20px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--gd);display:flex;align-items:center;justify-content:center}
+.nhx::after{content:'';width:7px;height:7px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--blk)}
+.nprog{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;color:var(--d3)}
+.npb{width:120px;height:3px;background:rgba(255,255,255,.07)}
+.npbf{height:100%;background:var(--gd);transition:width .5s ease}
+.ncta{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blk);background:var(--gd);border:none;padding:7px 16px;cursor:pointer;text-decoration:none;transition:background .2s}
+.ncta:hover{background:var(--gd3)}
+
+/* ── HERO ── */
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(201,162,39,.025) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(201,162,39,.025) 60px);pointer-events:none}
+.hero::after{content:'';position:absolute;width:700px;height:400px;background:radial-gradient(ellipse,rgba(201,162,39,.1) 0%,transparent 68%);top:50%;right:-60px;transform:translateY(-50%);pointer-events:none}
+.hi{position:relative;z-index:2;max-width:1160px;margin:0 auto;padding:72px 44px 52px;width:100%;display:grid;grid-template-columns:1fr 260px;gap:52px;align-items:center}
+
+.hk{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gd);margin-bottom:24px}
+.hk::before{content:'';width:16px;height:1px;background:var(--gd)}
+.htitle{font-family:var(--disp);font-size:clamp(54px,7.5vw,106px);font-weight:900;line-height:.88;letter-spacing:-.02em;text-transform:uppercase;margin-bottom:22px}
+.htitle .gd{color:var(--gd3)}
+.htitle .out{-webkit-text-stroke:2px rgba(255,255,255,.15);color:transparent}
+.hsub{font-family:var(--mono);font-size:13px;color:var(--d3);line-height:1.8;max-width:440px;margin-bottom:32px}
+.hsub strong{color:var(--wht);font-weight:500}
+.outcomes{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:32px}
+.oc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gd);border:1px solid rgba(201,162,39,.25);padding:5px 11px;display:flex;align-items:center;gap:6px}
+.oc::before{content:'';width:5px;height:5px;background:var(--gd);flex-shrink:0}
+.hctas{display:flex;gap:12px;flex-wrap:wrap}
+.bp{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blk);background:var(--gd);border:2px solid var(--gd);padding:14px 28px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s}
+.bp:hover{background:var(--gd3);border-color:var(--gd3)}
+.bg{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);padding:14px 24px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s;background:transparent}
+.bg:hover{border-color:var(--gd);color:var(--gd)}
+
+/* Scoreboard hero widget */
+.hero-score{background:rgba(0,0,0,.8);border:2px solid var(--gd);padding:20px 22px}
+.hs-before{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,80,60,.6);margin-bottom:10px}
+.hs-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.hs-lbl{font-family:var(--mono);font-size:9px;color:var(--d3);letter-spacing:.06em;text-transform:uppercase}
+.hs-val{font-family:var(--disp);font-size:22px;font-weight:900;line-height:1}
+.hs-val.bad{color:rgba(255,80,60,.65)}
+.hs-val.big{color:var(--gd3);font-size:28px}
+.hs-div{height:1px;background:rgba(201,162,39,.15);margin:10px 0}
+.hs-after{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gd);margin-bottom:8px;margin-top:10px}
+.hs-note{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.25);line-height:1.5}
+.hs-note span{color:var(--gd3);font-weight:700}
+
+/* ── OVERVIEW STRIP ── */
+.ostrip{background:var(--blk2);border-top:1px solid rgba(201,162,39,.1);border-bottom:1px solid rgba(201,162,39,.1);display:grid;grid-template-columns:repeat(4,1fr)}
+.osi{padding:22px 28px;border-right:1px solid rgba(201,162,39,.07)}
+.osi:last-child{border-right:none}
+.osi-n{font-family:var(--disp);font-size:34px;font-weight:900;color:var(--gd);line-height:1;margin-bottom:2px}
+.osi-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--d3)}
+
+/* ── SECTION ── */
+.si{max-width:1160px;margin:0 auto;padding:80px 44px}
+.sk{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--gd);display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sk::before{content:'';width:16px;height:1px;background:var(--gd);display:block}
+.st{font-family:var(--disp);font-size:clamp(32px,4vw,52px);font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:-.01em;margin-bottom:12px;color:var(--wht)}
+.sd{font-family:var(--mono);font-size:12px;color:var(--d3);max-width:480px;line-height:1.7;margin-top:8px}
+
+/* ── DAY TRACKER ── */
+.tracker-sec{background:var(--blk)}
+.day-nav{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:40px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.1)}
+.dn-btn{background:var(--blk);padding:16px 8px;text-align:center;cursor:pointer;transition:background .2s;border:none;color:inherit;width:100%}
+.dn-btn:hover{background:rgba(201,162,39,.06)}
+.dn-btn.active{background:var(--gd);color:var(--blk)}
+.dn-num{font-family:var(--disp);font-size:32px;font-weight:900;line-height:1;margin-bottom:4px;transition:color .2s}
+.dn-btn.active .dn-num{color:var(--blk)}
+.dn-btn:not(.active) .dn-num{color:rgba(255,255,255,.1)}
+.dn-btn.done .dn-num{color:var(--gd)}
+.dn-label{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.7;line-height:1.3}
+.dn-check{font-size:10px;margin-top:4px;opacity:0;transition:opacity .2s}
+.dn-btn.done .dn-check{opacity:1;color:var(--gd)}
+
+/* Day panel */
+.day-panel{margin-top:2px;border:1px solid rgba(201,162,39,.1);display:none}
+.day-panel.active{display:block}
+.dp-head{background:var(--blk2);padding:28px 34px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.dp-meta{flex:1}
+.dp-phase{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gd);margin-bottom:8px}
+.dp-title{font-family:var(--disp);font-size:clamp(28px,4vw,44px);font-weight:900;text-transform:uppercase;line-height:.95;color:var(--wht)}
+.dp-tagline{font-family:var(--mono);font-size:12px;color:var(--d3);margin-top:8px;max-width:500px;line-height:1.6}
+.dp-badge{flex-shrink:0;background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.2);padding:14px 18px;text-align:center;min-width:110px}
+.dp-badge-day{font-family:var(--disp);font-size:48px;font-weight:900;line-height:1;color:var(--gd)}
+.dp-badge-of{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--d3)}
+
+.dp-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(201,162,39,.05)}
+.dp-col{background:var(--blk);padding:28px 30px}
+.dp-section-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gd);margin-bottom:14px}
+.dp-objective{font-family:var(--mono);font-size:13px;color:var(--d1);line-height:1.7;padding:14px 18px;background:rgba(201,162,39,.05);border-left:3px solid var(--gd);margin-bottom:20px}
+
+/* Checklist */
+.checklist{display:flex;flex-direction:column;gap:8px}
+.cl-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:10px 12px;border:1px solid rgba(255,255,255,.04);transition:border-color .2s}
+.cl-item:hover{border-color:rgba(201,162,39,.2)}
+.cl-item.checked{opacity:.55}
+.cl-box{width:18px;height:18px;flex-shrink:0;border:1px solid rgba(201,162,39,.35);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .2s}
+.cl-item.checked .cl-box{background:var(--gd);border-color:var(--gd)}
+.cl-check-icon{color:var(--blk);font-size:10px;font-weight:800;opacity:0;transition:opacity .15s}
+.cl-item.checked .cl-check-icon{opacity:1}
+.cl-text{font-family:var(--mono);font-size:11px;color:var(--d1);line-height:1.5}
+.cl-item.checked .cl-text{text-decoration:line-through;color:var(--d3)}
+
+/* Output target */
+.output-target{background:rgba(0,0,0,.35);border:1px solid rgba(201,162,39,.14);padding:14px 18px;margin-top:14px}
+.ot-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gd);margin-bottom:8px}
+.ot-items{display:flex;flex-direction:column;gap:5px}
+.ot-item{font-family:var(--mono);font-size:11px;color:var(--d2);display:flex;gap:8px}
+.ot-item::before{content:'→';color:var(--gd);flex-shrink:0}
+
+/* Prompt stack */
+.prompt-stack{display:flex;flex-direction:column;gap:10px}
+.prompt-card{background:rgba(201,162,39,.04);border:1px solid rgba(201,162,39,.1);overflow:hidden}
+.pc-head{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .2s}
+.pc-head:hover{background:rgba(201,162,39,.06)}
+.pc-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gd)}
+.pc-toggle{font-family:var(--mono);font-size:12px;color:var(--gd);transition:transform .25s}
+.pc-toggle.open{transform:rotate(45deg)}
+.pc-body{padding:0 14px;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
+.pc-body.open{max-height:420px;padding:0 14px 14px}
+.pc-text{font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.7;background:rgba(0,0,0,.3);padding:12px;border-left:2px solid var(--gd);white-space:pre-wrap}
+.pc-copy{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gd);background:none;border:1px solid rgba(201,162,39,.25);padding:5px 10px;cursor:pointer;margin-top:8px;transition:all .2s}
+.pc-copy:hover{background:var(--gd);color:var(--blk)}
+
+/* Complete day */
+.complete-day{width:100%;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blk);background:var(--gd);border:none;padding:16px;cursor:pointer;transition:all .2s;position:relative}
+.complete-day::after{content:'→';position:absolute;right:20px;top:50%;transform:translateY(-50%)}
+.complete-day:hover{background:var(--gd3)}
+.complete-day.done{background:rgba(201,162,39,.1);color:var(--gd);cursor:default}
+.complete-day.done::after{content:'✓'}
+
+/* ── PROGRESS ── */
+.prog-sec{background:var(--blk2)}
+.prog-bar-outer{height:5px;background:rgba(255,255,255,.05);margin:28px 0 8px;overflow:hidden}
+.prog-bar-inner{height:100%;background:var(--gd);transition:width .6s ease}
+.prog-label{font-family:var(--mono);font-size:10px;color:var(--d3);display:flex;justify-content:space-between}
+.outputs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:26px}
+.og-card{border:1px solid rgba(255,255,255,.04);padding:16px;transition:border-color .2s}
+.og-card.unlocked{border-color:rgba(201,162,39,.2)}
+.og-card.locked{opacity:.28}
+.ogc-day{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gd);margin-bottom:5px}
+.ogc-name{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--wht);margin-bottom:3px}
+.ogc-desc{font-family:var(--mono);font-size:10px;color:var(--d3);line-height:1.4}
+
+/* ── ASCENSION ── */
+.asc-sec{background:var(--blk)}
+.asc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(201,162,39,.07);margin-top:40px}
+.asc-card{background:var(--blk);padding:26px 22px;position:relative;transition:background .2s}
+.asc-card:hover{background:rgba(201,162,39,.04)}
+.asc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gd);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.asc-card:hover::before{transform:scaleX(1)}
+.acc-n{font-family:var(--disp);font-size:42px;font-weight:900;color:rgba(201,162,39,.07);line-height:1;margin-bottom:8px}
+.acc-tag{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blk);background:var(--gd);padding:3px 9px;margin-bottom:10px}
+.acc-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--wht);margin-bottom:6px}
+.acc-desc{font-family:var(--mono);font-size:11px;color:var(--d3);line-height:1.6}
+
+/* ── CTA ── */
+.cta-sec{background:var(--blk2);text-align:center}
+.ct-title{font-family:var(--disp);font-size:clamp(34px,5vw,68px);font-weight:900;text-transform:uppercase;line-height:.9;color:var(--wht);max-width:680px;margin:0 auto 14px}
+.ct-title .gd{color:var(--gd3)}
+.ct-sub{font-family:var(--mono);font-size:12px;color:var(--d3);max-width:360px;margin:0 auto 30px;line-height:1.8}
+.ct-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+footer{background:var(--blk);border-top:1px solid rgba(201,162,39,.08);padding:22px 44px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.fi{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.15)}
+.fl{display:flex;gap:18px;list-style:none}
+.fl a{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.12);text-decoration:none;transition:color .2s}
+.fl a:hover{color:var(--gd)}
+
+@media(max-width:900px){
+  .sb{padding:0 20px} nav{padding:0 20px}
+  .hi{grid-template-columns:1fr;padding:60px 24px 44px}
+  .hero-score{display:none}
+  .si{padding:60px 24px}
+  .day-nav{grid-template-columns:repeat(4,1fr)}
+  .dp-body{grid-template-columns:1fr}
+  .outputs-grid{grid-template-columns:repeat(2,1fr)}
+  .asc-grid{grid-template-columns:1fr}
+  .ostrip{grid-template-columns:repeat(2,1fr)}
+  footer{padding:20px 24px}
+}
+.fu{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.fu.vis{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body class="gb">
+
+<!-- SUBBRAND -->
+<div class="sb">
+  <div class="sb-l"><span>MAIM × Hanzo AI</span> / <span style="color:var(--d3)">Athlete SPARK Lab</span></div>
+  <div class="sb-r">A Sub-Brand of Major AI Mindset</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nb"><div class="nhx"></div>NIL SPARK Lab</div>
+  <div class="nprog">
+    <span id="nav-progress-label" style="min-width:80px">Day 0 / 7</span>
+    <div class="npb"><div class="npbf" id="nav-prog-bar" style="width:0%"></div></div>
+  </div>
+  <a href="nil_command_center.html" class="ncta">Full System →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hi">
+    <div>
+      <div class="hk">Athlete Sovereignty Series · MAIM × Hanzo AI</div>
+      <h1 class="htitle">7-DAY<br>NIL <span class="gd">BRAND</span><br><span class="out">COMMAND</span><br>SPRINT</h1>
+      <p class="hsub">
+        Zero NIL experience required.<br>
+        <strong>One self-managed brand deal pipeline built in 7 days.</strong><br><br>
+        Daily missions, daily deliverables, daily sovereignty.<br>
+        By Day 7 you have a live media kit and 3 brand pitches sent.
+      </p>
+      <div class="outcomes">
+        <div class="oc">Brand Audit Done</div>
+        <div class="oc">Market Rate Known</div>
+        <div class="oc">Media Kit Live</div>
+        <div class="oc">3 Pitches Sent</div>
+        <div class="oc">Contract Literacy</div>
+        <div class="oc">Content Engine</div>
+      </div>
+      <div class="hctas">
+        <a href="#tracker" class="bp">Start Day 1 <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a href="nil_command_center.html" class="bg">Full System Access →</a>
+      </div>
+    </div>
+    <div class="hero-score">
+      <div class="hs-before">Without Hanzo — $50K Deal</div>
+      <div class="hs-row"><div class="hs-lbl">Agent cut</div><div class="hs-val bad">−$10K</div></div>
+      <div class="hs-row"><div class="hs-lbl">Legal fees</div><div class="hs-val bad">−$5K</div></div>
+      <div class="hs-row"><div class="hs-lbl">You keep</div><div class="hs-val" style="color:var(--d2)">$35K</div></div>
+      <div class="hs-div"></div>
+      <div class="hs-after">After this SPARK Lab</div>
+      <div class="hs-row"><div class="hs-lbl">You keep</div><div class="hs-val big">$47K+</div></div>
+      <div class="hs-note">Self-managed NIL infrastructure<br>replaces the middlemen.</div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW STRIP -->
+<div class="ostrip">
+  <div class="osi"><div class="osi-n">7</div><div class="osi-l">Day Sprint</div></div>
+  <div class="osi"><div class="osi-n">3</div><div class="osi-l">Pitches Sent</div></div>
+  <div class="osi"><div class="osi-n">1</div><div class="osi-l">Live Media Kit</div></div>
+  <div class="osi"><div class="osi-n">95%</div><div class="osi-l">Deal Revenue Kept</div></div>
+</div>
+
+<!-- DAY TRACKER -->
+<section id="tracker" class="tracker-sec">
+  <div class="si">
+    <div class="sk">Interactive Sprint Board</div>
+    <h2 class="st">Your 7-Day<br>Brand Command Mission</h2>
+    <p class="sd">Click a day to open your mission. Check off tasks as you complete them. Progress saves in your browser automatically.</p>
+
+    <div class="day-nav" id="day-nav">
+      <button class="dn-btn active" onclick="openDay(1)" id="dn1"><div class="dn-num">01</div><div class="dn-label">Brand Audit</div><div class="dn-check">✓</div></button>
+      <button class="dn-btn" onclick="openDay(2)" id="dn2"><div class="dn-num">02</div><div class="dn-label">Market Rate</div><div class="dn-check">✓</div></button>
+      <button class="dn-btn" onclick="openDay(3)" id="dn3"><div class="dn-num">03</div><div class="dn-label">Media Kit</div><div class="dn-check">✓</div></button>
+      <button class="dn-btn" onclick="openDay(4)" id="dn4"><div class="dn-num">04</div><div class="dn-label">Outreach</div><div class="dn-check">✓</div></button>
+      <button class="dn-btn" onclick="openDay(5)" id="dn5"><div class="dn-num">05</div><div class="dn-label">Contracts</div><div class="dn-check">✓</div></button>
+      <button class="dn-btn" onclick="openDay(6)" id="dn6"><div class="dn-num">06</div><div class="dn-label">Content Engine</div><div class="dn-check">✓</div></button>
+      <button class="dn-btn" onclick="openDay(7)" id="dn7"><div class="dn-num">07</div><div class="dn-label">Launch Day</div><div class="dn-check">✓</div></button>
+    </div>
+
+    <!-- DAY 1 -->
+    <div class="day-panel active" id="panel1">
+      <div class="dp-head">
+        <div class="dp-meta"><div class="dp-phase">Phase 1 · Foundation</div><div class="dp-title">Brand Audit</div><div class="dp-tagline">Before you can sell your brand, you need to know what you're selling. Today you inventory every asset you own — audience, platforms, reach, stories, and market signals.</div></div>
+        <div class="dp-badge"><div class="dp-badge-day">01</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Mission</div>
+          <div class="dp-objective">Leave with a complete NIL Asset Inventory: follower counts, engagement rates, brand alignment categories, and your 3 strongest personal brand stories documented.</div>
+          <div class="dp-section-label">Mission Checklist</div>
+          <div class="checklist" id="cl1">
+            <div class="cl-item" onclick="toggleCheck(this,'n1_1')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Document all platforms + follower counts + average engagement rate</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n1_2')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Identify your top 3 audience demographics (age, interest, location)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n1_3')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">List 5 brand categories you align with authentically (health, fashion, tech, etc.)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n1_4')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Write your 3 strongest personal brand stories (overcame X, learned Y, achieved Z)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n1_5')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Run the Brand Audit prompt and save your NIL Asset Inventory doc</div></div>
+          </div>
+          <div class="output-target" style="margin-top:14px">
+            <div class="ot-label">Day 1 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">NIL Asset Inventory (saved doc)</div>
+              <div class="ot-item">3 brand stories written</div>
+              <div class="ot-item">5 brand categories identified</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 1</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 1 · NIL Asset Inventory</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">I'm an athlete building my NIL brand. Help me complete a full NIL Asset Inventory.
+
+My platform data:
+- Instagram: [followers] / avg [engagement rate]%
+- TikTok: [followers] / avg [views]
+- Twitter/X: [followers]
+- YouTube: [subscribers]
+- Other: [platform + numbers]
+
+Based on this, tell me:
+1. My estimated CPM (cost per thousand impressions) by platform
+2. My strongest platform for brand deals
+3. What type of brands would most naturally align with these numbers
+4. What I need to grow before my rates meaningfully increase
+
+Then write a 2-sentence "Athlete Brand Summary" I can use in outreach.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 2 · Brand Story Extractor</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Help me identify my 3 most powerful personal brand stories for NIL outreach.
+
+Background:
+- Sport: [YOUR SPORT]
+- Level: [NCAA / Pro / etc.]
+- Major wins or moments: [LIST]
+- Challenges I've overcome: [LIST]
+- What I stand for off the field: [VALUES]
+
+For each story, tell me:
+1. The 1-line version (for social bios)
+2. The 30-second version (for brand calls)
+3. Which brand categories it resonates with most
+4. The emotion it triggers in a brand partner (inspiration, trust, aspiration)</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 3 · Brand Category Mapper</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Based on my athlete profile:
+- Sport: [SPORT]
+- Audience: [AGE RANGE, INTERESTS]
+- Personal values: [VALUES]
+- Lifestyle: [WHAT YOU DO OFF THE FIELD]
+
+Identify 8 brand categories that would authentically fit my personal brand. For each category:
+1. Examples of brands in that category
+2. Why I'm a natural fit
+3. Estimated deal range for my follower level
+4. The angle I'd use in outreach to that category
+
+Rank them by: (a) authenticity fit, (b) revenue potential, (c) ease of landing first deal.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd1" onclick="completeDay(1)">Complete Day 1 Mission — Unlock Day 2</button>
+    </div>
+
+    <!-- DAY 2 -->
+    <div class="day-panel" id="panel2">
+      <div class="dp-head">
+        <div class="dp-meta"><div class="dp-phase">Phase 1 · Foundation</div><div class="dp-title">Market Rate Intel</div><div class="dp-tagline">You can't negotiate what you don't know. Today you benchmark your market rate, research 5 target brands, and document exactly what you're worth so you never undersell again.</div></div>
+        <div class="dp-badge"><div class="dp-badge-day">02</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Mission</div>
+          <div class="dp-objective">Leave with your NIL Rate Card (what you charge per deliverable) and a shortlist of 5 target brands with alignment scores and estimated deal values documented.</div>
+          <div class="dp-section-label">Mission Checklist</div>
+          <div class="checklist" id="cl2">
+            <div class="cl-item" onclick="toggleCheck(this,'n2_1')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Run the Market Rate Benchmarking prompt</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n2_2')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Create your NIL Rate Card: post, story, reel, appearance, ambassador</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n2_3')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Research 5 brands in your top 2 categories (Day 1)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n2_4')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Score each brand on alignment (1–10) and deal likelihood (1–10)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n2_5')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Find the decision-maker contact for each brand (marketing lead / partnerships team)</div></div>
+          </div>
+          <div class="output-target" style="margin-top:14px">
+            <div class="ot-label">Day 2 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">NIL Rate Card (per deliverable)</div>
+              <div class="ot-item">5-brand target shortlist with scores</div>
+              <div class="ot-item">Contact info for each target</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 2</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 1 · Rate Card Builder</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Help me build a realistic NIL Rate Card based on my metrics.
+
+My stats:
+- Instagram followers: [N] | Engagement: [%]
+- TikTok followers: [N] | Avg views: [N]
+- Twitter followers: [N]
+- Sport / profile level: [SPORT, LEVEL]
+- Niche/audience type: [e.g. college sports fans, fitness community]
+
+For each deliverable below, give me a price range (low / mid / premium):
+1. Single Instagram post
+2. Instagram Story (3-frame set)
+3. TikTok/Reel (60 sec)
+4. YouTube integration (60 sec mention)
+5. In-person appearance (per hour)
+6. Season-long ambassador deal
+7. Email mention (if applicable)
+
+Also tell me what would need to change in my metrics to move from mid to premium rates.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 2 · Brand Alignment Scorer</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Score these 5 brands for NIL deal potential with my profile.
+
+My athlete profile:
+- Sport: [SPORT] | Level: [LEVEL]
+- Audience: [AGE RANGE, PLATFORM]
+- Brand values I align with: [VALUES]
+- Categories I'm pursuing: [CATEGORIES]
+
+Brands to score: [LIST 5 BRANDS]
+
+For each brand, give me:
+1. Alignment score out of 10 (how well we fit)
+2. Deal likelihood score out of 10 (how likely they are to say yes)
+3. Estimated deal value for my follower level
+4. The specific angle I should use in my pitch to THIS brand
+5. Red flags or reasons they might say no</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd2" onclick="completeDay(2)">Complete Day 2 Mission — Unlock Day 3</button>
+    </div>
+
+    <!-- DAY 3 -->
+    <div class="day-panel" id="panel3">
+      <div class="dp-head">
+        <div class="dp-meta"><div class="dp-phase">Phase 1 · Foundation</div><div class="dp-title">Media Kit Build</div><div class="dp-tagline">Your media kit is your brand's resume. Today you build a professional, AI-generated kit that positions you as a business partner — not just an athlete looking for a deal.</div></div>
+        <div class="dp-badge"><div class="dp-badge-day">03</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Mission</div>
+          <div class="dp-objective">Leave with a complete media kit document: bio, stats, audience overview, deliverables menu, rate card, and past collabs or case studies. Ready to send tomorrow.</div>
+          <div class="dp-section-label">Mission Checklist</div>
+          <div class="checklist" id="cl3">
+            <div class="cl-item" onclick="toggleCheck(this,'n3_1')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Run the Media Kit Generator prompt — get the full framework</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n3_2')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Write your athlete bio (3 versions: 1 sentence, 1 paragraph, extended)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n3_3')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Compile your audience stats + platform breakdown</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n3_4')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Add your deliverables menu + rate card (from Day 2)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n3_5')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Add 1–3 past collaborations or "proof moments" (even unpaid ones count)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n3_6')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Save media kit as PDF and hosted link (Google Drive or Canva)</div></div>
+          </div>
+          <div class="output-target" style="margin-top:14px">
+            <div class="ot-label">Day 3 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">Complete media kit (PDF or Canva link)</div>
+              <div class="ot-item">3-version athlete bio</div>
+              <div class="ot-item">Deliverables menu + rate card embedded</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 3</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 1 · Media Kit Generator</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Build me a complete NIL media kit framework based on my profile.
+
+Profile:
+- Name: [NAME] | Sport: [SPORT] | School/Team: [TEAM]
+- Platforms + stats: [PASTE FROM DAY 1]
+- Audience summary: [AGE, INTERESTS, LOCATION]
+- Brand categories: [DAY 1 CATEGORIES]
+- Key stories: [DAY 1 STORIES]
+- Rate card: [DAY 2 RATES]
+
+Create the following sections:
+1. Athlete Bio (1 sentence / 1 paragraph / extended 150-word version)
+2. Audience Overview (demographics in plain English — no jargon)
+3. Platform Performance Summary (format as a simple table)
+4. Deliverables Menu (what I offer + rates)
+5. Brand Fit Statement (why working with me is smart for brands)
+6. Contact + booking info section
+
+Write everything as copy I can paste directly into Canva or a Google Doc.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 2 · Proof Builder</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">I need to add credibility to my media kit but I don't have many paid brand deals yet.
+
+Here's what I DO have:
+- Unpaid collabs or gifted partnerships: [LIST]
+- Community moments or viral posts: [LIST]
+- Audience engagement examples: [e.g. "my post on X got 50k views"]
+- Testimonials or shoutouts: [LIST]
+
+Help me reframe these as "proof of value" statements for my media kit. Each should:
+- Quantify impact where possible
+- Position me as already having brand partnership experience
+- Read confidently — not apologetically
+
+Write 3–5 proof statements I can add to my media kit "Past Collaborations" section.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd3" onclick="completeDay(3)">Complete Day 3 Mission — Unlock Day 4</button>
+    </div>
+
+    <!-- DAY 4 -->
+    <div class="day-panel" id="panel4">
+      <div class="dp-head">
+        <div class="dp-meta"><div class="dp-phase">Phase 2 · Execute</div><div class="dp-title">Outreach System</div><div class="dp-tagline">Stop waiting for brands to find you. Today you write 3 personalized outreach messages — one for each of your top-scored brands — and prepare them to send tomorrow.</div></div>
+        <div class="dp-badge"><div class="dp-badge-day">04</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Mission</div>
+          <div class="dp-objective">Leave with 3 personalized, pitch-ready outreach messages — email or DM — that lead with value, reference the brand specifically, and attach your media kit link.</div>
+          <div class="dp-section-label">Mission Checklist</div>
+          <div class="checklist" id="cl4">
+            <div class="cl-item" onclick="toggleCheck(this,'n4_1')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Pick your top 3 brands from Day 2 shortlist</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n4_2')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Research each brand's recent campaigns, tone, and values (10 min each)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n4_3')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Run the Outreach Generator — personalized message for each brand</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n4_4')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Edit each message — make sure it sounds like YOU, not a template</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n4_5')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Embed your media kit link and confirm the link works</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n4_6')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Stage all 3 messages — ready to send on Day 7</div></div>
+          </div>
+          <div class="output-target" style="margin-top:14px">
+            <div class="ot-label">Day 4 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">3 personalized brand pitches written</div>
+              <div class="ot-item">Media kit link embedded in each</div>
+              <div class="ot-item">Staged and ready to send Day 7</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 4</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 1 · Personalized Pitch Generator</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Write a personalized NIL outreach email for this brand partnership opportunity.
+
+My profile: [PASTE YOUR ATHLETE BIO — 1 PARAGRAPH VERSION]
+Target brand: [BRAND NAME]
+What they sell: [PRODUCT/SERVICE]
+Recent campaign or thing I noticed about them: [SPECIFIC DETAIL]
+Why I'm a natural fit: [YOUR REASONING]
+What I'm proposing: [SPECIFIC DELIVERABLE — e.g. "3-month Instagram ambassador deal"]
+My media kit link: [LINK]
+
+Email requirements:
+- Subject line: curious, specific, not generic
+- Opening: reference something specific about THEIR brand (not a template opener)
+- Body: 3 sentences max — who I am, why I fit, what I'm proposing
+- CTA: one clear next step (15-min call or reply to this email)
+- Tone: confident but not arrogant. Peer-to-peer, not fan-to-brand.
+- Length: under 150 words total</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 2 · Follow-Up Sequence</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Write a 3-message follow-up sequence for if Brand [NAME] doesn't respond to my initial outreach.
+
+Context: [PASTE YOUR INITIAL PITCH]
+
+Follow-up rules:
+- Message 1 (5 days later): gentle check-in, add one new piece of value (recent post performance, press mention)
+- Message 2 (10 days later): reframe the offer slightly — maybe propose a smaller starting deal
+- Message 3 (20 days later): graceful close — leave the door open for future, no pressure
+
+Each message: under 80 words. Never sound desperate. Always sound like you have options.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd4" onclick="completeDay(4)">Complete Day 4 Mission — Unlock Day 5</button>
+    </div>
+
+    <!-- DAY 5 -->
+    <div class="day-panel" id="panel5">
+      <div class="dp-head">
+        <div class="dp-meta"><div class="dp-phase">Phase 2 · Execute</div><div class="dp-title">Contract Literacy</div><div class="dp-tagline">You don't need to be a lawyer. You need to know what to look for. Today you build your red-flag checklist and counter-offer framework so you never sign a deal blind again.</div></div>
+        <div class="dp-badge"><div class="dp-badge-day">05</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Mission</div>
+          <div class="dp-objective">Leave with a personal Contract Review Checklist and 3 counter-offer frameworks you can deploy any time a deal comes in that doesn't respect your rate or brand.</div>
+          <div class="dp-section-label">Mission Checklist</div>
+          <div class="checklist" id="cl5">
+            <div class="cl-item" onclick="toggleCheck(this,'n5_1')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Learn the 7 clauses every NIL contract must have</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n5_2')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Run the Red Flag Identifier prompt — know what to spot</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n5_3')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Build your personal Contract Review Checklist (save it)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n5_4')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Write your 3 counter-offer scripts (rate, exclusivity, usage rights)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n5_5')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Know your BATNA (Best Alternative to Negotiated Agreement) for each deal type</div></div>
+          </div>
+          <div class="output-target" style="margin-top:14px">
+            <div class="ot-label">Day 5 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">Personal Contract Review Checklist</div>
+              <div class="ot-item">3 counter-offer scripts saved</div>
+              <div class="ot-item">Red flag awareness document</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 5</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 1 · NIL Contract Literacy Guide</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Teach me the essential clauses and red flags in NIL contracts. Format this as an actionable checklist I can use every time I review a deal.
+
+Cover these areas:
+1. Exclusivity clauses — what's acceptable vs. dangerous
+2. Usage rights — who owns the content I create?
+3. Compensation structure — lump sum vs. performance-based vs. equity
+4. Term and renewal — how long and who controls extension?
+5. Termination clauses — how do I get out if things go wrong?
+6. Likeness rights — how far can they use my name/image?
+7. FTC compliance — what disclosure do I need to make?
+
+For each area: explain in plain English, give 1 red flag example, and give 1 acceptable version of that clause.
+
+Note: This is educational only — always have a licensed attorney review actual contracts.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 2 · Counter-Offer Scripts</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Write 3 professional counter-offer scripts for common NIL negotiation scenarios.
+
+My info: [ATHLETE NAME, SPORT, FOLLOWER LEVEL]
+
+Scenario 1 — They offered below my rate:
+They offered $[X]. My rate for this deliverable is $[Y].
+Write a counter that: thanks them, acknowledges the offer, presents my rate confidently, and offers a bridge (maybe a smaller scope at their budget).
+
+Scenario 2 — They want full exclusivity in my category:
+They want me to not work with any other [CATEGORY] brands for [TIME].
+Write a counter that: values the relationship, explains why full exclusivity at that rate doesn't work, proposes category exclusivity for a premium instead.
+
+Scenario 3 — They want to own the content I create forever:
+Write a counter that: agrees to 12-month licensed usage with renewal option, retains my rights to the content after the term, and proposes a reasonable fee for extended usage.
+
+Each script: professional, confident, not apologetic. Under 100 words each.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd5" onclick="completeDay(5)">Complete Day 5 Mission — Unlock Day 6</button>
+    </div>
+
+    <!-- DAY 6 -->
+    <div class="day-panel" id="panel6">
+      <div class="dp-head">
+        <div class="dp-meta"><div class="dp-phase">Phase 2 · Execute</div><div class="dp-title">Content Engine</div><div class="dp-tagline">Your content IS your market rate in motion. Today you build a 7-day athlete content calendar that keeps your audience engaged and your brand value climbing — every single week.</div></div>
+        <div class="dp-badge"><div class="dp-badge-day">06</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Mission</div>
+          <div class="dp-objective">Leave with a 7-day content calendar (repeatable weekly template) and 5 content pieces drafted — your brand-building engine that runs every week to keep your market value high.</div>
+          <div class="dp-section-label">Mission Checklist</div>
+          <div class="checklist" id="cl6">
+            <div class="cl-item" onclick="toggleCheck(this,'n6_1')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Define your 3 athlete content pillars (performance, lifestyle, perspective)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n6_2')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Run the Athlete Content Calendar prompt — 7-day repeatable template</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n6_3')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Draft 5 pieces from the calendar (3 social posts + 1 longer piece + 1 sponsored template)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n6_4')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Write 1 template for brand integration posts (natural, FTC-compliant)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n6_5')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Schedule or stage Week 1 content ready to post</div></div>
+          </div>
+          <div class="output-target" style="margin-top:14px">
+            <div class="ot-label">Day 6 Output</div>
+            <div class="ot-items">
+              <div class="ot-item">7-day repeatable content template</div>
+              <div class="ot-item">5 pieces drafted and staged</div>
+              <div class="ot-item">Brand integration post template</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 6</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 1 · Athlete Content Calendar</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Build me a 7-day repeatable athlete content calendar.
+
+My profile:
+- Sport: [SPORT] | Level: [LEVEL]
+- Primary platform: [PLATFORM]
+- Content pillars: [PERFORMANCE, LIFESTYLE, PERSPECTIVE]
+- Goal: Build brand deal value by showing consistency + engagement
+
+Day structure (assign one content type each day):
+- Performance: training content, game prep, competition moments
+- Lifestyle: who you are off the field — values, interests, routines
+- Perspective: opinion, lessons learned, things your sport taught you
+- Engagement: polls, Q&A, community interaction
+- Brand-adjacent: content that naturally leads into a brand deal without feeling like an ad
+
+For each day: Content type | Hook/Angle | Format (post, reel, story) | Best time to post | Optional brand integration note
+
+Make this repeatable — I should be able to run this same 7-day cycle every week with new content.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 2 · Brand Integration Script</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Write a natural, FTC-compliant brand integration template for sponsored content.
+
+Brand: [BRAND NAME]
+Product/Service: [WHAT THEY SELL]
+Deliverable: [Instagram post / TikTok / Story]
+Key message from the brand: [WHAT THEY WANT COMMUNICATED]
+My personal connection to this brand: [WHY YOU ACTUALLY USE / LIKE THEM]
+
+Write a version that:
+1. Starts with MY story (not the brand's pitch)
+2. Naturally weaves in the product in context
+3. Includes FTC disclosure naturally ("partnered with" or "ad")
+4. Ends with an authentic personal CTA (not a generic "link in bio")
+
+Also give me a version that's 50% shorter for a Story format.
+
+The post should sound like me — not an ad agency wrote it.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day" id="cd6" onclick="completeDay(6)">Complete Day 6 Mission — Unlock Day 7</button>
+    </div>
+
+    <!-- DAY 7 -->
+    <div class="day-panel" id="panel7">
+      <div class="dp-head">
+        <div class="dp-meta"><div class="dp-phase">Phase 3 · Launch</div><div class="dp-title">Launch Day</div><div class="dp-tagline">Today is the day you stop preparing and start operating. Send your 3 brand pitches, publish your first piece of content, and document your baseline. Your NIL business is now live.</div></div>
+        <div class="dp-badge"><div class="dp-badge-day">07</div><div class="dp-badge-of">of 7</div></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col">
+          <div class="dp-section-label">Today's Mission</div>
+          <div class="dp-objective">Leave with 3 brand pitches sent, at least 1 content piece published, and your baseline metrics documented. The sprint ends when action is taken — not when content is drafted.</div>
+          <div class="dp-section-label">Mission Checklist</div>
+          <div class="checklist" id="cl7">
+            <div class="cl-item" onclick="toggleCheck(this,'n7_1')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Send brand pitch to Brand #1 (email or DM)</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n7_2')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Send brand pitch to Brand #2</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n7_3')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Send brand pitch to Brand #3</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n7_4')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Publish your first Week 1 content piece from Day 6</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n7_5')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Document baseline metrics: current followers, avg engagement, open brand conversations</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n7_6')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Set 30-day follow-up reminders for all 3 brands</div></div>
+            <div class="cl-item" onclick="toggleCheck(this,'n7_7')"><div class="cl-box"><div class="cl-check-icon">✓</div></div><div class="cl-text">Apply for NIL Command Center full access to continue the build</div></div>
+          </div>
+          <div class="output-target" style="margin-top:14px">
+            <div class="ot-label">Sprint Complete — What You Built</div>
+            <div class="ot-items">
+              <div class="ot-item">NIL Asset Inventory + Brand Stories</div>
+              <div class="ot-item">Rate Card + 5-Brand Target List</div>
+              <div class="ot-item">Live Media Kit (PDF + hosted link)</div>
+              <div class="ot-item">3 brand pitches sent</div>
+              <div class="ot-item">Contract literacy + counter-offer scripts</div>
+              <div class="ot-item">7-day content engine running</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-col">
+          <div class="dp-section-label">Hanzo Prompt Stack — Day 7</div>
+          <div class="prompt-stack">
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 1 · Pre-Send Pitch Review</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">Review my brand outreach pitch before I send it: [PASTE PITCH]
+
+Check against these criteria and give me a pass/fail + fix for each:
+1. Personalization — does it reference something specific about THIS brand?
+2. Brevity — is it under 150 words?
+3. Value-first — does it lead with what's in it for THEM, not me?
+4. Confidence — does it read peer-to-peer, not fan-to-brand?
+5. Clear ask — is there ONE specific next step?
+6. Media kit — is the link included and accessible?
+7. Tone — does it sound authentic and human, not template-generated?
+
+If anything fails, rewrite that section and show me the fix.</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+            <div class="prompt-card">
+              <div class="pc-head" onclick="togglePrompt(this)"><div class="pc-label">Prompt 2 · Sprint Debrief + 30-Day Plan</div><div class="pc-toggle">+</div></div>
+              <div class="pc-body">
+                <div class="pc-text">I just completed my 7-Day NIL SPARK Sprint. Here's what I built:
+- Media kit: [LINK OR "DONE"]
+- Brands pitched: [BRAND 1, 2, 3]
+- Content calendar: [STATUS]
+- Biggest challenge: [WHAT WAS HARD]
+- What I'm most confident about now: [WHAT CLICKED]
+
+Based on this, give me my 30-day NIL action plan:
+1. Daily habits to maintain momentum (content + outreach)
+2. What to do if brands respond (next step sequence)
+3. What to do if nobody responds in 2 weeks
+4. The one metric I should obsess over this month
+5. The one thing that would 2x my NIL income in 90 days</div>
+                <button class="pc-copy" onclick="copyPrompt(this)">Copy Prompt</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding:20px;background:rgba(201,162,39,0.07);border:1px solid rgba(201,162,39,0.25)">
+            <div class="dp-section-label" style="margin-bottom:10px">Sprint Complete — What's Next</div>
+            <p style="font-family:var(--mono);font-size:11px;color:var(--d2);line-height:1.7;margin-bottom:14px">You've built the foundation. The NIL Command Center gives you all 6 modules, monthly live deal review sessions, and 60+ Hanzo prompts to turn your SPARK system into a full NIL operation.</p>
+            <a href="nil_command_center.html#apply" class="bp" style="display:inline-flex;font-size:11px;padding:12px 20px">Apply for NIL Command Center →</a>
+          </div>
+        </div>
+      </div>
+      <button class="complete-day done" id="cd7" onclick="completeDay(7)">Sprint Complete ✓</button>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRESS -->
+<section class="prog-sec">
+  <div class="si">
+    <div class="sk">Mission Progress</div>
+    <h2 class="st">Your NIL<br>Asset Stack</h2>
+    <div class="prog-bar-outer"><div class="prog-bar-inner" id="main-prog-bar" style="width:0%"></div></div>
+    <div class="prog-label"><span id="prog-text">0 of 7 missions complete</span><span id="prog-pct">0%</span></div>
+    <div class="outputs-grid" id="outputs-grid">
+      <div class="og-card locked" id="og1"><div class="ogc-day">Day 1</div><div class="ogc-name">NIL Asset Inventory</div><div class="ogc-desc">Platform stats + brand stories + categories</div></div>
+      <div class="og-card locked" id="og2"><div class="ogc-day">Day 2</div><div class="ogc-name">Rate Card + Target List</div><div class="ogc-desc">What you charge + 5 scored brand targets</div></div>
+      <div class="og-card locked" id="og3"><div class="ogc-day">Day 3</div><div class="ogc-name">Live Media Kit</div><div class="ogc-desc">PDF + hosted link ready to send</div></div>
+      <div class="og-card locked" id="og4"><div class="ogc-day">Day 4</div><div class="ogc-name">3 Brand Pitches</div><div class="ogc-desc">Personalized, media kit attached, staged</div></div>
+      <div class="og-card locked" id="og5"><div class="ogc-day">Day 5</div><div class="ogc-name">Contract Literacy Kit</div><div class="ogc-desc">Red flag checklist + counter-offer scripts</div></div>
+      <div class="og-card locked" id="og6"><div class="ogc-day">Day 6</div><div class="ogc-name">Content Engine</div><div class="ogc-desc">7-day repeatable calendar + 5 pieces drafted</div></div>
+      <div class="og-card locked" id="og7" style="grid-column:span 2"><div class="ogc-day">Day 7</div><div class="ogc-name">NIL Business Live</div><div class="ogc-desc">3 pitches sent · content published · baseline documented</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ASCENSION -->
+<section class="asc-sec fu">
+  <div class="si">
+    <div class="sk">From Sprint to System</div>
+    <h2 class="st">The SPARK Lab<br>Is The Entry Point</h2>
+    <p class="sd">The NIL Command Center is the full infrastructure. 6 modules, 60+ prompts, live deal review sessions every month.</p>
+    <div class="asc-grid">
+      <div class="asc-card"><div class="acc-n">01</div><div class="acc-tag">Month 1</div><div class="acc-title">Pipeline Active</div><div class="acc-desc">3 pitches sent. Responses coming in. You're now negotiating — not waiting. Content engine running weekly.</div></div>
+      <div class="asc-card"><div class="acc-n">02</div><div class="acc-tag">Month 2</div><div class="acc-title">First Deal Signed</div><div class="acc-desc">First brand deal closed on your terms. Contract reviewed. 95% of revenue stays with you. Proof of concept established.</div></div>
+      <div class="asc-card"><div class="acc-n">03</div><div class="acc-tag">Month 3</div><div class="acc-title">Portfolio Building</div><div class="acc-desc">Multiple brand relationships active. Media kit updated with real deal history. Post-Career Stack planning begins.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="si" style="text-align:center">
+    <div class="sk" style="justify-content:center;margin-bottom:18px">Next Step</div>
+    <div class="ct-title">Your Brand.<br><span class="gd">Your Terms.</span></div>
+    <p class="ct-sub">The SPARK Lab built your foundation.<br>The NIL Command Center<br>runs your operation.</p>
+    <div class="ct-btns">
+      <a href="nil_command_center.html#apply" class="bp">Apply for NIL Command <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a href="creator_spark_lab.html" class="bg">Creator SPARK Lab →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fi">MAIM × Hanzo AI · NIL SPARK Lab · A Sub-Brand of Major AI Mindset</div>
+  <ul class="fl">
+    <li><a href="#tracker">Sprint Board</a></li>
+    <li><a href="nil_command_center.html">Full System</a></li>
+    <li><a href="creator_spark_lab.html">Creator Lab</a></li>
+    <li><a href="digital_asset_lab.html">Asset Lab</a></li>
+  </ul>
+</footer>
+
+<script>
+const STATE_KEY='nil_spark_v1';
+function loadState(){try{return JSON.parse(localStorage.getItem(STATE_KEY))||{completed:[],checks:{}}}catch(e){return{completed:[],checks:{}}}}
+function saveState(s){try{localStorage.setItem(STATE_KEY,JSON.stringify(s))}catch(e){}}
+let state=loadState();
+
+function init(){
+  Object.keys(state.checks).forEach(k=>{
+    if(state.checks[k]){const el=document.querySelector(`[onclick*="${k}"]`);if(el)el.classList.add('checked')}
+  });
+  state.completed.forEach(d=>{
+    const btn=document.getElementById(`dn${d}`);if(btn){btn.classList.remove('active');btn.classList.add('done')}
+    const cd=document.getElementById(`cd${d}`);if(cd){cd.textContent=`Day ${d} Complete ✓`;cd.classList.add('done')}
+    const og=document.getElementById(`og${d}`);if(og){og.classList.remove('locked');og.classList.add('unlocked')}
+  });
+  updateProgress();
+  const nextDay=getNextDay();if(nextDay)openDay(nextDay);
+}
+
+function getNextDay(){for(let i=1;i<=7;i++){if(!state.completed.includes(i))return i;}return 7;}
+
+function openDay(n){
+  document.querySelectorAll('.day-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.dn-btn').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById(`panel${n}`);const btn=document.getElementById(`dn${n}`);
+  if(panel)panel.classList.add('active');if(btn)btn.classList.add('active');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleCheck(el,key){
+  el.classList.toggle('checked');state.checks[key]=el.classList.contains('checked');saveState(state);
+}
+
+function completeDay(n){
+  const cd=document.getElementById(`cd${n}`);if(cd.classList.contains('done'))return;
+  if(!state.completed.includes(n))state.completed.push(n);saveState(state);
+  cd.textContent=`Day ${n} Complete ✓`;cd.classList.add('done');
+  const btn=document.getElementById(`dn${n}`);if(btn){btn.classList.remove('active');btn.classList.add('done')}
+  const og=document.getElementById(`og${n}`);if(og){og.classList.remove('locked');og.classList.add('unlocked')}
+  updateProgress();if(n<7)setTimeout(()=>openDay(n+1),500);
+}
+
+function updateProgress(){
+  const pct=Math.round(state.completed.length/7*100);
+  document.getElementById('main-prog-bar').style.width=pct+'%';
+  document.getElementById('nav-prog-bar').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=`${state.completed.length} of 7 missions complete`;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('nav-progress-label').textContent=`Day ${state.completed.length} / 7`;
+}
+
+function togglePrompt(head){
+  const body=head.nextElementSibling;const tog=head.querySelector('.pc-toggle');
+  body.classList.toggle('open');tog.classList.toggle('open');
+}
+
+function copyPrompt(btn){
+  const text=btn.previousElementSibling.textContent;
+  navigator.clipboard.writeText(text).then(()=>{const o=btn.textContent;btn.textContent='Copied ✓';setTimeout(()=>btn.textContent=o,2000)});
+}
+
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')})},{threshold:.1});
+document.querySelectorAll('.fu').forEach(el=>obs.observe(el));
+init();
+</script>
+</body>
+</html>
