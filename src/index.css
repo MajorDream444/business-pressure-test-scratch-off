@@ -286,6 +286,12 @@ body {
   box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.14);
 }
 
+.gold-textarea {
+  resize: none;
+  min-height: 7rem;
+  line-height: 1.55;
+}
+
 /* ── Credit UI elements ──────────────────────────────────────────────────── */
 
 .credit-pill {
