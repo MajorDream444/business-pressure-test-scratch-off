@@ -49,6 +49,61 @@ async function startServer() {
     res.json({ ok: true, service: 'business-pressure-test-api' });
   });
 
+  // Airtable submission — mirrors api/submit.ts for local dev
+  app.post('/api/submit', async (req, res) => {
+    try {
+      const { name, email, telegramOrPhone, score, notes } = req.body as {
+        name: string; email: string; telegramOrPhone: string;
+        score: number; notes: string;
+      };
+
+      const baseId = process.env.AIRTABLE_BASE_ID;
+      const tableId = process.env.AIRTABLE_TABLE_ID;
+      const pat = process.env.AIRTABLE_PAT;
+      const source = process.env.APP_SOURCE || 'business-pressure-test';
+
+      if (!baseId || !tableId || !pat) {
+        console.warn('[submit] Airtable env vars not set — skipping write');
+        return res.json({ success: true, note: 'Airtable not configured' });
+      }
+
+      const airtableRes = await fetch(
+        `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableId)}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${pat}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            records: [{
+              fields: {
+                Name: name ?? '',
+                Email: email ?? '',
+                Telegram_or_Phone: telegramOrPhone ?? '',
+                Notes: notes ?? '',
+                Score: typeof score === 'number' ? score : parseInt(String(score), 10),
+                Source: source,
+              },
+            }],
+          }),
+        }
+      );
+
+      if (!airtableRes.ok) {
+        const text = await airtableRes.text();
+        console.error('[submit] Airtable error:', airtableRes.status, text);
+        return res.status(502).json({ error: 'Failed to save submission' });
+      }
+
+      console.log('[submit] Saved:', name, email, score);
+      return res.json({ success: true });
+    } catch (err) {
+      console.error('[submit] Error:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.post('/api/event', async (req, res) => {
     try {
       const { type, lead_data } = req.body;

@@ -1,820 +1,565 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import { useState, useCallback, useEffect, FormEvent } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Screen, LeadData, LeadPayload, Band } from './types';
+import { ChevronLeft } from 'lucide-react';
 import { QUESTIONS, BANDS } from './constants';
-import { 
-  ChevronRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  ArrowRight, 
-  Mail, 
-  Phone, 
-  User, 
-  Trophy,
-  Zap,
-  Target,
-  Twitter,
-  Linkedin,
-  Facebook,
-  Share2
-} from 'lucide-react';
+import type { Band } from './types';
 
-// --- Components ---
-// ... (LandingScreen, ScratchScreen, ScratchCanvas, QuizScreen, ResultsScreen stay the same)
+// ── Lead-capture option lists ─────────────────────────────────────────────────
 
-const LandingScreen = ({ onStart }: { onStart: () => void }) => (
-  <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    className="flex flex-col items-center justify-center min-h-screen p-6 text-center"
-  >
-    <motion.div
-      initial={{ scale: 0.9 }}
-      animate={{ scale: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className="mb-8"
-    >
-      <div className="inline-block px-3 py-1 mb-6 text-xs font-semibold tracking-widest uppercase border rounded-full border-accent/30 text-accent bg-accent/5">
-        Business Diagnostic
-      </div>
-      <h1 className="mb-6 text-4xl font-bold leading-tight md:text-5xl font-serif">
-        If you stopped working for 2 weeks… <br/>
-        <span className="italic text-accent">would your business still bring in clients?</span>
-      </h1>
-      <p className="max-w-md mx-auto mb-10 text-lg text-white/60">
-        Scratch to reveal what your business qualifies for.
-      </p>
-    </motion.div>
-    
-    <button 
-      onClick={onStart}
-      className="group relative px-10 py-4 bg-accent hover:bg-accent-dark text-black font-bold rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(199,168,90,0.3)]"
-    >
-      <span className="flex items-center gap-2">
-        Start <ChevronRight size={20} className="transition-transform group-hover:translate-x-1" />
-      </span>
-    </button>
-  </motion.div>
-);
+const BIZ_TYPES = [
+  'Freelancing / Consulting',
+  'Coaching / Training',
+  'Agency / Service Business',
+  'E-commerce / Products',
+  'SaaS / Tech',
+  'Other',
+];
 
-const ScratchScreen = ({ onComplete }: { onComplete: () => void }) => {
-  const [scratchedPercent, setScratchedPercent] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
+const REVENUE_RANGES = [
+  'Pre-revenue',
+  'Under $1k / month',
+  '$1k – $5k / month',
+  '$5k – $15k / month',
+  '$15k – $50k / month',
+  '$50k+ / month',
+];
 
-  const handleScratch = useCallback((percent: number) => {
-    setScratchedPercent(percent);
-    if (percent > 40 && !isFinished) {
-      setIsFinished(true);
-    }
-  }, [isFinished]);
+// ── Step index constants ──────────────────────────────────────────────────────
+// 0  = landing
+// 1  = name
+// 2  = email
+// 3  = contact
+// 4  = biz_type
+// 5  = revenue
+// 6–15 = quiz questions 0–9
+// 16 = results
+// 17 = cta
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-center min-h-screen p-6 text-center"
-    >
-      <div className="mb-12">
-        <h2 className="mb-2 text-2xl font-bold font-serif">Your Qualification</h2>
-        <p className="text-white/60">Scratch the card below to reveal your credit.</p>
-      </div>
+const QUIZ_OFFSET = 6;
+const LAST_QUIZ_STEP = QUIZ_OFFSET + QUESTIONS.length - 1; // 15
+const RESULTS_STEP = LAST_QUIZ_STEP + 1; // 16
+const CTA_STEP = RESULTS_STEP + 1; // 17
+// Progress bar spans steps 1–15 (15 steps total)
+const PROGRESS_DENOM = LAST_QUIZ_STEP; // 15
 
-      <div className="relative w-full max-w-sm aspect-[3/2] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-        {/* Revealed Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-card-dark to-black">
-          <Trophy className="mb-4 text-accent" size={48} />
-          <h3 className="mb-2 text-2xl font-bold text-accent">Congratulations!</h3>
-          <p className="text-xl font-medium">You unlocked a $100 Business Diagnostic Credit.</p>
-        </div>
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-        {/* Scratch Layer */}
-        {!isFinished && (
-          <ScratchCanvas onScratch={handleScratch} />
-        )}
-      </div>
+function getBand(score: number): Band {
+  return BANDS.find(b => score >= b.min && score <= b.max) ?? BANDS[0];
+}
 
-      <AnimatePresence>
-        {isFinished && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-12"
-          >
-            <p className="mb-8 text-lg text-white/80">
-              Now let’s see where your business is actually leaking.
-            </p>
-            <button 
-              onClick={onComplete}
-              className="px-10 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all flex items-center gap-2 mx-auto"
-            >
-              Take the Pressure Test <ArrowRight size={20} />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
+function getScoreColor(score: number): string {
+  if (score >= 76) return '#4ade80';
+  if (score >= 51) return '#facc15';
+  if (score >= 26) return '#fb923c';
+  return '#f87171';
+}
+
+function buildNotes(
+  bizType: string,
+  revenue: string,
+  answers: Record<string, { label: string; score: number }>
+): string {
+  return [
+    `Business Type: ${bizType}`,
+    `Monthly Revenue: ${revenue}`,
+    '',
+    'Quiz Answers:',
+    ...QUESTIONS.map(q => `• ${q.question}\n  → ${answers[q.id]?.label ?? 'N/A'}`),
+  ].join('\n');
+}
+
+// ── Animation ─────────────────────────────────────────────────────────────────
+
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? '55%' : '-55%', opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? '-55%' : '55%', opacity: 0 }),
 };
 
-const ScratchCanvas = ({ onScratch }: { onScratch: (percent: number) => void }) => {
-  const canvasRef = useCallback((node: HTMLCanvasElement | null) => {
-    if (!node) return;
-    const ctx = node.getContext('2d');
-    if (!ctx) return;
-
-    const width = node.offsetWidth;
-    const height = node.offsetHeight;
-    node.width = width;
-    node.height = height;
-
-    // Draw scratch layer
-    ctx.fillStyle = '#1c1c1c';
-    ctx.fillRect(0, 0, width, height);
-    
-    // Add some texture/pattern
-    ctx.strokeStyle = '#2a2a2a';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < width; i += 10) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, height);
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = '#c7a85a';
-    ctx.font = 'bold 24px serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('SCRATCH HERE', width / 2, height / 2 + 8);
-
-    let isDrawing = false;
-    let scratchedPixels = 0;
-    const totalPixels = width * height;
-
-    const scratch = (x: number, y: number) => {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.beginPath();
-      ctx.arc(x, y, 30, 0, Math.PI * 2);
-      ctx.fill();
-      
-      scratchedPixels += 1;
-      // Trigger completion after ~50 scratch movements
-      if (scratchedPixels > 50) {
-        onScratch(100);
-      }
-    };
-
-    const handleMove = (e: MouseEvent | TouchEvent) => {
-      if (!isDrawing) return;
-      const rect = node.getBoundingClientRect();
-      const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left;
-      const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top;
-      scratch(x, y);
-    };
-
-    node.addEventListener('mousedown', () => isDrawing = true);
-    node.addEventListener('touchstart', () => isDrawing = true);
-    window.addEventListener('mouseup', () => isDrawing = false);
-    window.addEventListener('touchend', () => isDrawing = false);
-    node.addEventListener('mousemove', handleMove);
-    node.addEventListener('touchmove', handleMove);
-  }, [onScratch]);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 z-10 cursor-crosshair scratch-canvas" />;
+const slideTrans = {
+  duration: 0.28,
+  ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
 };
 
-const QuizScreen = ({
-  onComplete,
-}: {
-  onComplete: (quizData: { totalScore: number; answers: string[]; answerScores: number[] }) => void;
-}) => {
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [totalScore, setTotalScore] = useState(0);
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [answerScores, setAnswerScores] = useState<number[]>([]);
-  const question = QUESTIONS[currentIdx];
-  const progress = ((currentIdx + 1) / QUESTIONS.length) * 100;
-
-  const handleAnswer = (label: string, score: number) => {
-    const newScore = totalScore + score;
-    const newAnswers = [...answers, label];
-    const newAnswerScores = [...answerScores, Math.round(score)];
-    if (currentIdx < QUESTIONS.length - 1) {
-      setTotalScore(newScore);
-      setAnswers(newAnswers);
-      setAnswerScores(newAnswerScores);
-      setCurrentIdx(currentIdx + 1);
-    } else {
-      onComplete({
-        totalScore: Math.round(newScore),
-        answers: newAnswers,
-        answerScores: newAnswerScores,
-      });
-    }
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col min-h-screen p-6"
-    >
-      <div className="w-full max-w-md mx-auto mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-bold tracking-widest uppercase text-white/40">Question {currentIdx + 1} of {QUESTIONS.length}</span>
-          <span className="text-xs font-bold text-accent">{Math.round(progress)}%</span>
-        </div>
-        <div className="w-full h-1 mb-12 overflow-hidden rounded-full bg-white/5">
-          <motion.div 
-            className="h-full bg-accent" 
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIdx}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="mb-10 text-2xl font-bold leading-tight font-serif">
-              {question.question}
-            </h2>
-
-            <div className="space-y-4">
-              {question.options.map((opt, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleAnswer(opt.label, opt.score)}
-                  className="w-full p-5 text-left transition-all border rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 hover:border-accent/50 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium text-white/80 group-hover:text-white">{opt.label}</span>
-                    <ChevronRight size={18} className="opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1 text-accent" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-};
-
-const ResultsScreen = ({ score, onNext }: { score: number, onNext: () => void }) => {
-  const band = BANDS.find(b => score >= b.min && score <= b.max) || BANDS[0];
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col min-h-screen p-6 pb-20"
-    >
-      <div className="w-full max-w-md mx-auto mt-8">
-        <div className="flex flex-col items-center mb-12 text-center">
-          <div className="relative flex items-center justify-center w-32 h-32 mb-6">
-            <svg className="absolute inset-0 w-full h-full -rotate-90">
-              <circle
-                cx="64"
-                cy="64"
-                r="60"
-                fill="transparent"
-                stroke="currentColor"
-                strokeWidth="4"
-                className="text-white/5"
-              />
-              <motion.circle
-                cx="64"
-                cy="64"
-                r="60"
-                fill="transparent"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeDasharray="377"
-                initial={{ strokeDashoffset: 377 }}
-                animate={{ strokeDashoffset: 377 - (377 * score) / 100 }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="text-accent"
-              />
-            </svg>
-            <span className="text-4xl font-bold font-serif">{Math.round(score)}</span>
-          </div>
-          <h2 className="mb-4 text-3xl font-bold font-serif text-accent">{band.title}</h2>
-          <p className="text-lg text-white/70 leading-relaxed">
-            {band.diagnosis}
-          </p>
-        </div>
-
-        <div className="p-6 mb-8 border rounded-3xl border-accent/20 bg-accent/5">
-          <div className="flex items-center gap-2 mb-4 text-accent">
-            <AlertCircle size={20} />
-            <h3 className="text-sm font-bold tracking-widest uppercase">Likely Leaks</h3>
-          </div>
-          <ul className="space-y-3">
-            {band.leaks.map((leak, i) => (
-              <li key={i} className="flex items-start gap-3 text-white/80">
-                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent/60 shrink-0" />
-                <span>{leak}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="p-6 mb-12 border rounded-3xl border-white/5 bg-white/5">
-          <div className="flex items-center gap-2 mb-4 text-white/60">
-            <Zap size={20} />
-            <h3 className="text-sm font-bold tracking-widest uppercase">Next Moves</h3>
-          </div>
-          <ul className="space-y-3">
-            {band.next_moves.map((move, i) => (
-              <li key={i} className="flex items-start gap-3 text-white/80">
-                <CheckCircle2 size={18} className="mt-0.5 text-emerald-500 shrink-0" />
-                <span>{move}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="p-6 mb-12 text-center border rounded-3xl border-accent/30 bg-gradient-to-br from-accent/10 to-transparent">
-          <p className="text-sm font-medium text-accent/80">Reminder: You unlocked a</p>
-          <p className="text-xl font-bold text-accent">$100 Business Diagnostic Credit</p>
-        </div>
-
-        <div className="mb-12 text-center">
-          <p className="mb-4 text-xs font-bold tracking-widest uppercase text-white/40">Share your diagnosis</p>
-          <div className="flex items-center justify-center gap-4">
-            <button 
-              onClick={() => {
-                const text = `I just took the Business Pressure Test! My score: ${Math.round(score)}/100. Result: ${band.title}. Check yours:`;
-                const url = window.location.href;
-                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-              }}
-              className="flex items-center justify-center w-12 h-12 transition-all border rounded-full border-white/10 bg-white/5 hover:bg-white/10 hover:border-accent/50 text-white/60 hover:text-accent"
-              title="Share on Twitter"
-            >
-              <Twitter size={20} />
-            </button>
-            <button 
-              onClick={() => {
-                const url = window.location.href;
-                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-              }}
-              className="flex items-center justify-center w-12 h-12 transition-all border rounded-full border-white/10 bg-white/5 hover:bg-white/10 hover:border-accent/50 text-white/60 hover:text-accent"
-              title="Share on LinkedIn"
-            >
-              <Linkedin size={20} />
-            </button>
-            <button 
-              onClick={() => {
-                const url = window.location.href;
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-              }}
-              className="flex items-center justify-center w-12 h-12 transition-all border rounded-full border-white/10 bg-white/5 hover:bg-white/10 hover:border-accent/50 text-white/60 hover:text-accent"
-              title="Share on Facebook"
-            >
-              <Facebook size={20} />
-            </button>
-            <button 
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'Business Pressure Test',
-                    text: `I just took the Business Pressure Test! My score: ${Math.round(score)}/100. Result: ${band.title}.`,
-                    url: window.location.href,
-                  }).catch(console.error);
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Link copied to clipboard!');
-                }
-              }}
-              className="flex items-center justify-center w-12 h-12 transition-all border rounded-full border-white/10 bg-white/5 hover:bg-white/10 hover:border-accent/50 text-white/60 hover:text-accent"
-              title="Copy Link"
-            >
-              <Share2 size={20} />
-            </button>
-          </div>
-        </div>
-
-        <button 
-          onClick={onNext}
-          className="w-full py-5 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all flex items-center justify-center gap-2"
-        >
-          Get the Full Diagnosis <ArrowRight size={20} />
-        </button>
-      </div>
-    </motion.div>
-  );
-};
-
-const LeadCaptureScreen = ({
-  score,
-  band,
-  quizAnswers,
-  quizAnswerScores,
-  onComplete,
-}: {
-  score: number;
-  band: Band;
-  quizAnswers: string[];
-  quizAnswerScores: number[];
-  onComplete: (data: LeadData) => void;
-}) => {
-  const [formData, setFormData] = useState<LeadData>({
-    emailAddress: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    telegramOrPhone: '',
-    businessType: '',
-    monthlyRevenue: '',
-    biggestIssue: '',
-  });
-
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError('');
-    const leadEndpoint = import.meta.env.VITE_LEAD_ENDPOINT;
-
-    if (!leadEndpoint) {
-      setError('Lead endpoint is not configured. Please contact support.');
-      setSubmitting(false);
-      return;
-    }
-
-    const payload: LeadPayload = {
-      ...formData,
-      q1: quizAnswers[0] || '',
-      q2: quizAnswers[1] || '',
-      q3: quizAnswers[2] || '',
-      q4: quizAnswers[3] || '',
-      q5: quizAnswers[4] || '',
-      q6: quizAnswers[5] || '',
-      q7: quizAnswers[6] || '',
-      q8: quizAnswers[7] || '',
-      q9: quizAnswers[8] || '',
-      q10: quizAnswers[9] || '',
-      q1Score: quizAnswerScores[0] ?? 0,
-      q2Score: quizAnswerScores[1] ?? 0,
-      q3Score: quizAnswerScores[2] ?? 0,
-      q4Score: quizAnswerScores[3] ?? 0,
-      q5Score: quizAnswerScores[4] ?? 0,
-      q6Score: quizAnswerScores[5] ?? 0,
-      q7Score: quizAnswerScores[6] ?? 0,
-      q8Score: quizAnswerScores[7] ?? 0,
-      q9Score: quizAnswerScores[8] ?? 0,
-      q10Score: quizAnswerScores[9] ?? 0,
-      totalScore: Math.round(score),
-      scoreBand: band.title,
-      credit: Math.round(score) < 18 ? 'Warm' : 'Standard',
-      priority: Math.round(score) < 18 ? 'High' : 'Normal',
-      source: 'Business Pressure Test',
-      nextStep: Math.round(score) < 18 ? 'Book call' : 'Get full diagnosis',
-      timestamp: new Date().toISOString(),
-    };
-
-    try {
-      const res = await fetch(leadEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        throw new Error('Lead submission failed');
-      }
-
-      onComplete(formData);
-    } catch (err) {
-      console.error(err);
-      setError('Something went wrong saving your info. Try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col min-h-screen p-6 pb-20"
-    >
-      <div className="w-full max-w-md mx-auto mt-8">
-        <div className="mb-10 text-center">
-          <h2 className="mb-4 text-3xl font-bold font-serif">Get Your Full Diagnosis</h2>
-          <p className="text-white/60">
-            Enter your details to receive the complete breakdown and claim your $100 credit.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <User size={14} /> First Name
-            </label>
-            <input
-              required
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-              placeholder="Your name"
-              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <User size={14} /> Last Name
-            </label>
-            <input
-              required
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              placeholder="Your last name"
-              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Mail size={14} /> Email Address
-            </label>
-            <input
-              required
-              type="email"
-              value={formData.emailAddress}
-              onChange={(e) =>
-                setFormData({ ...formData, emailAddress: e.target.value, email: e.target.value })
-              }
-              placeholder="name@company.com"
-              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Phone size={14} /> Telegram or Phone
-            </label>
-            <input
-              type="text"
-              value={formData.telegramOrPhone}
-              onChange={(e) => setFormData({ ...formData, telegramOrPhone: e.target.value })}
-              placeholder="@yourhandle or phone"
-              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Target size={14} /> Business Type
-            </label>
-            <input
-              required
-              type="text"
-              value={formData.businessType}
-              onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
-              placeholder="Consulting, agency, ecom, etc."
-              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Target size={14} /> Monthly Revenue
-            </label>
-            <input
-              required
-              type="text"
-              value={formData.monthlyRevenue}
-              onChange={(e) => setFormData({ ...formData, monthlyRevenue: e.target.value })}
-              placeholder="$5k-$10k"
-              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40">
-              <Target size={14} /> Biggest Issue
-            </label>
-            <textarea
-              required
-              rows={3}
-              value={formData.biggestIssue}
-              onChange={(e) => setFormData({ ...formData, biggestIssue: e.target.value })}
-              placeholder="Lead flow, backend, follow-up, etc."
-              className="w-full p-4 border rounded-2xl border-white/10 bg-white/5 focus:outline-none focus:border-accent/50 transition-colors"
-            />
-          </div>
-
-          {error && <p className="text-sm text-red-400">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-5 bg-accent text-black font-bold rounded-full hover:bg-accent-dark transition-all disabled:opacity-60"
-          >
-            {submitting ? 'Saving...' : 'Continue'}
-          </button>
-        </form>
-      </div>
-    </motion.div>
-  );
-};
-
-const CTAScreen = ({ leadData }: { leadData: LeadData | null }) => {
-  const triggerEvent = async (type: 'CALL_BOOKED' | 'HIGH_INTENT_ACTION') => {
-    try {
-      await fetch('/api/event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, lead_data: leadData }),
-      });
-    } catch (err) {
-      console.error('Failed to trigger event:', err);
-    }
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-center min-h-screen p-6 text-center"
-    >
-      <div className="w-full max-w-md">
-        <div className="mb-12">
-          <Target className="mx-auto mb-6 text-accent" size={48} />
-          <h2 className="mb-4 text-4xl font-bold font-serif">Ready to fix it?</h2>
-          <div className="mb-6 p-4 border border-accent/30 bg-accent/5 rounded-2xl inline-block">
-            <p className="text-accent font-bold">You unlocked a $100 diagnostic credit.</p>
-            <p className="text-sm text-accent/70">Use it now to get the full diagnosis.</p>
-          </div>
-          <p className="text-lg text-white/60">
-            Most people don’t have a client problem. <br/>
-            <span className="text-white font-medium">They have a system problem.</span>
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <a 
-            href="https://majordream.gumroad.com/l/tvnwkw" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            onClick={() => triggerEvent('HIGH_INTENT_ACTION')}
-            className="block w-full py-5 bg-accent text-black font-bold rounded-full hover:bg-accent-dark transition-all shadow-[0_0_20px_rgba(199,168,90,0.2)]"
-          >
-            Get the Full Diagnosis
-          </a>
-          <a 
-            href="https://calendly.com/major-yks/major_hanzo" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            onClick={() => triggerEvent('CALL_BOOKED')}
-            className="block w-full py-5 border border-white/20 text-white font-bold rounded-full hover:bg-white/5 transition-all"
-          >
-            Book a Strategy Call
-          </a>
-          <a 
-            href="https://t.me/addlist/fehziWk_hgg0MTI1" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block w-full py-5 text-white/60 font-medium rounded-full hover:text-white transition-all"
-          >
-            Join Fix It Now
-          </a>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// --- Main App ---
+// ── Root component ────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('landing');
+  const [step, setStep] = useState(0);
+  const [dir, setDir] = useState(1);
+
+  // Lead data
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
+  const [bizType, setBizType] = useState('');
+  const [revenue, setRevenue] = useState('');
+
+  // Quiz
+  const [answers, setAnswers] = useState<Record<string, { label: string; score: number }>>({});
+  const [highlighted, setHighlighted] = useState<string | null>(null);
+
+  // Results
   const [score, setScore] = useState(0);
-  const [quizAnswers, setQuizAnswers] = useState<string[]>([]);
-  const [quizAnswerScores, setQuizAnswerScores] = useState<number[]>([]);
-  const [leadData, setLeadData] = useState<LeadData | null>(null);
 
-  const currentBand =
-    BANDS.find((band) => score >= band.min && score <= band.max) || BANDS[0];
+  const navigate = (target: number) => {
+    setDir(target > step ? 1 : -1);
+    setStep(target);
+    setHighlighted(null);
+  };
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [screen]);
+  const goNext = () => navigate(step + 1);
+  const goPrev = () => navigate(step - 1);
+
+  const showProgress = step >= 1 && step <= LAST_QUIZ_STEP;
+  const progressPct = showProgress ? Math.round((step / PROGRESS_DENOM) * 100) : 0;
+
+  const handleQuizAnswer = (
+    qId: string,
+    option: { label: string; score: number }
+  ) => {
+    if (highlighted) return; // prevent double-tap
+    setHighlighted(option.label);
+
+    const newAnswers = { ...answers, [qId]: option };
+    setAnswers(newAnswers);
+
+    setTimeout(() => {
+      if (step === LAST_QUIZ_STEP) {
+        const total = Object.values(newAnswers).reduce((s, a) => s + a.score, 0);
+        const finalScore = Math.round(total);
+        setScore(finalScore);
+
+        // Fire-and-forget — never blocks UX
+        fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            telegramOrPhone: contact,
+            score: finalScore,
+            notes: buildNotes(bizType, revenue, newAnswers),
+          }),
+        }).catch(() => {/* silent */});
+
+        navigate(RESULTS_STEP);
+      } else {
+        goNext();
+      }
+    }, 320);
+  };
+
+  const band = getBand(score);
+  const calendlyUrl = (import.meta.env.VITE_CALENDLY_URL as string) || '#';
+  const gumroadUrl = (import.meta.env.VITE_GUMROAD_URL as string) || '#';
+
+  // ── Step renderer ───────────────────────────────────────────────────────────
+
+  const renderStep = () => {
+    if (step === 0) {
+      return <LandingScreen onStart={goNext} />;
+    }
+    if (step === 1) {
+      return (
+        <InputScreen
+          key="name"
+          question="What's your first name?"
+          placeholder="Your first name"
+          value={name}
+          type="text"
+          inputMode="text"
+          autoCapitalize="words"
+          autoComplete="given-name"
+          onChange={setName}
+          onNext={goNext}
+          canProceed={name.trim().length > 0}
+        />
+      );
+    }
+    if (step === 2) {
+      return (
+        <InputScreen
+          key="email"
+          question="What's your email address?"
+          placeholder="you@example.com"
+          value={email}
+          type="email"
+          inputMode="email"
+          autoCapitalize="none"
+          autoComplete="email"
+          onChange={setEmail}
+          onNext={goNext}
+          canProceed={email.includes('@') && email.includes('.')}
+        />
+      );
+    }
+    if (step === 3) {
+      return (
+        <InputScreen
+          key="contact"
+          question="Telegram username or phone number?"
+          placeholder="@handle  or  +1 555 000 0000"
+          value={contact}
+          type="text"
+          inputMode="text"
+          autoCapitalize="none"
+          autoComplete="off"
+          onChange={setContact}
+          onNext={goNext}
+          canProceed={contact.trim().length > 2}
+          hint="We'll send your results and credit here."
+        />
+      );
+    }
+    if (step === 4) {
+      return (
+        <OptionScreen
+          key="biz_type"
+          question="What type of business do you run?"
+          options={BIZ_TYPES}
+          selected={bizType}
+          onSelect={v => { setBizType(v); setTimeout(goNext, 220); }}
+        />
+      );
+    }
+    if (step === 5) {
+      return (
+        <OptionScreen
+          key="revenue"
+          question="What's your current monthly revenue?"
+          options={REVENUE_RANGES}
+          selected={revenue}
+          onSelect={v => { setRevenue(v); setTimeout(goNext, 220); }}
+        />
+      );
+    }
+    if (step >= QUIZ_OFFSET && step <= LAST_QUIZ_STEP) {
+      const q = QUESTIONS[step - QUIZ_OFFSET];
+      return (
+        <QuizScreen
+          key={q.id}
+          question={q.question}
+          options={q.options}
+          highlighted={highlighted}
+          currentAnswer={answers[q.id]?.label ?? null}
+          onSelect={opt => handleQuizAnswer(q.id, opt)}
+        />
+      );
+    }
+    if (step === RESULTS_STEP) {
+      return (
+        <ResultsScreen
+          name={name}
+          score={score}
+          band={band}
+          onCta={() => navigate(CTA_STEP)}
+        />
+      );
+    }
+    if (step === CTA_STEP) {
+      return (
+        <CtaScreen
+          name={name}
+          calendlyUrl={calendlyUrl}
+          gumroadUrl={gumroadUrl}
+        />
+      );
+    }
+    return null;
+  };
+
+  const showBack = step > 0 && step < RESULTS_STEP;
+  const quizNum =
+    step >= QUIZ_OFFSET && step <= LAST_QUIZ_STEP
+      ? step - QUIZ_OFFSET + 1
+      : null;
 
   return (
-    <div className="min-h-screen bg-bg-dark selection:bg-accent selection:text-black">
-      <AnimatePresence mode="wait">
-        {screen === 'landing' && (
+    <div className="app-root">
+      {/* Progress bar */}
+      {showProgress && (
+        <div className="progress-track">
           <motion.div
-            key="landing"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="h-full"
-          >
-            <LandingScreen onStart={() => setScreen('scratch')} />
-          </motion.div>
-        )}
+            className="progress-fill"
+            animate={{ width: `${progressPct}%` }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          />
+        </div>
+      )}
 
-        {screen === 'scratch' && (
-          <motion.div
-            key="scratch"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="h-full"
-          >
-            <ScratchScreen onComplete={() => setScreen('quiz')} />
-          </motion.div>
-        )}
+      {/* Back button */}
+      {showBack && (
+        <button className="back-btn" onClick={goPrev} aria-label="Go back">
+          <ChevronLeft size={22} />
+        </button>
+      )}
 
-        {screen === 'quiz' && (
-          <motion.div
-            key="quiz"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="h-full"
-          >
-            <QuizScreen
-              onComplete={({ totalScore, answers, answerScores }) => {
-                setScore(totalScore);
-                setQuizAnswers(answers);
-                setQuizAnswerScores(answerScores);
-                setScreen('results');
-              }}
-            />
-          </motion.div>
-        )}
+      {/* Quiz counter */}
+      {quizNum !== null && (
+        <div className="quiz-counter">
+          {quizNum} / {QUESTIONS.length}
+        </div>
+      )}
 
-        {screen === 'results' && (
-          <motion.div
-            key="results"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            className="h-full"
-          >
-            <ResultsScreen
-              score={score}
-              onNext={() => setScreen('lead_capture')}
-            />
-          </motion.div>
-        )}
-
-        {screen === 'lead_capture' && (
-          <motion.div
-            key="lead_capture"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="h-full"
-          >
-            <LeadCaptureScreen
-              score={score}
-              band={currentBand}
-              quizAnswers={quizAnswers}
-              quizAnswerScores={quizAnswerScores}
-              onComplete={(data) => {
-                setLeadData(data);
-                setScreen('cta');
-              }}
-            />
-          </motion.div>
-        )}
-
-        {screen === 'cta' && (
-          <motion.div
-            key="cta"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            className="h-full"
-          >
-            <CTAScreen leadData={leadData} />
-          </motion.div>
-        )}
+      {/* Animated page */}
+      <AnimatePresence mode="wait" custom={dir}>
+        <motion.div
+          key={step}
+          custom={dir}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={slideTrans}
+          className="page-wrapper"
+        >
+          {renderStep()}
+        </motion.div>
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Screen components ─────────────────────────────────────────────────────────
+
+function LandingScreen({ onStart }: { onStart: () => void }) {
+  return (
+    <div className="screen screen-center">
+      <div className="label-gold">Business Pressure Test</div>
+
+      <h1 className="headline">
+        If you stopped working for 2 weeks…{' '}
+        <span className="text-gold">would your business still run?</span>
+      </h1>
+
+      <p className="subtext">
+        10 questions. 2 minutes. Find out if you own a business — or if your business owns you.
+      </p>
+
+      <div className="credit-pill">
+        <span>🎁</span>
+        <span>You've unlocked a $100 Build Credit</span>
+      </div>
+
+      <button onClick={onStart} className="btn-gold btn-lg">
+        Start the Test →
+      </button>
+    </div>
+  );
+}
+
+interface InputScreenProps {
+  question: string;
+  placeholder: string;
+  value: string;
+  type: string;
+  inputMode: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  autoCapitalize: string;
+  autoComplete: string;
+  onChange: (v: string) => void;
+  onNext: () => void;
+  canProceed: boolean;
+  hint?: string;
+}
+
+function InputScreen({
+  question, placeholder, value, type, inputMode, autoCapitalize,
+  autoComplete, onChange, onNext, canProceed, hint,
+}: InputScreenProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 120);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="screen screen-form">
+      <h2 className="question-text">{question}</h2>
+      {hint && <p className="hint-text">{hint}</p>}
+      <input
+        ref={inputRef}
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && canProceed && onNext()}
+        placeholder={placeholder}
+        className="gold-input"
+        autoComplete={autoComplete}
+        autoCorrect="off"
+        autoCapitalize={autoCapitalize}
+        spellCheck={false}
+        inputMode={inputMode}
+      />
+      <button onClick={onNext} disabled={!canProceed} className="btn-gold">
+        Continue →
+      </button>
+    </div>
+  );
+}
+
+interface OptionScreenProps {
+  question: string;
+  options: string[];
+  selected: string;
+  onSelect: (v: string) => void;
+}
+
+function OptionScreen({ question, options, selected, onSelect }: OptionScreenProps) {
+  return (
+    <div className="screen screen-form">
+      <h2 className="question-text">{question}</h2>
+      <div className="option-list">
+        {options.map(opt => (
+          <button
+            key={opt}
+            onClick={() => onSelect(opt)}
+            className={`option-card${selected === opt ? ' option-card-active' : ''}`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface QuizScreenProps {
+  question: string;
+  options: { label: string; score: number }[];
+  highlighted: string | null;
+  currentAnswer: string | null;
+  onSelect: (opt: { label: string; score: number }) => void;
+}
+
+function QuizScreen({ question, options, highlighted, currentAnswer, onSelect }: QuizScreenProps) {
+  return (
+    <div className="screen screen-form">
+      <h2 className="question-text">{question}</h2>
+      <div className="option-list">
+        {options.map(opt => {
+          const active = highlighted === opt.label || currentAnswer === opt.label;
+          return (
+            <button
+              key={opt.label}
+              onClick={() => onSelect(opt)}
+              className={`option-card${active ? ' option-card-active' : ''}`}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+interface ResultsScreenProps {
+  name: string;
+  score: number;
+  band: Band;
+  onCta: () => void;
+}
+
+function ResultsScreen({ name, score, band, onCta }: ResultsScreenProps) {
+  const scoreColor = getScoreColor(score);
+  return (
+    <div className="screen screen-form">
+      <div className="credit-banner">
+        <span>🎁</span>
+        <span>You've unlocked a $100 Build Credit</span>
+      </div>
+
+      <div className="score-block">
+        {name && <p className="score-label">{name}'s score</p>}
+        <div className="score-number" style={{ color: scoreColor }}>
+          {score}
+        </div>
+        <div className="score-denom">out of 100</div>
+      </div>
+
+      <div className="band-card">
+        <div className="band-title">{band.title}</div>
+        <p className="band-diagnosis">{band.diagnosis}</p>
+
+        <div className="band-section">
+          <div className="band-section-label">Pressure points</div>
+          {band.leaks.map(l => (
+            <div key={l} className="band-item">
+              <span className="icon-red">↓</span>
+              {l}
+            </div>
+          ))}
+        </div>
+
+        <div className="band-section">
+          <div className="band-section-label">Next moves</div>
+          {band.next_moves.map(m => (
+            <div key={m} className="band-item">
+              <span className="icon-gold">→</span>
+              {m}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button onClick={onCta} className="btn-gold btn-lg">
+        See how to fix this →
+      </button>
+    </div>
+  );
+}
+
+interface CtaScreenProps {
+  name: string;
+  calendlyUrl: string;
+  gumroadUrl: string;
+}
+
+function CtaScreen({ name, calendlyUrl, gumroadUrl }: CtaScreenProps) {
+  return (
+    <div className="screen screen-center">
+      <div className="label-gold">Your next step</div>
+
+      <h2 className="headline headline-sm">
+        {name ? `${name}, apply` : 'Apply'} your{' '}
+        <span className="text-gold">$100 Build Credit</span>
+      </h2>
+
+      <p className="subtext">Your credit is reserved. Choose how you want to move next.</p>
+
+      <div className="cta-cards">
+        <a
+          href={calendlyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cta-card cta-card-primary"
+        >
+          <div className="cta-card-title cta-card-title-gold">Book a Strategy Call →</div>
+          <div className="cta-card-body">
+            45 minutes. We map your exact pressure points and build a fix plan.
+          </div>
+          <div className="cta-card-note cta-card-note-gold">$100 credit applied automatically</div>
+        </a>
+
+        <a
+          href={gumroadUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cta-card cta-card-secondary"
+        >
+          <div className="cta-card-title">Get the Build Playbook →</div>
+          <div className="cta-card-body">
+            The exact framework to fix the leaks found in your results.
+          </div>
+          <div className="cta-card-note">Use credit code at checkout</div>
+        </a>
+      </div>
+
+      <p className="footer-note">
+        Business Pressure Test · {new Date().getFullYear()}
+      </p>
     </div>
   );
 }

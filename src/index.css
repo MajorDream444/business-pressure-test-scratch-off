@@ -1,22 +1,468 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", serif;
-  
-  --color-accent: #c7a85a;
-  --color-accent-dark: #a68b4a;
-  --color-bg-dark: #0a0a0a;
-  --color-card-dark: #141414;
+/* ── Base resets ─────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-@layer base {
-  body {
-    @apply bg-bg-dark text-white font-sans antialiased;
-  }
+html {
+  height: 100%;
 }
 
-.scratch-canvas {
-  touch-action: none;
+body {
+  min-height: 100%;
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ── App shell ───────────────────────────────────────────────────────────── */
+
+.app-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #0a0a0a;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4.5rem 1.25rem 2rem;
+  will-change: transform, opacity;
+}
+
+/* ── Progress bar ────────────────────────────────────────────────────────── */
+
+.progress-track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.07);
+  z-index: 50;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #c9a84c;
+}
+
+/* ── Navigation chrome ───────────────────────────────────────────────────── */
+
+.back-btn {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  transition: color 0.15s;
+  padding: 0;
+}
+
+.back-btn:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.quiz-counter {
+  position: fixed;
+  top: 18px;
+  right: 16px;
+  z-index: 40;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Screen layouts ──────────────────────────────────────────────────────── */
+
+.screen {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.screen-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.screen-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+/* ── Typography ──────────────────────────────────────────────────────────── */
+
+.label-gold {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #c9a84c;
+}
+
+.headline {
+  font-size: clamp(1.75rem, 5.5vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.18;
+  color: #fff;
+  margin: 0;
+}
+
+.headline-sm {
+  font-size: clamp(1.4rem, 4.5vw, 1.875rem);
+}
+
+.question-text {
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.28;
+  color: #fff;
+  margin: 0;
+}
+
+.subtext {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hint-text {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 13px;
+  margin: -8px 0 0;
+}
+
+.text-gold {
+  color: #c9a84c;
+}
+
+.footer-note {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 11px;
+  margin: 0;
+}
+
+/* ── Gold CTA button ─────────────────────────────────────────────────────── */
+
+.btn-gold {
+  display: block;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: linear-gradient(135deg, #c9a84c 0%, #e8c96a 55%, #c9a84c 100%);
+  background-size: 200% 100%;
+  color: #0a0a0a;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  border-radius: 0.875rem;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: opacity 0.15s ease, transform 0.1s ease, background-position 0.35s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.btn-gold:hover:not(:disabled) {
+  background-position: 100% 0;
+  opacity: 0.94;
+}
+
+.btn-gold:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-gold:disabled {
+  opacity: 0.22;
+  cursor: not-allowed;
+}
+
+.btn-lg {
+  padding: 1.1rem 1.5rem;
+  font-size: 1.0625rem;
+}
+
+/* ── Option cards ────────────────────────────────────────────────────────── */
+
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-card {
+  display: block;
+  width: 100%;
+  padding: 0.875rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease,
+    transform 0.1s ease;
+  min-height: 3rem;
+  -webkit-appearance: none;
+}
+
+.option-card:hover {
+  border-color: rgba(201, 168, 76, 0.45);
+  background: rgba(201, 168, 76, 0.06);
+  color: #ffffff;
+}
+
+.option-card:active {
+  transform: scale(0.985);
+}
+
+.option-card-active {
+  border-color: #c9a84c !important;
+  background: rgba(201, 168, 76, 0.13) !important;
+  color: #ffffff !important;
+}
+
+/* ── Text input ──────────────────────────────────────────────────────────── */
+
+.gold-input {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.875rem;
+  color: #ffffff;
+  font-size: 1.0625rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.gold-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.gold-input:focus {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.14);
+}
+
+/* ── Credit UI elements ──────────────────────────────────────────────────── */
+
+.credit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: rgba(201, 168, 76, 0.09);
+  color: #c9a84c;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.credit-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  background: rgba(201, 168, 76, 0.1);
+  color: #c9a84c;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Results screen ──────────────────────────────────────────────────────── */
+
+.score-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.score-label {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  margin: 0;
+}
+
+.score-number {
+  font-size: clamp(4rem, 18vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-denom {
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.band-card {
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.band-title {
+  color: #c9a84c;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.band-diagnosis {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.band-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.band-section-label {
+  color: rgba(255, 255, 255, 0.22);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.band-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.45;
+}
+
+.icon-gold {
+  color: #c9a84c;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.icon-red {
+  color: #f87171;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── CTA screen ──────────────────────────────────────────────────────────── */
+
+.cta-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.cta-card {
+  display: block;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.cta-card-primary {
+  border: 1px solid #c9a84c;
+  background: rgba(201, 168, 76, 0.06);
+}
+
+.cta-card-primary:hover {
+  background: rgba(201, 168, 76, 0.11);
+}
+
+.cta-card-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.cta-card-secondary:hover {
+  border-color: rgba(201, 168, 76, 0.4);
+  background: rgba(201, 168, 76, 0.04);
+}
+
+.cta-card-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.cta-card-title-gold {
+  color: #c9a84c;
+}
+
+.cta-card-body {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cta-card-note {
+  color: rgba(255, 255, 255, 0.22);
+  font-size: 11px;
+  margin-top: 10px;
+}
+
+.cta-card-note-gold {
+  color: rgba(201, 168, 76, 0.55);
 }
