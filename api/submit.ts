@@ -98,6 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     'Score Q10': p.scores?.q10 ?? 0,
 
     // ── Scoring + routing ─────────────────────────────────────────────────────
+    'Score':             p.totalScore       ?? 0,   // keep existing field
     'Total Score':       p.totalScore       ?? 0,
     'Score Band':        p.scoreBand        ?? '',
     'Priority':          p.priority         ?? '',
