@@ -1,0 +1,6 @@
+interface:
+  display_name: "Business Pressure Test Scratch Off"
+  short_description: "Repo-specific patterns and workflows for business-pressure-test-scratch-off"
+  default_prompt: "Use the business-pressure-test-scratch-off repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
