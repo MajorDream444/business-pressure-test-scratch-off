@@ -1,21 +1,27 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 interface Payload {
-  submissionId?: string;
-  submittedAt?: string;
-  appVersion?: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  email?: string;
-  telegramOrPhone?: string;
-  source?: string;
-  businessType?: string;
-  revenueRange?: string;
-  biggestIssue?: string;
-  answers?: Record<string, string>;
-  scores?: Record<string, number>;
-  totalScore?: number;
+  submissionId?:     string;
+  submittedAt?:      string;
+  appVersion?:       string;
+  firstName?:        string;
+  lastName?:         string;
+  name?:             string;
+  email?:            string;
+  telegramOrPhone?:  string;
+  source?:           string;
+  businessType?:     string;
+  revenueRange?:     string;
+  biggestIssue?:     string;
+  answers?:          Record<string, string>;
+  scores?:           Record<string, number>;
+  totalScore?:       number;
+  scoreBand?:        string;
+  priority?:         string;
+  primaryLeak?:      string;
+  diagnosisSummary?: string;
+  recommendedOffer?: string;
+  nextStep?:         string;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -42,8 +48,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('[submit] Missing Airtable env vars');
     return res.status(500).json({ error: 'Server configuration error' });
   }
-
-  const fullName = p.name?.trim() || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim();
 
   const fields: Record<string, string | number> = {
     // ── Identity ──────────────────────────────────────────────────────────────
