@@ -29,23 +29,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Defensive parse — handles both pre-parsed object and raw string body
+  // Defensive parse — handles pre-parsed object or raw string body
   const raw = req.body;
-  const p: Payload =
+  const body: Payload =
     typeof raw === 'string'
       ? (JSON.parse(raw) as Payload)
       : raw && typeof raw === 'object'
       ? (raw as Payload)
       : {};
 
-  console.log('[submit] received:', {
-    submissionId: p.submissionId,
-    name:         p.name,
-    email:        p.email,
-    totalScore:   p.totalScore,
-    scoreBand:    p.scoreBand,
-    priority:     p.priority,
-  });
+  console.log('BODY:', JSON.stringify(body, null, 2));
 
   const baseId  = process.env.AIRTABLE_BASE_ID;
   const tableId = process.env.AIRTABLE_TABLE_ID;
@@ -58,70 +51,67 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const fields: Record<string, string | number> = {
     // ── Identity ──────────────────────────────────────────────────────────────
-    'Name':              p.name            ?? '',
-    'First Name':        p.firstName       ?? '',
-    'Last Name':         p.lastName        ?? '',
-    'Email':             p.email           ?? '',
-    'Telegram_or_Phone': p.telegramOrPhone ?? '',
-    'Source':            p.source          ?? 'business-pressure-test',
-    'Submitted At':      p.submittedAt     ?? new Date().toISOString(),
-    'App Version':       p.appVersion      ?? 'v2',
-    'Submission ID':     p.submissionId    ?? '',
+    'Name':              body.name            ?? '',
+    'First Name':        body.firstName       ?? '',
+    'Last Name':         body.lastName        ?? '',
+    'Email':             body.email           ?? '',
+    'Telegram_or_Phone': body.telegramOrPhone ?? '',
+    'Source':            body.source          ?? 'business-pressure-test',
+    'Submitted At':      body.submittedAt     ?? new Date().toISOString(),
+    'App Version':       body.appVersion      ?? 'v2',
+    'Submission ID':     body.submissionId    ?? '',
 
     // ── Business context ──────────────────────────────────────────────────────
-    'Business Type':  p.businessType  ?? '',
-    'Revenue Range':  p.revenueRange  ?? '',
-    'Biggest Issue':  p.biggestIssue  ?? '',
+    'Business Type': body.businessType ?? '',
+    'Revenue Range': body.revenueRange ?? '',
+    'Biggest Issue': body.biggestIssue ?? '',
 
-    // ── Quiz answers (label text) ─────────────────────────────────────────────
-    'Q1':  p.answers?.q1  ?? '',
-    'Q2':  p.answers?.q2  ?? '',
-    'Q3':  p.answers?.q3  ?? '',
-    'Q4':  p.answers?.q4  ?? '',
-    'Q5':  p.answers?.q5  ?? '',
-    'Q6':  p.answers?.q6  ?? '',
-    'Q7':  p.answers?.q7  ?? '',
-    'Q8':  p.answers?.q8  ?? '',
-    'Q9':  p.answers?.q9  ?? '',
-    'Q10': p.answers?.q10 ?? '',
+    // ── Quiz answers ──────────────────────────────────────────────────────────
+    'Q1':  body.answers?.q1  ?? '',
+    'Q2':  body.answers?.q2  ?? '',
+    'Q3':  body.answers?.q3  ?? '',
+    'Q4':  body.answers?.q4  ?? '',
+    'Q5':  body.answers?.q5  ?? '',
+    'Q6':  body.answers?.q6  ?? '',
+    'Q7':  body.answers?.q7  ?? '',
+    'Q8':  body.answers?.q8  ?? '',
+    'Q9':  body.answers?.q9  ?? '',
+    'Q10': body.answers?.q10 ?? '',
 
     // ── Per-question scores ───────────────────────────────────────────────────
-    'Score Q1':  p.scores?.q1  ?? 0,
-    'Score Q2':  p.scores?.q2  ?? 0,
-    'Score Q3':  p.scores?.q3  ?? 0,
-    'Score Q4':  p.scores?.q4  ?? 0,
-    'Score Q5':  p.scores?.q5  ?? 0,
-    'Score Q6':  p.scores?.q6  ?? 0,
-    'Score Q7':  p.scores?.q7  ?? 0,
-    'Score Q8':  p.scores?.q8  ?? 0,
-    'Score Q9':  p.scores?.q9  ?? 0,
-    'Score Q10': p.scores?.q10 ?? 0,
+    'Score Q1':  body.scores?.q1  ?? 0,
+    'Score Q2':  body.scores?.q2  ?? 0,
+    'Score Q3':  body.scores?.q3  ?? 0,
+    'Score Q4':  body.scores?.q4  ?? 0,
+    'Score Q5':  body.scores?.q5  ?? 0,
+    'Score Q6':  body.scores?.q6  ?? 0,
+    'Score Q7':  body.scores?.q7  ?? 0,
+    'Score Q8':  body.scores?.q8  ?? 0,
+    'Score Q9':  body.scores?.q9  ?? 0,
+    'Score Q10': body.scores?.q10 ?? 0,
 
     // ── Scoring + routing ─────────────────────────────────────────────────────
-    'Score':             p.totalScore       ?? 0,   // keep existing field
-    'Total Score':       p.totalScore       ?? 0,
-    'Score Band':        p.scoreBand        ?? '',
-    'Priority':          p.priority         ?? '',
-    'Primary Leak':      p.primaryLeak      ?? '',
-    'Diagnosis Summary': p.diagnosisSummary ?? '',
-    'Recommended Offer': p.recommendedOffer ?? '',
-    'Next Step':         p.nextStep         ?? '',
+    'Score':             body.totalScore       ?? 0,   // keep existing column
+    'Total Score':       body.totalScore       ?? 0,
+    'Score Band':        body.scoreBand        ?? '',
+    'Priority':          body.priority         ?? '',
+    'Primary Leak':      body.primaryLeak      ?? '',
+    'Diagnosis Summary': body.diagnosisSummary ?? '',
+    'Recommended Offer': body.recommendedOffer ?? '',
+    'Next Step':         body.nextStep         ?? '',
 
     // ── Backup ────────────────────────────────────────────────────────────────
-    'Raw Payload JSON':  JSON.stringify(p),
+    'Raw Payload JSON': JSON.stringify(body),
   };
 
-  console.log('[submit] writing to Airtable — fields count:', Object.keys(fields).length);
+  console.log('AIRTABLE PAYLOAD:', JSON.stringify(fields, null, 2));
 
   try {
     const airtableRes = await fetch(
       `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableId)}`,
       {
         method: 'POST',
-        headers: {
-          Authorization:  `Bearer ${pat}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${pat}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ records: [{ fields }] }),
       }
     );
@@ -130,13 +120,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!airtableRes.ok) {
       console.error('[submit] Airtable error:', airtableRes.status, responseText);
-      return res.status(502).json({ error: 'Failed to save submission', detail: responseText });
+      return res.status(502).json({
+        error:  'Failed to save submission',
+        status: airtableRes.status,
+        detail: JSON.parse(responseText),
+      });
     }
 
-    console.log('[submit] success:', p.name, p.email, p.totalScore, p.priority);
+    console.log('[submit] success:', body.name, body.email, body.totalScore, body.priority);
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('[submit] Unexpected error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', detail: String(err) });
   }
 }
