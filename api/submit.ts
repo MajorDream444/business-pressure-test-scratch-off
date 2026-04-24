@@ -1,27 +1,21 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 interface Payload {
-  submissionId?:     string;
-  submittedAt?:      string;
-  appVersion?:       string;
-  firstName?:        string;
-  lastName?:         string;
-  name?:             string;
-  email?:            string;
-  telegramOrPhone?:  string;
-  source?:           string;
-  businessType?:     string;
-  revenueRange?:     string;
-  biggestIssue?:     string;
-  answers?:          Record<string, string>;
-  scores?:           Record<string, number>;
-  totalScore?:       number;
-  scoreBand?:        string;
-  priority?:         string;
-  primaryLeak?:      string;
-  diagnosisSummary?: string;
-  recommendedOffer?: string;
-  nextStep?:         string;
+  submissionId?: string;
+  submittedAt?: string;
+  appVersion?: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  email?: string;
+  telegramOrPhone?: string;
+  source?: string;
+  businessType?: string;
+  revenueRange?: string;
+  biggestIssue?: string;
+  answers?: Record<string, string>;
+  scores?: Record<string, number>;
+  totalScore?: number;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -35,19 +29,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     typeof raw === 'string'
       ? (JSON.parse(raw) as Payload)
       : raw && typeof raw === 'object'
-      ? (raw as Payload)
-      : {};
+        ? (raw as Payload)
+        : {};
 
   console.log('BODY:', JSON.stringify(body, null, 2));
 
-  const baseId  = process.env.AIRTABLE_BASE_ID;
+  const baseId = process.env.AIRTABLE_BASE_ID;
   const tableId = process.env.AIRTABLE_TABLE_ID;
-  const pat     = process.env.AIRTABLE_PAT;
+  const pat = process.env.AIRTABLE_PAT;
 
   if (!baseId || !tableId || !pat) {
     console.error('[submit] Missing Airtable env vars');
     return res.status(500).json({ error: 'Server configuration error' });
   }
+
+  const fullName = p.name?.trim() || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim();
 
   const fields: Record<string, string | number> = {
     // ── Identity ──────────────────────────────────────────────────────────────
