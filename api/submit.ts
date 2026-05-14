@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { buildEmail } from './email-template.js';
 
 interface Payload {
   submissionId?:     string;
@@ -22,6 +23,8 @@ interface Payload {
   diagnosisSummary?: string;
   recommendedOffer?: string;
   nextStep?:         string;
+  leaks?:            string[];
+  nextMoves?:        string[];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -91,7 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     'Score Q10': body.scores?.q10 ?? 0,
 
     // ── Scoring + routing ─────────────────────────────────────────────────────
-    'Score':             body.totalScore       ?? 0,   // keep existing column
+    'Score':             body.totalScore       ?? 0,
     'Total Score':       body.totalScore       ?? 0,
     'Score Band':        body.scoreBand        ?? '',
     'Priority':          body.priority         ?? '',
@@ -128,6 +131,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     console.log('[submit] success:', body.name, body.email, body.totalScore, body.priority);
+
+    // Send results email (fire-and-forget — never blocks the 200 response)
+    const resendKey   = process.env.RESEND_API_KEY;
+    const fromEmail   = process.env.RESEND_FROM_EMAIL ?? 'Business Pressure Test <results@businesspressuretest.com>';
+    const calendlyUrl = process.env.VITE_CALENDLY_URL ?? '#';
+
+    if (resendKey && body.email && body.totalScore !== undefined) {
+      const emailData = {
+        firstName:        body.firstName        ?? body.name ?? 'there',
+        totalScore:       body.totalScore,
+        scoreBand:        body.scoreBand        ?? '',
+        priority:         body.priority         ?? '',
+        diagnosisSummary: body.diagnosisSummary ?? '',
+        biggestIssue:     body.biggestIssue     ?? '',
+        leaks:            body.leaks            ?? [],
+        nextMoves:        body.nextMoves        ?? [],
+        recommendedOffer: body.recommendedOffer ?? 'Diagnostic Call',
+      };
+
+      const { subject, html } = buildEmail(emailData, calendlyUrl);
+
+      fetch('https://api.resend.com/emails', {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ from: fromEmail, to: [body.email], subject, html }),
+      })
+        .then(r => r.json())
+        .then(r => console.log('[email] sent:', r))
+        .catch(e => console.error('[email] error:', e));
+    }
+
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('[submit] Unexpected error:', err);
