@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Resend } from 'resend';
 import { buildEmail } from './email-template.js';
 
 interface Payload {
@@ -134,10 +135,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Send results email (fire-and-forget — never blocks the 200 response)
     const resendKey   = process.env.RESEND_API_KEY;
-    const fromEmail   = process.env.RESEND_FROM_EMAIL ?? 'Business Pressure Test <results@businesspressuretest.com>';
+    const fromEmail   = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev';
     const calendlyUrl = process.env.VITE_CALENDLY_URL ?? '#';
 
     if (resendKey && body.email && body.totalScore !== undefined) {
+      const resend = new Resend(resendKey);
+
       const emailData = {
         firstName:        body.firstName        ?? body.name ?? 'there',
         totalScore:       body.totalScore,
@@ -152,12 +155,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const { subject, html } = buildEmail(emailData, calendlyUrl);
 
-      fetch('https://api.resend.com/emails', {
-        method:  'POST',
-        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ from: fromEmail, to: [body.email], subject, html }),
-      })
-        .then(r => r.json())
+      resend.emails.send({ from: fromEmail, to: body.email, subject, html })
         .then(r => console.log('[email] sent:', r))
         .catch(e => console.error('[email] error:', e));
     }
