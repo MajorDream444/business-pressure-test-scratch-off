@@ -5,385 +5,782 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Email Mockup — Business Pressure Test Results</title>
   <style>
-    /* Preview chrome */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      margin: 0;
-      background: #0f0f0f;
+      background: #080808;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      padding: 40px 16px;
+      padding: 32px 16px 64px;
+      color: #f5f5f5;
     }
-    .preview-label {
+
+    /* ─── Preview chrome ──────────────────────────────────────────── */
+    .preview-chrome {
+      max-width: 640px;
+      margin: 0 auto 28px;
+    }
+    .preview-title {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #555;
       text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Band switcher */
+    .switcher {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .switcher-btn {
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid #333;
+      background: #141414;
       color: #666;
       font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: all 0.15s;
     }
+    .switcher-btn:hover { border-color: #555; color: #aaa; }
+    .switcher-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.04); }
+
+    /* Inbox preview strip */
+    .inbox-strip {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 10px 10px 0 0;
+      padding: 14px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .inbox-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c9a227, #7a5f10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f0f0f;
+      flex-shrink: 0;
+    }
+    .inbox-meta { flex: 1; min-width: 0; }
+    .inbox-sender {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e0e0e0;
+      margin-bottom: 2px;
+    }
+    .inbox-subject {
+      font-size: 13px;
+      color: #aaa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .inbox-subject strong { color: #ddd; }
+    .inbox-preheader {
+      font-size: 12px;
+      color: #555;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .inbox-time {
+      font-size: 11px;
+      color: #444;
+      flex-shrink: 0;
+    }
+
     /* ─── Email wrapper ─────────────────────────────────────────── */
     .email-wrapper {
-      max-width: 600px;
+      max-width: 640px;
       margin: 0 auto;
       background: #141414;
-      border: 1px solid #2a2a2a;
-      border-radius: 12px;
+      border: 1px solid #222;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
       overflow: hidden;
     }
 
-    /* ─── Header band ───────────────────────────────────────────── */
-    .email-header {
-      background: linear-gradient(135deg, #1a1400 0%, #0f0f0f 100%);
-      border-bottom: 1px solid #2a2200;
-      padding: 36px 40px 28px;
-      text-align: center;
+    /* ─── Gold accent bar ───────────────────────────────────────── */
+    .accent-bar {
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
     }
-    .email-brand {
+
+    /* ─── Header ────────────────────────────────────────────────── */
+    .email-header {
+      padding: 36px 44px 32px;
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .brand-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .brand-name {
       font-size: 11px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: #c9a227;
-      margin-bottom: 20px;
+      color: var(--accent);
+      font-weight: 700;
     }
     .email-headline {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
-      color: #f5f5f5;
-      line-height: 1.25;
-      margin: 0 0 8px;
+      color: #f0f0f0;
+      line-height: 1.3;
+      margin-bottom: 10px;
     }
     .email-subline {
       font-size: 14px;
-      color: #888;
-      margin: 0;
+      color: #666;
+      line-height: 1.6;
     }
 
-    /* ─── Score card ────────────────────────────────────────────── */
+    /* ─── Score band ────────────────────────────────────────────── */
     .score-section {
-      padding: 36px 40px 24px;
-      text-align: center;
-      border-bottom: 1px solid #222;
+      padding: 32px 44px;
+      border-bottom: 1px solid #1e1e1e;
     }
-    .score-greeting {
-      font-size: 14px;
-      color: #888;
-      margin-bottom: 20px;
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 24px;
     }
-    .score-circle {
-      display: inline-flex;
+    .score-big {
+      flex-shrink: 0;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: #0f0f0f;
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      border: 3px solid #c9a227;
-      background: radial-gradient(circle at 50% 40%, #1f1800, #0f0f0f);
-      margin: 0 auto 20px;
-      box-shadow: 0 0 40px rgba(201,162,39,0.15);
+      box-shadow: 0 0 32px var(--glow);
     }
-    .score-number {
-      font-size: 52px;
+    .score-num {
+      font-size: 38px;
       font-weight: 800;
-      color: #fb923c;
+      color: var(--accent);
       line-height: 1;
     }
-    .score-out-of {
-      font-size: 11px;
-      color: #666;
-      letter-spacing: 0.1em;
+    .score-denom {
+      font-size: 10px;
+      color: #555;
+      letter-spacing: 0.08em;
     }
+    .score-meta { flex: 1; }
     .score-band-pill {
-      display: inline-block;
-      background: rgba(201,162,39,0.12);
-      border: 1px solid rgba(201,162,39,0.35);
-      color: #c9a227;
-      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--pill-bg);
+      border: 1px solid var(--pill-border);
+      color: var(--accent);
+      font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      padding: 5px 16px;
+      padding: 4px 12px;
       border-radius: 999px;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+    }
+    .pill-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
     }
     .score-band-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
-      color: #f5f5f5;
-      margin-bottom: 10px;
+      color: #efefef;
+      margin-bottom: 6px;
     }
-    .score-diagnosis {
-      font-size: 14px;
+    .score-priority {
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 0.08em;
+    }
+    /* Progress bar */
+    .score-bar-wrap {
+      background: #0f0f0f;
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--bar-start), var(--accent));
+      width: var(--bar-width);
+      transition: width 0.6s ease;
+    }
+    .score-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #444;
+      letter-spacing: 0.06em;
+    }
+    /* Challenge echo */
+    .challenge-echo {
+      margin-top: 20px;
+      background: #0f0f0f;
+      border-left: 2px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+    }
+    .challenge-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 4px;
+    }
+    .challenge-text {
+      font-size: 13px;
       color: #aaa;
-      line-height: 1.65;
-      max-width: 440px;
-      margin: 0 auto;
+      line-height: 1.5;
+      font-style: italic;
+    }
+    /* Diagnosis */
+    .diagnosis-text {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+      line-height: 1.7;
     }
 
-    /* ─── Section blocks ────────────────────────────────────────── */
-    .email-section {
-      padding: 28px 40px;
-      border-bottom: 1px solid #222;
+    /* ─── Leaks + Moves ─────────────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid #1e1e1e;
     }
-    .section-label {
+    .col-block {
+      padding: 28px 44px;
+    }
+    .col-block:first-child {
+      border-right: 1px solid #1e1e1e;
+    }
+    .col-label {
       font-size: 10px;
       letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: #666;
-      margin-bottom: 14px;
+      color: #555;
+      margin-bottom: 16px;
     }
-    .item-row {
+    .col-item {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
-    .item-icon {
-      font-size: 13px;
-      margin-top: 2px;
+    .col-item:last-child { margin-bottom: 0; }
+    .col-icon {
+      font-size: 12px;
       flex-shrink: 0;
+      margin-top: 2px;
     }
-    .item-text {
-      font-size: 14px;
-      color: #ccc;
-      line-height: 1.5;
-    }
-    .item-row.leak .item-text { color: #f87171; }
-    .item-row.move .item-text { color: #d4af50; }
+    .col-item.leak .col-text { color: #f87171; font-size: 13px; line-height: 1.45; }
+    .col-item.move .col-text { color: #c9a227; font-size: 13px; line-height: 1.45; }
 
-    /* ─── Credit banner ─────────────────────────────────────────── */
-    .credit-section {
-      background: linear-gradient(135deg, #1a1400, #0f0c00);
-      border-bottom: 1px solid #2a2200;
-      padding: 28px 40px;
-      text-align: center;
+    /* ─── Call steps ────────────────────────────────────────────── */
+    .steps-section {
+      padding: 28px 44px;
+      border-bottom: 1px solid #1e1e1e;
     }
-    .credit-tag {
-      display: inline-block;
-      font-size: 11px;
-      letter-spacing: 0.14em;
+    .steps-label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: #c9a227;
-      border: 1px solid rgba(201,162,39,0.4);
-      padding: 4px 14px;
-      border-radius: 999px;
-      margin-bottom: 12px;
-    }
-    .credit-headline {
-      font-size: 22px;
-      font-weight: 700;
-      color: #f5f5f5;
-      margin-bottom: 8px;
-    }
-    .credit-sub {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    /* ─── CTA buttons ───────────────────────────────────────────── */
-    .cta-primary {
-      display: block;
-      background: #c9a227;
-      color: #0f0f0f;
-      text-decoration: none;
-      font-size: 15px;
-      font-weight: 700;
-      padding: 15px 24px;
-      border-radius: 8px;
-      text-align: center;
-      margin-bottom: 12px;
-      letter-spacing: 0.02em;
-    }
-    .cta-secondary {
-      display: block;
-      background: transparent;
-      color: #c9a227;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 13px 24px;
-      border-radius: 8px;
-      border: 1px solid rgba(201,162,39,0.4);
-      text-align: center;
-      letter-spacing: 0.02em;
-    }
-    .cta-note {
-      font-size: 11px;
       color: #555;
-      text-align: center;
-      margin-top: 14px;
+      margin-bottom: 16px;
     }
-
-    /* ─── What happens next ─────────────────────────────────────── */
-    .steps-row {
+    .step-row {
       display: flex;
+      align-items: flex-start;
       gap: 16px;
+      margin-bottom: 16px;
     }
-    .step-card {
-      flex: 1;
+    .step-row:last-child { margin-bottom: 0; }
+    .step-num-circle {
+      width: 28px; height: 28px;
+      border-radius: 50%;
       background: #1a1a1a;
       border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      padding: 16px;
-    }
-    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 11px;
-      color: #c9a227;
       font-weight: 700;
-      letter-spacing: 0.1em;
-      margin-bottom: 6px;
+      color: var(--accent);
+      flex-shrink: 0;
     }
+    .step-content { padding-top: 4px; }
     .step-title {
       font-size: 13px;
       font-weight: 600;
-      color: #e5e5e5;
-      margin-bottom: 4px;
+      color: #ddd;
+      margin-bottom: 2px;
     }
     .step-body {
       font-size: 12px;
+      color: #555;
+      line-height: 1.55;
+    }
+
+    /* ─── CTA ───────────────────────────────────────────────────── */
+    .cta-section {
+      padding: 36px 44px;
+      text-align: center;
+      background: linear-gradient(180deg, #141414 0%, #0f0d00 100%);
+    }
+    .cta-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .cta-headline {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f0f0f0;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .cta-sub {
+      font-size: 13px;
       color: #666;
-      line-height: 1.5;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .btn-primary {
+      display: block;
+      background: var(--accent);
+      color: #0a0a0a;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 16px 24px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+    .btn-secondary {
+      display: block;
+      background: transparent;
+      color: #555;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid #252525;
+      text-align: center;
+    }
+    /* Urgency strip */
+    .urgency-strip {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .urgency-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .urgency-text {
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 0.06em;
     }
 
     /* ─── Footer ────────────────────────────────────────────────── */
     .email-footer {
-      padding: 24px 40px;
+      padding: 20px 44px;
+      border-top: 1px solid #1a1a1a;
       text-align: center;
     }
     .footer-text {
       font-size: 11px;
-      color: #444;
-      line-height: 1.8;
+      color: #383838;
+      line-height: 1.9;
     }
-    .footer-text a {
-      color: #666;
-    }
+    .footer-text a { color: #444; text-decoration: none; }
+    .footer-text a:hover { color: #666; }
 
     /* ─── Responsive ────────────────────────────────────────────── */
-    @media (max-width: 520px) {
-      .email-header, .score-section, .email-section, .credit-section, .email-footer {
+    @media (max-width: 560px) {
+      .email-header, .score-section, .col-block, .steps-section, .cta-section, .email-footer {
         padding-left: 24px;
         padding-right: 24px;
       }
-      .email-headline { font-size: 22px; }
-      .steps-row { flex-direction: column; }
-      .score-circle { width: 120px; height: 120px; }
-      .score-number { font-size: 44px; }
+      .email-headline { font-size: 21px; }
+      .two-col { grid-template-columns: 1fr; }
+      .col-block:first-child { border-right: none; border-bottom: 1px solid #1e1e1e; }
+      .score-row { flex-direction: column; align-items: flex-start; gap: 16px; }
     }
   </style>
 </head>
 <body>
 
-<p class="preview-label">Email Artifact Mockup — "Leaking / Score 38" scenario</p>
+<!-- ─── Preview chrome ─────────────────────────────────────────── -->
+<div class="preview-chrome">
+  <p class="preview-title">Email results artifact — switch band below</p>
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  EMAIL BEGINS                                                   -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="email-wrapper">
+  <div class="switcher">
+    <button class="switcher-btn" onclick="setBand('critical')">Critical · 0–25</button>
+    <button class="switcher-btn active" onclick="setBand('leaking')">Leaking · 26–50</button>
+    <button class="switcher-btn" onclick="setBand('functional')">Functional · 51–75</button>
+    <button class="switcher-btn" onclick="setBand('strong')">Strong · 76–100</button>
+  </div>
+
+  <!-- Inbox strip -->
+  <div class="inbox-strip">
+    <div class="inbox-avatar">BPT</div>
+    <div class="inbox-meta">
+      <div class="inbox-sender">Business Pressure Test</div>
+      <div class="inbox-subject" id="inbox-subject">
+        <strong>Jordan, your score is 38 — here's where you're leaking</strong>
+      </div>
+      <div class="inbox-preheader" id="inbox-preheader">
+        You have movement but not enough structure. Here's your full diagnosis + next moves →
+      </div>
+    </div>
+    <div class="inbox-time">Now</div>
+  </div>
+</div>
+
+<!-- ─── Email ──────────────────────────────────────────────────── -->
+<div class="email-wrapper" id="email-root"
+  style="--accent:#fb923c; --glow:rgba(251,146,60,0.18); --pill-bg:rgba(251,146,60,0.08); --pill-border:rgba(251,146,60,0.3); --bar-start:#7a3010; --bar-width:38%">
+
+  <div class="accent-bar"></div>
 
   <!-- Header -->
   <div class="email-header">
-    <div class="email-brand">Business Pressure Test</div>
-    <h1 class="email-headline">Your results are ready, Jordan.</h1>
-    <p class="email-subline">Here's exactly where your business is leaking — and how to fix it.</p>
+    <div class="brand-row">
+      <div class="brand-dot"></div>
+      <div class="brand-name">Business Pressure Test</div>
+    </div>
+    <h1 class="email-headline" id="header-headline">Your results are in, Jordan.<br>Your business is leaking — here's the map.</h1>
+    <p class="email-subline" id="header-subline">You scored in the <strong style="color:#fb923c">Inconsistent / Unstable</strong> band. The gaps are fixable — but they're costing you monthly.</p>
   </div>
 
-  <!-- Score card -->
+  <!-- Score -->
   <div class="score-section">
-    <p class="score-greeting">You scored</p>
-    <div class="score-circle">
-      <span class="score-number">38</span>
-      <span class="score-out-of">out of 100</span>
+    <div class="score-row">
+      <div class="score-big">
+        <span class="score-num" id="score-num">38</span>
+        <span class="score-denom">/ 100</span>
+      </div>
+      <div class="score-meta">
+        <div class="score-band-pill">
+          <span class="pill-dot"></span>
+          <span id="pill-label">Leaking · Warm Lead</span>
+        </div>
+        <div class="score-band-title" id="band-title">Inconsistent / Unstable</div>
+        <div class="score-priority" id="score-priority">PRIORITY: WARM · Recommended: Diagnostic Call</div>
+      </div>
     </div>
-    <div class="score-band-pill">Leaking · Warm Lead</div>
-    <div class="score-band-title">Inconsistent / Unstable</div>
-    <p class="score-diagnosis">
-      You have some movement, but not enough structure. Revenue and client flow
-      are too dependent on timing, energy, or luck. The gaps are fixable — but
-      they're costing you monthly.
+
+    <div class="score-bar-wrap">
+      <div class="score-bar-fill" id="score-bar"></div>
+    </div>
+    <div class="score-bar-labels">
+      <span>Critical</span><span>Leaking</span><span>Functional</span><span>Strong</span>
+    </div>
+
+    <div class="challenge-echo">
+      <div class="challenge-label">You said your biggest challenge is</div>
+      <div class="challenge-text" id="challenge-text">"Cash flow is unpredictable — I never know what next month looks like."</div>
+    </div>
+
+    <p class="diagnosis-text" id="diagnosis-text">
+      You have some movement, but not enough structure. Revenue and client flow are too dependent on timing, energy, or luck. The good news: the leaks are specific — and specific leaks are fixable.
     </p>
   </div>
 
-  <!-- Pressure points -->
-  <div class="email-section">
-    <div class="section-label">Your pressure points</div>
-    <div class="item-row leak">
-      <span class="item-icon">↓</span>
-      <span class="item-text">Lead flow is inconsistent — you're not sure where the next client comes from</span>
-    </div>
-    <div class="item-row leak">
-      <span class="item-icon">↓</span>
-      <span class="item-text">Offer is not converting predictably — something is getting lost between interest and yes</span>
-    </div>
-    <div class="item-row leak">
-      <span class="item-icon">↓</span>
-      <span class="item-text">Backend process is loose — delivery works, but it drains more energy than it should</span>
-    </div>
-  </div>
-
-  <!-- Next moves -->
-  <div class="email-section">
-    <div class="section-label">Your next moves</div>
-    <div class="item-row move">
-      <span class="item-icon">→</span>
-      <span class="item-text">Tighten offer positioning so it lands in one sentence</span>
-    </div>
-    <div class="item-row move">
-      <span class="item-icon">→</span>
-      <span class="item-text">Systemize follow-up so leads don't fall through the cracks</span>
-    </div>
-    <div class="item-row move">
-      <span class="item-icon">→</span>
-      <span class="item-text">Build a more predictable client path from first touch to paid</span>
-    </div>
-  </div>
-
-  <!-- What happens next -->
-  <div class="email-section">
-    <div class="section-label">What happens on the call</div>
-    <div class="steps-row">
-      <div class="step-card">
-        <div class="step-num">01</div>
-        <div class="step-title">Diagnose the leak</div>
-        <div class="step-body">We go deeper on your specific answers and identify the root cause — not just the symptom.</div>
+  <!-- Leaks + Moves -->
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-label">Where you're leaking</div>
+      <div id="leaks-list">
+        <div class="col-item leak"><span class="col-icon">↓</span><span class="col-text">Lead flow is inconsistent — you're not sure where the next client comes from</span></div>
+        <div class="col-item leak"><span class="col-icon">↓</span><span class="col-text">Offer isn't converting predictably — something breaks between interest and yes</span></div>
+        <div class="col-item leak"><span class="col-icon">↓</span><span class="col-text">Backend is loose — delivery works, but costs more energy than it should</span></div>
       </div>
-      <div class="step-card">
-        <div class="step-num">02</div>
-        <div class="step-title">Map the fix</div>
-        <div class="step-body">You leave with a clear action plan — what to build, what to cut, what to do first.</div>
-      </div>
-      <div class="step-card">
-        <div class="step-num">03</div>
-        <div class="step-title">Apply your credit</div>
-        <div class="step-body">Your $100 Build Credit is applied automatically toward whatever we decide to build together.</div>
+    </div>
+    <div class="col-block">
+      <div class="col-label">Your next moves</div>
+      <div id="moves-list">
+        <div class="col-item move"><span class="col-icon">→</span><span class="col-text">Tighten offer positioning so it lands in one sentence</span></div>
+        <div class="col-item move"><span class="col-icon">→</span><span class="col-text">Systemize follow-up so leads stop falling through the cracks</span></div>
+        <div class="col-item move"><span class="col-icon">→</span><span class="col-text">Build a predictable client path from first touch to paid</span></div>
       </div>
     </div>
   </div>
 
-  <!-- $100 Credit CTA -->
-  <div class="credit-section">
-    <div class="credit-tag">🎁 Your $100 Build Credit is waiting</div>
-    <div class="credit-headline">Ready to stop the leak?</div>
-    <p class="credit-sub">
-      Book your free 45-minute Strategy Call. We'll map your exact pressure<br>
-      points and build a fix plan — your credit applies automatically.
-    </p>
-    <a href="#" class="cta-primary">Book Your Strategy Call →</a>
-    <a href="#" class="cta-secondary">Get the Build Playbook instead →</a>
-    <p class="cta-note">Credit expires in 7 days · No credit card required for the call</p>
+  <!-- Call steps -->
+  <div class="steps-section">
+    <div class="steps-label">What happens on the 45-min strategy call</div>
+    <div class="step-row">
+      <div class="step-num-circle">1</div>
+      <div class="step-content">
+        <div class="step-title">We diagnose your specific leak</div>
+        <div class="step-body">We go deeper on your answers — not generic advice, the exact root cause for your business.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num-circle">2</div>
+      <div class="step-content">
+        <div class="step-title">You leave with a fix plan</div>
+        <div class="step-body">What to build, what to cut, what to do in the first 14 days. You'll know exactly what's next.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num-circle">3</div>
+      <div class="step-content">
+        <div class="step-title">Your $100 credit is applied</div>
+        <div class="step-body">Whatever we build together, your Build Credit comes off the top — no code needed at checkout.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-eyebrow">🎁 Your $100 Build Credit is reserved</div>
+    <h2 class="cta-headline" id="cta-headline">Stop the leak.<br>Book your free strategy call.</h2>
+    <p class="cta-sub" id="cta-sub">45 minutes. We map the fix and you leave with a clear plan.<br>Your credit applies automatically — no awkward pitch.</p>
+    <a href="#" class="btn-primary" id="cta-btn">Book My Strategy Call →</a>
+    <a href="#" class="btn-secondary">Get the Build Playbook instead ($97 → $0 with credit)</a>
+    <div class="urgency-strip">
+      <div class="urgency-dot"></div>
+      <span class="urgency-text">Credit expires in 7 days · No payment required for the call</span>
+    </div>
   </div>
 
   <!-- Footer -->
   <div class="email-footer">
     <p class="footer-text">
-      You're receiving this because you completed the Business Pressure Test.<br>
-      Business Pressure Test · <a href="#">Unsubscribe</a> · <a href="#">View in browser</a>
+      Business Pressure Test &nbsp;·&nbsp; <a href="#">Unsubscribe</a> &nbsp;·&nbsp; <a href="#">View in browser</a><br>
+      You completed the Business Pressure Test on May 14, 2026.
     </p>
   </div>
 
 </div>
-<!-- EMAIL ENDS -->
+
+<!-- ─── Band data + switcher logic ────────────────────────────── -->
+<script>
+const BANDS = {
+  critical: {
+    score: 14,
+    barWidth: '14%',
+    accent: '#f87171',
+    glow: 'rgba(248,113,113,0.18)',
+    pillBg: 'rgba(248,113,113,0.08)',
+    pillBorder: 'rgba(248,113,113,0.3)',
+    barStart: '#5a0a0a',
+    pill: 'Critical · Hot Lead',
+    title: 'You Are the System',
+    priority: 'PRIORITY: HOT · Recommended: Diagnostic Call',
+    subject: 'Jordan, your score is 14 — your business stops when you stop',
+    preheader: 'Right now, you are the system. Here\'s your full diagnosis and how to change that →',
+    headline: 'Jordan, your results are in.<br>Your business runs on you — and that\'s the problem.',
+    subline: 'You scored in the <strong style="color:#f87171">Critical</strong> band. The business depends heavily on your daily effort. If you stop, most things slow down or break.',
+    challenge: '"I\'m doing everything myself and I\'m exhausted. I can\'t take a single day off."',
+    diagnosis: 'Right now, you are the system. Every client, every delivery, every decision flows through you. That\'s not a business — it\'s a job you can\'t quit. The foundation needs to be built, not just fixed.',
+    leaks: [
+      'Lead flow depends entirely on your personal effort',
+      'Follow-up is inconsistent or forgotten',
+      'Core operations are not structured — it\'s all in your head',
+    ],
+    moves: [
+      'Clarify one core offer so you can stop reinventing the pitch',
+      'Install one reliable lead path that works without you chasing',
+      'Create a simple follow-up system — even a checklist is a start',
+    ],
+    ctaHeadline: 'Build the foundation.<br>Book your free strategy call.',
+    ctaSub: '45 minutes. We identify the single highest-leverage thing to build first — so you can step back without everything falling apart.',
+    ctaBtn: 'Book My Strategy Call →',
+  },
+  leaking: {
+    score: 38,
+    barWidth: '38%',
+    accent: '#fb923c',
+    glow: 'rgba(251,146,60,0.18)',
+    pillBg: 'rgba(251,146,60,0.08)',
+    pillBorder: 'rgba(251,146,60,0.3)',
+    barStart: '#7a3010',
+    pill: 'Leaking · Warm Lead',
+    title: 'Inconsistent / Unstable',
+    priority: 'PRIORITY: WARM · Recommended: Diagnostic Call',
+    subject: 'Jordan, your score is 38 — here\'s where you\'re leaking',
+    preheader: 'You have movement but not enough structure. Here\'s your full diagnosis + next moves →',
+    headline: 'Your results are in, Jordan.<br>Your business is leaking — here\'s the map.',
+    subline: 'You scored in the <strong style="color:#fb923c">Inconsistent / Unstable</strong> band. The gaps are fixable — but they\'re costing you monthly.',
+    challenge: '"Cash flow is unpredictable — I never know what next month looks like."',
+    diagnosis: 'You have some movement, but not enough structure. Revenue and client flow are too dependent on timing, energy, or luck. The good news: the leaks are specific — and specific leaks are fixable.',
+    leaks: [
+      'Lead flow is inconsistent — you\'re not sure where the next client comes from',
+      'Offer isn\'t converting predictably — something breaks between interest and yes',
+      'Backend is loose — delivery works, but costs more energy than it should',
+    ],
+    moves: [
+      'Tighten offer positioning so it lands in one sentence',
+      'Systemize follow-up so leads stop falling through the cracks',
+      'Build a predictable client path from first touch to paid',
+    ],
+    ctaHeadline: 'Stop the leak.<br>Book your free strategy call.',
+    ctaSub: '45 minutes. We map the fix and you leave with a clear plan. Your credit applies automatically — no awkward pitch.',
+    ctaBtn: 'Book My Strategy Call →',
+  },
+  functional: {
+    score: 62,
+    barWidth: '62%',
+    accent: '#facc15',
+    glow: 'rgba(250,204,21,0.14)',
+    pillBg: 'rgba(250,204,21,0.07)',
+    pillBorder: 'rgba(250,204,21,0.28)',
+    barStart: '#5a4500',
+    pill: 'Functional · Warm Lead',
+    title: 'Functional but Capped',
+    priority: 'PRIORITY: WARM · Recommended: System Build',
+    subject: 'Jordan, your score is 62 — you\'re functional but you\'ve hit a ceiling',
+    preheader: 'The business works. But it can\'t scale yet. Here\'s what\'s blocking the next level →',
+    headline: 'Your results are in, Jordan.<br>The business works — but it\'s capped.',
+    subline: 'You scored in the <strong style="color:#facc15">Functional</strong> band. There\'s real structure here. But there\'s a ceiling, and it\'s getting closer.',
+    challenge: '"I\'m getting clients but I can\'t seem to break past a certain revenue level."',
+    diagnosis: 'The business works, but it\'s likely hitting a ceiling. There\'s enough structure to function — but not enough to scale cleanly. The next move isn\'t survival or cleanup. It\'s optimization and leverage.',
+    leaks: [
+      'Growth channels are limited — most revenue comes from one or two sources',
+      'Offer or conversion path is under-optimized — leaving money on the table',
+      'Delegation and automation are partial — you\'re still too deep in delivery',
+    ],
+    moves: [
+      'Optimize the conversion path to increase close rate without more volume',
+      'Expand demand generation so you\'re not reliant on one channel',
+      'Build automation and delegation frameworks to free up capacity',
+    ],
+    ctaHeadline: 'Break the ceiling.<br>Book your free strategy call.',
+    ctaSub: '45 minutes. We identify the specific constraint that\'s capping your growth and map the next build — your credit applies.',
+    ctaBtn: 'Book My Strategy Call →',
+  },
+  strong: {
+    score: 84,
+    barWidth: '84%',
+    accent: '#4ade80',
+    glow: 'rgba(74,222,128,0.14)',
+    pillBg: 'rgba(74,222,128,0.07)',
+    pillBorder: 'rgba(74,222,128,0.28)',
+    barStart: '#0a3a1a',
+    pill: 'Strong · Scale Ready',
+    title: 'Structured and Ready to Scale',
+    priority: 'PRIORITY: COLD · Recommended: Retainer',
+    subject: 'Jordan, your score is 84 — your foundation is strong. Here\'s what\'s next.',
+    preheader: 'You\'re built to scale. The next move isn\'t survival — it\'s leverage and expansion →',
+    headline: 'Your results are in, Jordan.<br>Your foundation is strong. Now let\'s scale it.',
+    subline: 'You scored in the <strong style="color:#4ade80">Strong</strong> band. You have real structure. The next move isn\'t fixing — it\'s scaling and building leverage.',
+    challenge: '"I\'ve built something solid but I want to grow faster without burning out."',
+    diagnosis: 'You have a solid foundation. The next move is not survival or cleanup — it\'s scale, leverage, and strategic expansion. The question is no longer "how do I fix this?" — it\'s "how do I 3x this without breaking it?"',
+    leaks: [
+      'Scale path may be unclear — growth is happening but not always by design',
+      'Growth may still rely on a narrow channel mix',
+      'Upsell and backend monetization may be underbuilt',
+    ],
+    moves: [
+      'Expand acquisition channels to reduce dependency on any single source',
+      'Increase leverage through automation — make the system work harder',
+      'Build a clearer scale roadmap with defined milestones',
+    ],
+    ctaHeadline: 'Time to scale.<br>Let\'s build the next layer.',
+    ctaSub: '45 minutes. We map the highest-leverage expansion moves for your specific business — and your credit applies to whatever we build.',
+    ctaBtn: 'Book My Scale Call →',
+  },
+};
+
+function setBand(key) {
+  const b = BANDS[key];
+  const root = document.getElementById('email-root');
+
+  // CSS vars
+  root.style.setProperty('--accent', b.accent);
+  root.style.setProperty('--glow', b.glow);
+  root.style.setProperty('--pill-bg', b.pillBg);
+  root.style.setProperty('--pill-border', b.pillBorder);
+  root.style.setProperty('--bar-start', b.barStart);
+  root.style.setProperty('--bar-width', b.barWidth);
+
+  // Inbox strip
+  document.getElementById('inbox-subject').innerHTML = `<strong>${b.subject}</strong>`;
+  document.getElementById('inbox-preheader').textContent = b.preheader;
+
+  // Header
+  document.getElementById('header-headline').innerHTML = b.headline;
+  document.getElementById('header-subline').innerHTML = b.subline;
+
+  // Score
+  document.getElementById('score-num').textContent = b.score;
+  document.getElementById('pill-label').textContent = b.pill;
+  document.getElementById('band-title').textContent = b.title;
+  document.getElementById('score-priority').textContent = b.priority;
+  document.getElementById('challenge-text').textContent = b.challenge;
+  document.getElementById('diagnosis-text').textContent = b.diagnosis;
+
+  // Leaks
+  document.getElementById('leaks-list').innerHTML = b.leaks.map(l =>
+    `<div class="col-item leak"><span class="col-icon">↓</span><span class="col-text">${l}</span></div>`
+  ).join('');
+
+  // Moves
+  document.getElementById('moves-list').innerHTML = b.moves.map(m =>
+    `<div class="col-item move"><span class="col-icon">→</span><span class="col-text">${m}</span></div>`
+  ).join('');
+
+  // CTA
+  document.getElementById('cta-headline').innerHTML = b.ctaHeadline;
+  document.getElementById('cta-sub').innerHTML = b.ctaSub;
+  document.getElementById('cta-btn').textContent = b.ctaBtn;
+
+  // Switcher active state
+  document.querySelectorAll('.switcher-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${key}'`));
+  });
+}
+</script>
 
 </body>
 </html>
