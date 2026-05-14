@@ -177,6 +177,8 @@ export default function App() {
           diagnosisSummary:  finalBand.diagnosis,
           recommendedOffer:  getRecommendedOffer(finalScore),
           nextStep:          finalBand.next_moves[0] ?? '',
+          leaks:             finalBand.leaks,
+          nextMoves:         finalBand.next_moves,
         };
 
         // Fire-and-forget — never blocks UX
