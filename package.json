@@ -1,5 +1,5 @@
 {
-  "name": "react-example",
+  "name": "business-pressure-test",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,10 +8,12 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "setup:airtable": "tsx scripts/setup-airtable.ts",
+    "test:airtable": "tsx scripts/test-submission.ts",
+    "test:endpoint": "tsx scripts/test-endpoint.ts"
   },
   "dependencies": {
-    "@google/genai": "^1.29.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",
@@ -26,11 +28,12 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vercel/node": "^5.0.0",
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "typescript": "~5.8.2"
   }
 }

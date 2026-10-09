@@ -53,7 +53,7 @@ const FIELDS_TO_CREATE: FieldSpec[] = [
 
   // Per-question scores
   ...[1,2,3,4,5,6,7,8,9,10].map(n => ({
-    name: SQ(n), type: 'number', options: { precision: 0 },
+    name: SQ(n), type: 'number', options: { precision: 1 },
   })),
 
   // Total score
@@ -78,17 +78,17 @@ const FIELDS_TO_CREATE: FieldSpec[] = [
     options: { choices: ['Pressure Test','Diagnostic Call','System Build','Retainer','Not Ready'].map(name => ({ name })) },
   },
   { name: 'Next Step', type: 'singleLineText' },
+  { name: 'Email Status', type: 'singleLineText' },
 ];
 
-const SELECT_UPDATES: Record<string, string[]> = {
-  Source: ['business-pressure-test','Bali Spirit Festival','Black In Bali','Coffee Meeting','Google Meet','Referral','Manual'],
-  Status: ['New','Reviewing','Qualified','Contacted','Booked','Won','Not Fit'],
-};
+// Question scores include 2.5 and 7.5, so these need 1 decimal place.
+// Airtable's API cannot change precision or select choices on existing fields.
+const DECIMAL_FIELDS = [1,2,3,4,5,6,7,8,9,10].map(SQ);
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
 interface AirtableChoice { id?: string; name: string; color?: string; }
-interface AirtableField  { id: string; name: string; type: string; options?: { choices?: AirtableChoice[] }; }
+interface AirtableField  { id: string; name: string; type: string; options?: { choices?: AirtableChoice[]; precision?: number }; }
 
 async function fetchFields(): Promise<AirtableField[]> {
   const res  = await fetch(`${META}/tables`, { headers: HEADERS });
@@ -108,25 +108,6 @@ async function createField(spec: FieldSpec) {
   else         console.log( `  ✅ Created  "${spec.name}" (${spec.type})`);
 }
 
-async function patchSelectChoices(field: AirtableField, desired: string[]) {
-  const existing     = field.options?.choices ?? [];
-  const existingSet  = new Set(existing.map(c => c.name));
-  const toAdd        = desired.filter(n => !existingSet.has(n)).map(name => ({ name }));
-
-  if (!toAdd.length) {
-    console.log(`  ✓  "${field.name}" — all choices present`);
-    return;
-  }
-
-  const res  = await fetch(`${META}/tables/${TABLE_ID}/fields/${field.id}`, {
-    method: 'PATCH', headers: HEADERS,
-    body: JSON.stringify({ options: { choices: [...existing, ...toAdd] } }),
-  });
-  const data = await res.json();
-  if (!res.ok) console.warn(`  ⚠  "${field.name}": ${JSON.stringify(data?.error ?? data)}`);
-  else         console.log( `  ✅ Updated  "${field.name}" — added: ${toAdd.map(c => c.name).join(', ')}`);
-}
-
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -144,12 +125,21 @@ async function main() {
     }
   }
 
-  console.log('\n🔄  Updating select options…');
-  for (const [fieldName, desired] of Object.entries(SELECT_UPDATES)) {
-    const field = existing.find(f => f.name === fieldName);
-    if (!field) { console.warn(`  ⚠  "${fieldName}" not found — skipping`); continue; }
-    await patchSelectChoices(field, desired);
+  console.log('\n🔎  Checking decimal precision…');
+  const rounded = DECIMAL_FIELDS.filter(name => {
+    const f = existing.find(x => x.name === name);
+    return f && f.type === 'number' && (f.options?.precision ?? 0) < 1;
+  });
+  if (rounded.length) {
+    console.warn(`  ⚠  ${rounded.length} score field(s) are integer-only, so 2.5 / 7.5 will be rounded by Airtable:`);
+    console.warn(`     ${rounded.join(', ')}`);
+    console.warn('     Fix in Airtable: open each field → Customize field → Precision → 1.0 (the API cannot change this).');
+  } else {
+    console.log('  ✓  Score Q fields support decimals');
   }
+
+  console.log('\nℹ️   Select options: the server writes with typecast, so new Source values are added automatically.');
+  console.log('    Edit the Status options (New, Reviewing, Qualified, Contacted, Booked, Won, Not Fit) in the Airtable UI if you use that field.');
 
   console.log('\n🎉  Schema setup complete!\n');
 }

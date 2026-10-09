@@ -1,23 +1,19 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import fs from 'fs';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import submitHandler from './api/submit.js';
 
+dotenv.config({ path: 'env/.env.local' });
 dotenv.config({ path: '.env.local' });
 dotenv.config(); // Also load .env as fallback for standard platform secrets
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
-  const DATA_DIR = path.resolve('data');
-  const LEADS_FILE = path.join(DATA_DIR, 'leads.jsonl');
 
   app.use(express.json());
-
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
 
   const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_ALERT_BOT_TOKEN || '';
   const TELEGRAM_CHAT_ID = process.env.TELEGRAM_ALERT_CHAT_ID || '';
@@ -49,59 +45,9 @@ async function startServer() {
     res.json({ ok: true, service: 'business-pressure-test-api' });
   });
 
-  // Airtable submission — mirrors api/submit.ts for local dev
-  app.post('/api/submit', async (req, res) => {
-    try {
-      const { name, email, telegramOrPhone, score, notes } = req.body as {
-        name: string; email: string; telegramOrPhone: string;
-        score: number; notes: string;
-      };
-
-      const baseId = process.env.AIRTABLE_BASE_ID;
-      const tableId = process.env.AIRTABLE_TABLE_ID;
-      const pat = process.env.AIRTABLE_PAT;
-      const source = process.env.APP_SOURCE || 'business-pressure-test';
-
-      if (!baseId || !tableId || !pat) {
-        console.warn('[submit] Airtable env vars not set — skipping write');
-        return res.json({ success: true, note: 'Airtable not configured' });
-      }
-
-      const airtableRes = await fetch(
-        `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableId)}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${pat}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            records: [{
-              fields: {
-                Name: name ?? '',
-                Email: email ?? '',
-                Telegram_or_Phone: telegramOrPhone ?? '',
-                Notes: notes ?? '',
-                Score: typeof score === 'number' ? score : parseInt(String(score), 10),
-                Source: source,
-              },
-            }],
-          }),
-        }
-      );
-
-      if (!airtableRes.ok) {
-        const text = await airtableRes.text();
-        console.error('[submit] Airtable error:', airtableRes.status, text);
-        return res.status(502).json({ error: 'Failed to save submission' });
-      }
-
-      console.log('[submit] Saved:', name, email, score);
-      return res.json({ success: true });
-    } catch (err) {
-      console.error('[submit] Error:', err);
-      return res.status(500).json({ error: 'Internal server error' });
-    }
+  // Same handler Vercel runs in production, so local and live behave identically.
+  app.post('/api/submit', (req, res) => {
+    void submitHandler(req as unknown as VercelRequest, res as unknown as VercelResponse);
   });
 
   app.post('/api/event', async (req, res) => {
@@ -127,74 +73,6 @@ async function startServer() {
     } catch (error) {
       console.error('Event alert error:', error);
       return res.status(500).json({ ok: false, error: 'Failed to send event alert' });
-    }
-  });
-
-  app.post('/api/lead', async (req, res) => {
-    try {
-      const payload = req.body;
-
-      if (!payload?.first_name || !payload?.email) {
-        return res.status(400).json({ ok: false, error: 'Missing required fields' });
-      }
-
-      const record = {
-        ...payload,
-        received_at: new Date().toISOString(),
-        user_agent: req.headers['user-agent'] || '',
-        ip:
-          (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-          req.socket.remoteAddress ||
-          '',
-      };
-
-      fs.appendFileSync(LEADS_FILE, JSON.stringify(record) + '\n', 'utf8');
-
-      if (process.env.LEAD_WEBHOOK_URL) {
-        try {
-          await fetch(process.env.LEAD_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(record),
-          });
-        } catch (webhookErr) {
-          console.error('Webhook forward failed:', webhookErr);
-        }
-      }
-
-      if (record.priority === 'HOT') {
-        const msg =
-          `<b>🚨 HOT LEAD</b>\n\n` +
-          `<b>Name:</b> ${record.first_name}\n` +
-          `<b>Email:</b> ${record.email}\n` +
-          `<b>Business:</b> ${record.business_type || '-'}\n` +
-          `<b>Revenue:</b> ${record.revenue_range || '-'}\n` +
-          `<b>Score:</b> ${record.score}\n` +
-          `<b>Band:</b> ${record.band_title}\n\n` +
-          `<b>Issue:</b>\n${record.biggest_issue || '-'}\n\n` +
-          `<b>Time:</b>\n${new Date().toLocaleString()}\n\n` +
-          `<a href="https://t.me/major_hanzo">💬 Message Major Now</a>`;
-
-        try {
-          await sendTelegramAlert(msg);
-        } catch (telegramErr) {
-          console.error('Telegram alert failed:', telegramErr);
-        }
-      }
-
-      console.log(
-        'NEW LEAD:',
-        record.first_name,
-        record.email,
-        record.score,
-        record.band_title,
-        record.priority
-      );
-
-      return res.json({ ok: true });
-    } catch (error) {
-      console.error('Lead save error:', error);
-      return res.status(500).json({ ok: false, error: 'Failed to save lead' });
     }
   });
 

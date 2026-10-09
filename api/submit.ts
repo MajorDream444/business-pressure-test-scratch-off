@@ -1,168 +1,231 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { randomUUID } from 'node:crypto';
 import { Resend } from 'resend';
 import { buildEmail } from './email-template.js';
+import { BIZ_TYPES, REVENUE_RANGES, scoreSubmission } from '../src/scoring.js';
 
-interface Payload {
-  submissionId?:     string;
-  submittedAt?:      string;
-  appVersion?:       string;
-  firstName?:        string;
-  lastName?:         string;
-  name?:             string;
-  email?:            string;
-  telegramOrPhone?:  string;
-  source?:           string;
-  businessType?:     string;
-  revenueRange?:     string;
-  biggestIssue?:     string;
-  answers?:          Record<string, string>;
-  scores?:           Record<string, number>;
-  totalScore?:       number;
-  scoreBand?:        string;
-  priority?:         string;
-  primaryLeak?:      string;
-  diagnosisSummary?: string;
-  recommendedOffer?: string;
-  nextStep?:         string;
-  leaks?:            string[];
-  nextMoves?:        string[];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SUBMISSION_ID_RE = /^bpt_[A-Za-z0-9_-]{8,64}$/;
+const EMAIL_TIMEOUT_MS = 8000;
+
+function text(v: unknown, min: number, max: number): string | null {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  return t.length >= min && t.length <= max ? t : null;
+}
+
+function parseBody(raw: unknown): Record<string, unknown> | null {
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('timeout')), ms);
+    p.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
+  });
+}
+
+async function airtableError(res: Response): Promise<string> {
+  try {
+    const j = (await res.json()) as { error?: { type?: string; message?: string } | string };
+    const e = j.error;
+    return typeof e === 'string' ? e : `${e?.type ?? ''} ${e?.message ?? ''}`.trim().slice(0, 200);
+  } catch {
+    return 'unparseable error body';
+  }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const requestId = randomUUID().slice(0, 8);
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Defensive parse — handles pre-parsed object or raw string body
-  const raw = req.body;
-  const body: Payload =
-    typeof raw === 'string'
-      ? (JSON.parse(raw) as Payload)
-      : raw && typeof raw === 'object'
-        ? (raw as Payload)
-        : {};
-
-  console.log('BODY:', JSON.stringify(body, null, 2));
-
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const tableId = process.env.AIRTABLE_TABLE_ID;
-  const pat = process.env.AIRTABLE_PAT;
-
-  if (!baseId || !tableId || !pat) {
-    console.error('[submit] Missing Airtable env vars');
-    return res.status(500).json({ error: 'Server configuration error' });
+  const body = parseBody(req.body);
+  if (!body) {
+    return res.status(400).json({ error: 'Invalid JSON body', requestId });
   }
 
-  const fields: Record<string, string | number> = {
-    // ── Identity ──────────────────────────────────────────────────────────────
-    'Name':              body.name            ?? '',
-    'First Name':        body.firstName       ?? '',
-    'Last Name':         body.lastName        ?? '',
-    'Email':             body.email           ?? '',
-    'Telegram_or_Phone': body.telegramOrPhone ?? '',
-    'Source':            body.source          ?? 'business-pressure-test',
-    'Submitted At':      body.submittedAt     ?? new Date().toISOString(),
-    'App Version':       body.appVersion      ?? 'v2',
-    'Submission ID':     body.submissionId    ?? '',
+  // ── Validate (never log the values — they are personal data) ────────────────
+  const problems: string[] = [];
 
-    // ── Business context ──────────────────────────────────────────────────────
-    'Business Type': body.businessType ?? '',
-    'Revenue Range': body.revenueRange ?? '',
-    'Biggest Issue': body.biggestIssue ?? '',
+  const firstName = text(body.firstName, 1, 60);
+  if (!firstName) problems.push('firstName');
 
-    // ── Quiz answers ──────────────────────────────────────────────────────────
-    'Q1':  body.answers?.q1  ?? '',
-    'Q2':  body.answers?.q2  ?? '',
-    'Q3':  body.answers?.q3  ?? '',
-    'Q4':  body.answers?.q4  ?? '',
-    'Q5':  body.answers?.q5  ?? '',
-    'Q6':  body.answers?.q6  ?? '',
-    'Q7':  body.answers?.q7  ?? '',
-    'Q8':  body.answers?.q8  ?? '',
-    'Q9':  body.answers?.q9  ?? '',
-    'Q10': body.answers?.q10 ?? '',
+  const lastName = body.lastName === undefined || body.lastName === '' ? '' : text(body.lastName, 1, 60);
+  if (lastName === null) problems.push('lastName');
 
-    // ── Per-question scores ───────────────────────────────────────────────────
-    'Score Q1':  body.scores?.q1  ?? 0,
-    'Score Q2':  body.scores?.q2  ?? 0,
-    'Score Q3':  body.scores?.q3  ?? 0,
-    'Score Q4':  body.scores?.q4  ?? 0,
-    'Score Q5':  body.scores?.q5  ?? 0,
-    'Score Q6':  body.scores?.q6  ?? 0,
-    'Score Q7':  body.scores?.q7  ?? 0,
-    'Score Q8':  body.scores?.q8  ?? 0,
-    'Score Q9':  body.scores?.q9  ?? 0,
-    'Score Q10': body.scores?.q10 ?? 0,
+  const email = text(body.email, 3, 254);
+  if (!email || !EMAIL_RE.test(email)) problems.push('email');
 
-    // ── Scoring + routing ─────────────────────────────────────────────────────
-    'Score':             body.totalScore       ?? 0,
-    'Total Score':       body.totalScore       ?? 0,
-    'Score Band':        body.scoreBand        ?? '',
-    'Priority':          body.priority         ?? '',
-    'Primary Leak':      body.primaryLeak      ?? '',
-    'Diagnosis Summary': body.diagnosisSummary ?? '',
-    'Recommended Offer': body.recommendedOffer ?? '',
-    'Next Step':         body.nextStep         ?? '',
+  const telegramOrPhone = text(body.telegramOrPhone, 3, 64);
+  if (!telegramOrPhone) problems.push('telegramOrPhone');
 
-    // ── Backup ────────────────────────────────────────────────────────────────
-    'Raw Payload JSON': JSON.stringify(body),
-  };
+  const businessType = typeof body.businessType === 'string' && (BIZ_TYPES as readonly string[]).includes(body.businessType)
+    ? body.businessType : null;
+  if (!businessType) problems.push('businessType');
 
-  console.log('AIRTABLE PAYLOAD:', JSON.stringify(fields, null, 2));
+  const revenueRange = typeof body.revenueRange === 'string' && (REVENUE_RANGES as readonly string[]).includes(body.revenueRange)
+    ? body.revenueRange : null;
+  if (!revenueRange) problems.push('revenueRange');
+
+  const biggestIssue = body.biggestIssue === undefined || body.biggestIssue === ''
+    ? ''
+    : text(body.biggestIssue, 1, 1000);
+  if (biggestIssue === null) problems.push('biggestIssue');
+
+  const submissionId =
+    typeof body.submissionId === 'string' && SUBMISSION_ID_RE.test(body.submissionId)
+      ? body.submissionId
+      : body.submissionId === undefined
+        ? `bpt_${randomUUID().replace(/-/g, '')}`
+        : null;
+  if (!submissionId) problems.push('submissionId');
+
+  const scored = scoreSubmission(body.answers);
+  if (!scored) problems.push('answers');
+
+  if (problems.length || !scored || !firstName || !email || !telegramOrPhone ||
+      !businessType || !revenueRange || !submissionId || lastName === null || biggestIssue === null) {
+    console.warn(`[submit ${requestId}] rejected invalid fields: ${problems.join(',')}`);
+    return res.status(400).json({ error: 'Invalid submission', fields: problems, requestId });
+  }
+
+  const baseId  = process.env.AIRTABLE_BASE_ID;
+  const tableId = process.env.AIRTABLE_TABLE_ID;
+  const pat     = process.env.AIRTABLE_PAT;
+  if (!baseId || !tableId || !pat) {
+    console.error(`[submit ${requestId}] missing Airtable env vars`);
+    return res.status(500).json({ error: 'Server configuration error', requestId });
+  }
+
+  const tableUrl = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableId)}`;
+  const authHeaders = { Authorization: `Bearer ${pat}`, 'Content-Type': 'application/json' };
 
   try {
-    const airtableRes = await fetch(
-      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableId)}`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${pat}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ records: [{ fields }] }),
-      }
+    // ── Idempotency: a retried submission must not create a second row/email ──
+    const lookup = await fetch(
+      `${tableUrl}?maxRecords=1&fields%5B%5D=Submission%20ID&filterByFormula=${encodeURIComponent(`{Submission ID}="${submissionId}"`)}`,
+      { headers: authHeaders }
     );
-
-    const responseText = await airtableRes.text();
-
-    if (!airtableRes.ok) {
-      console.error('[submit] Airtable error:', airtableRes.status, responseText);
-      return res.status(502).json({
-        error:  'Failed to save submission',
-        status: airtableRes.status,
-        detail: JSON.parse(responseText),
-      });
+    if (lookup.ok) {
+      const found = (await lookup.json()) as { records?: unknown[] };
+      if (found.records?.length) {
+        console.log(`[submit ${requestId}] duplicate submissionId=${submissionId} — skipped`);
+        return res.status(200).json({ success: true, duplicate: true, requestId });
+      }
+    } else {
+      console.warn(`[submit ${requestId}] duplicate lookup failed (${lookup.status}) — continuing`);
     }
 
-    console.log('[submit] success:', body.name, body.email, body.totalScore, body.priority);
+    const fullName = `${firstName} ${lastName}`.trim();
+    const fields: Record<string, string | number> = {
+      'Name':              fullName,
+      'First Name':        firstName,
+      'Last Name':         lastName,
+      'Email':             email,
+      'Telegram_or_Phone': telegramOrPhone,
+      'Source':            process.env.APP_SOURCE || 'business-pressure-test',
+      'Submitted At':      new Date().toISOString(),
+      'App Version':       'v2',
+      'Submission ID':     submissionId,
+      'Business Type':     businessType,
+      'Revenue Range':     revenueRange,
+      'Biggest Issue':     biggestIssue,
+      'Score':             scored.totalScore,
+      'Total Score':       scored.totalScore,
+      'Score Band':        scored.scoreBand,
+      'Priority':          scored.priority,
+      'Primary Leak':      scored.primaryLeak,
+      'Diagnosis Summary': scored.diagnosisSummary,
+      'Recommended Offer': scored.recommendedOffer,
+      'Next Step':         scored.nextStep,
+    };
+    for (let i = 1; i <= 10; i++) {
+      fields[`Q${i}`]       = scored.answers[`q${i}`];
+      fields[`Score Q${i}`] = scored.scores[`q${i}`];
+    }
+    fields['Raw Payload JSON'] = JSON.stringify({
+      submissionId, firstName, lastName, email, telegramOrPhone, businessType,
+      revenueRange, biggestIssue, answers: scored.answers, scores: scored.scores,
+      totalScore: scored.totalScore,
+    });
 
-    // Send results email (fire-and-forget — never blocks the 200 response)
-    const resendKey   = process.env.RESEND_API_KEY;
-    const fromEmail   = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev';
-    const calendlyUrl = process.env.VITE_CALENDLY_URL ?? '#';
+    const created = await fetch(tableUrl, {
+      method: 'POST',
+      headers: authHeaders,
+      // typecast lets Airtable add new single-select options (e.g. Source) instead of rejecting the row
+      body: JSON.stringify({ records: [{ fields }], typecast: true }),
+    });
 
-    if (resendKey && body.email && body.totalScore !== undefined) {
-      const resend = new Resend(resendKey);
-
-      const emailData = {
-        firstName:        body.firstName        ?? body.name ?? 'there',
-        totalScore:       body.totalScore,
-        scoreBand:        body.scoreBand        ?? '',
-        priority:         body.priority         ?? '',
-        diagnosisSummary: body.diagnosisSummary ?? '',
-        biggestIssue:     body.biggestIssue     ?? '',
-        leaks:            body.leaks            ?? [],
-        nextMoves:        body.nextMoves        ?? [],
-        recommendedOffer: body.recommendedOffer ?? 'Diagnostic Call',
-      };
-
-      const { subject, html } = buildEmail(emailData, calendlyUrl);
-
-      resend.emails.send({ from: fromEmail, to: body.email, subject, html })
-        .then(r => console.log('[email] sent:', r))
-        .catch(e => console.error('[email] error:', e));
+    if (!created.ok) {
+      console.error(`[submit ${requestId}] Airtable create failed: ${created.status} ${await airtableError(created)}`);
+      return res.status(502).json({ error: 'Failed to save submission', requestId });
     }
 
-    return res.status(200).json({ success: true });
+    const recordId = ((await created.json()) as { records?: { id: string }[] }).records?.[0]?.id;
+    console.log(`[submit ${requestId}] saved submissionId=${submissionId} record=${recordId} score=${scored.totalScore} priority=${scored.priority}`);
+
+    // ── Results email: bounded wait, outcome persisted, never fails the lead ──
+    let emailStatus = 'skipped: RESEND_API_KEY not set';
+    const resendKey = process.env.RESEND_API_KEY;
+    if (resendKey) {
+      try {
+        const { subject, html } = buildEmail(
+          {
+            firstName,
+            totalScore:       scored.totalScore,
+            scoreBand:        scored.scoreBand,
+            priority:         scored.priority,
+            diagnosisSummary: scored.diagnosisSummary,
+            biggestIssue,
+            leaks:            scored.leaks,
+            nextMoves:        scored.nextMoves,
+            recommendedOffer: scored.recommendedOffer,
+          },
+          process.env.VITE_CALENDLY_URL ?? ''
+        );
+        const { error } = await withTimeout(
+          new Resend(resendKey).emails.send(
+            {
+              from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
+              to: email,
+              subject,
+              html,
+            },
+            { idempotencyKey: `results-${submissionId}` }
+          ),
+          EMAIL_TIMEOUT_MS
+        );
+        emailStatus = error ? `failed: ${error.name}`.slice(0, 100) : 'sent';
+        if (error) console.error(`[submit ${requestId}] email error: ${error.name} ${error.message}`);
+      } catch (e) {
+        emailStatus = `failed: ${e instanceof Error ? e.message : 'unknown'}`.slice(0, 100);
+        console.error(`[submit ${requestId}] email exception: ${emailStatus}`);
+      }
+    }
+
+    if (recordId) {
+      // Best effort: needs an "Email Status" text field (created by scripts/setup-airtable.ts)
+      const patch = await fetch(tableUrl, {
+        method: 'PATCH',
+        headers: authHeaders,
+        body: JSON.stringify({ records: [{ id: recordId, fields: { 'Email Status': emailStatus } }] }),
+      }).catch(() => null);
+      if (!patch?.ok) console.warn(`[submit ${requestId}] could not persist Email Status`);
+    }
+
+    return res.status(200).json({ success: true, email: emailStatus.split(':')[0], requestId });
   } catch (err) {
-    console.error('[submit] Unexpected error:', err);
-    return res.status(500).json({ error: 'Internal server error', detail: String(err) });
+    console.error(`[submit ${requestId}] unexpected error:`, err instanceof Error ? err.message : 'unknown');
+    return res.status(500).json({ error: 'Internal server error', requestId });
   }
 }

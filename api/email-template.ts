@@ -66,7 +66,39 @@ function listItems(items: string[], color: string, arrow: string): string {
     </tr>`).join('');
 }
 
-export function buildEmail(data: EmailData, calendlyUrl: string): { subject: string; html: string } {
+function esc(v: string): string {
+  return v
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' || u.protocol === 'http:' ? esc(u.toString()) : '#';
+  } catch {
+    return '#';
+  }
+}
+
+export function buildEmail(raw: EmailData, rawCalendlyUrl: string): { subject: string; html: string } {
+  // Subject is plain text (raw values); everything interpolated into HTML is escaped.
+  const subject = getBandTheme(raw.totalScore, raw.firstName, raw.scoreBand).subject;
+  const data: EmailData = {
+    ...raw,
+    firstName:        esc(raw.firstName),
+    scoreBand:        esc(raw.scoreBand),
+    priority:         esc(raw.priority),
+    diagnosisSummary: esc(raw.diagnosisSummary),
+    biggestIssue:     esc(raw.biggestIssue),
+    recommendedOffer: esc(raw.recommendedOffer),
+    leaks:            raw.leaks.map(esc),
+    nextMoves:        raw.nextMoves.map(esc),
+  };
+  const calendlyUrl = safeUrl(rawCalendlyUrl);
   const theme = getBandTheme(data.totalScore, data.firstName, data.scoreBand);
   const a = theme.accent;
 
@@ -76,7 +108,7 @@ export function buildEmail(data: EmailData, calendlyUrl: string): { subject: str
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="x-apple-disable-message-reformatting"/>
-<title>${theme.subject}</title>
+<title>${esc(subject)}</title>
 </head>
 <body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0f0f0f;">
@@ -229,5 +261,5 @@ export function buildEmail(data: EmailData, calendlyUrl: string): { subject: str
 </body>
 </html>`;
 
-  return { subject: theme.subject, html };
+  return { subject, html };
 }

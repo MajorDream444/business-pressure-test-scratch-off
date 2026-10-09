@@ -1,28 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft } from 'lucide-react';
-import { QUESTIONS, BANDS } from './constants';
+import { QUESTIONS } from './constants';
+import { BIZ_TYPES, REVENUE_RANGES, getBand } from './scoring';
 import type { Band } from './types';
-
-// ── Lead-capture option lists ─────────────────────────────────────────────────
-
-const BIZ_TYPES = [
-  'Freelancing / Consulting',
-  'Coaching / Training',
-  'Agency / Service Business',
-  'E-commerce / Products',
-  'SaaS / Tech',
-  'Other',
-];
-
-const REVENUE_RANGES = [
-  'Pre-revenue',
-  'Under $1k / month',
-  '$1k – $5k / month',
-  '$5k – $15k / month',
-  '$15k – $50k / month',
-  '$50k+ / month',
-];
 
 // ── Step index constants ──────────────────────────────────────────────────────
 // 0  = landing
@@ -43,11 +24,7 @@ const RESULTS_STEP  = LAST_QUIZ_STEP + 1;                  // 18
 const CTA_STEP      = RESULTS_STEP + 1;                    // 19
 const PROGRESS_DENOM = LAST_QUIZ_STEP;                     // 17
 
-// ── Derived-field helpers ─────────────────────────────────────────────────────
-
-function getBand(score: number): Band {
-  return BANDS.find(b => score >= b.min && score <= b.max) ?? BANDS[0];
-}
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getScoreColor(score: number): string {
   if (score >= 76) return '#4ade80';
@@ -56,31 +33,7 @@ function getScoreColor(score: number): string {
   return '#f87171';
 }
 
-function getScoreBand(score: number): string {
-  if (score >= 76) return 'Strong';
-  if (score >= 51) return 'Functional';
-  if (score >= 26) return 'Leaking';
-  return 'Critical';
-}
-
-function getPriority(score: number): string {
-  if (score <= 30) return 'HOT';
-  if (score <= 60) return 'WARM';
-  return 'COLD';
-}
-
-function getRecommendedOffer(score: number): string {
-  if (score >= 76) return 'Retainer';
-  if (score >= 51) return 'System Build';
-  return 'Diagnostic Call';
-}
-
-const LEAK_MAP: Record<string, string> = {
-  you_are_the_system:        'Lead Flow',
-  inconsistent_unstable:     'Offer',
-  functional_but_capped:     'Conversion',
-  structured_ready_to_scale: 'Operations',
-};
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 // ── Animation ─────────────────────────────────────────────────────────────────
 
@@ -116,6 +69,24 @@ export default function App() {
 
   // Results
   const [score, setScore] = useState(0);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const pendingPayload = useRef<Record<string, unknown> | null>(null);
+
+  // Never blocks the results screen, but failures are surfaced and retryable.
+  const submitLead = async () => {
+    if (!pendingPayload.current) return;
+    setSaveStatus('saving');
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pendingPayload.current),
+      });
+      setSaveStatus(res.ok ? 'saved' : 'error');
+    } catch {
+      setSaveStatus('error');
+    }
+  };
 
   const navigate = (target: number) => {
     setDir(target > step ? 1 : -1);
@@ -144,49 +115,26 @@ export default function App() {
         const total      = Object.values(newAnswers).reduce((s, a) => s + a.score, 0);
         const finalScore = Math.round(total);
         setScore(finalScore);
-        const finalBand = getBand(finalScore);
 
-        // Build per-question answer + score maps
+        // Raw answers only — the server recomputes score, band, priority and offer.
         const answerLabels: Record<string, string> = {};
-        const answerScores: Record<string, number> = {};
         QUESTIONS.forEach((q, i) => {
-          const key = `q${i + 1}`;
-          answerLabels[key] = newAnswers[q.id]?.label ?? '';
-          answerScores[key]  = newAnswers[q.id]?.score ?? 0;
+          answerLabels[`q${i + 1}`] = newAnswers[q.id]?.label ?? '';
         });
 
-        const payload = {
-          submissionId:      `bpt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          submittedAt:       new Date().toISOString(),
-          appVersion:        'v2',
-          firstName,
-          lastName,
-          name:              `${firstName} ${lastName}`.trim(),
-          email,
-          telegramOrPhone:   contact,
-          source:            'business-pressure-test',
-          businessType:      bizType,
-          revenueRange:      revenue,
-          biggestIssue,
-          answers:           answerLabels,
-          scores:            answerScores,
-          totalScore:        finalScore,
-          scoreBand:         getScoreBand(finalScore),
-          priority:          getPriority(finalScore),
-          primaryLeak:       LEAK_MAP[finalBand.key] ?? 'Lead Flow',
-          diagnosisSummary:  finalBand.diagnosis,
-          recommendedOffer:  getRecommendedOffer(finalScore),
-          nextStep:          finalBand.next_moves[0] ?? '',
-          leaks:             finalBand.leaks,
-          nextMoves:         finalBand.next_moves,
+        // Same submissionId is reused on retry so the server can dedupe.
+        pendingPayload.current = {
+          submissionId:    `bpt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          firstName:       firstName.trim(),
+          lastName:        lastName.trim(),
+          email:           email.trim(),
+          telegramOrPhone: contact.trim(),
+          businessType:    bizType,
+          revenueRange:    revenue,
+          biggestIssue:    biggestIssue.trim(),
+          answers:         answerLabels,
         };
-
-        // Fire-and-forget — never blocks UX
-        fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }).catch(() => {/* silent */});
+        void submitLead();
 
         navigate(RESULTS_STEP);
       } else {
@@ -233,7 +181,7 @@ export default function App() {
         value={email} type="email" inputMode="email"
         autoCapitalize="none" autoComplete="email"
         onChange={setEmail} onNext={goNext}
-        canProceed={email.includes('@') && email.includes('.')}
+        canProceed={/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())}
       />
     );
 
@@ -295,6 +243,8 @@ export default function App() {
         name={firstName}
         score={score}
         band={band}
+        saveStatus={saveStatus}
+        onRetry={submitLead}
         onCta={() => navigate(CTA_STEP)}
       />
     );
@@ -378,6 +328,10 @@ function LandingScreen({ onStart }: { onStart: () => void }) {
       <button onClick={onStart} className="btn-gold btn-lg">
         Start the Test →
       </button>
+
+      <p className="consent-note">
+        By starting, you agree we store your answers and email you your results.
+      </p>
     </div>
   );
 }
@@ -455,7 +409,7 @@ function InputScreen({
 
 interface OptionScreenProps {
   question: string;
-  options: string[];
+  options: readonly string[];
   selected: string;
   onSelect: (v: string) => void;
 }
@@ -513,13 +467,24 @@ interface ResultsScreenProps {
   name: string;
   score: number;
   band: Band;
+  saveStatus: SaveStatus;
+  onRetry: () => void;
   onCta: () => void;
 }
 
-function ResultsScreen({ name, score, band, onCta }: ResultsScreenProps) {
+function ResultsScreen({ name, score, band, saveStatus, onRetry, onCta }: ResultsScreenProps) {
   const scoreColor = getScoreColor(score);
   return (
     <div className="screen screen-form">
+      {saveStatus === 'error' && (
+        <div className="save-banner save-banner-error" role="alert">
+          <span>We couldn't save your results yet.</span>
+          <button onClick={onRetry} className="save-retry">Try again</button>
+        </div>
+      )}
+      {saveStatus === 'saving' && (
+        <div className="save-banner" role="status">Saving your results…</div>
+      )}
       <div className="credit-banner">
         <span>🎁</span>
         <span>You've unlocked a $100 Build Credit</span>
