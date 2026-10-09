@@ -1,4 +1,4 @@
-import { QUESTIONS, BANDS } from "../src/constants";
+import { QUESTIONS, BANDS } from "../src/constants.js";
 export { QUESTIONS };
 export const BUSINESS_TYPES = [
   "Freelancing / Consulting",

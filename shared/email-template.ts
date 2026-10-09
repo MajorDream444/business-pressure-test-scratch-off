@@ -1,5 +1,5 @@
-import type { Submission } from "./diagnostic";
-import { diagnose } from "./diagnostic";
+import type { Submission } from "./diagnostic.js";
+import { diagnose } from "./diagnostic.js";
 export function escapeHtml(value: string) {
   return value.replace(
     /[&<>"']/g,

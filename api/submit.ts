@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { validateSubmission, diagnose, toFields } from "../shared/diagnostic";
-import { buildEmail, safeUrl } from "../shared/email-template";
-import { validChallenge } from "../shared/server-protection";
+import { validateSubmission, diagnose, toFields } from "../shared/diagnostic.js";
+import { buildEmail, safeUrl } from "../shared/email-template.js";
+import { validChallenge } from "../shared/server-protection.js";
 export interface ApiRequest {
   method?: string;
   body: unknown;

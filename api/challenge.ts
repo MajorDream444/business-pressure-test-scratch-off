@@ -1,5 +1,5 @@
-import type { ApiRequest, ApiResponse } from "./submit";
-import { issueChallenge } from "../shared/server-protection";
+import type { ApiRequest, ApiResponse } from "./submit.js";
+import { issueChallenge } from "../shared/server-protection.js";
 export default function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET")
