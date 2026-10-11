@@ -53,3 +53,11 @@ Only two added fields: Results Email Status (text), Results Email Updated At (te
 - Concurrent upserts depend on Airtable's provider semantics, and provider status writes can fail. Resend deduplicates within its retention window; the persisted sent status handles later retries when present.
 - There are no payment links, paid blueprint fulfillment, CRM promotion, Telegram alerts, or autonomous MOB dispatch in this version.
 - AMASOLAGI integration is planned only; see docs/amasolagi-integration-plan.md.
+
+## Clarity & continuity update
+
+The home page now offers the original Business Pressure Test and a separate six-question Founder Continuity Check. Continuity has no numeric resilience score. Its result can be downloaded as text or printed to PDF, and optional saving uses `/api/continuity`.
+
+The optional USD $250 Client System Blueprint uses `/api/shop` and Stripe Checkout; payment sync uses `/api/stripe-webhook` with raw body signature verification. Checkout stays disabled until credentials, webhook, booking and email are configured. No live purchase was tested.
+
+Coaching automation is prepared but paused pending Major's founder interview and approved email copy. It requires separate marketing consent. No scheduler is active. See `docs/deployment-readiness.md` for exact mappings, verification gates and remaining setup.

@@ -19,6 +19,7 @@ export default function handler(req: ApiRequest, res: ApiResponse) {
     .status(200)
     .json({
       captureAvailable: capture,
+      continuityAvailable: capture && !!process.env.AIRTABLE_ASSESSMENTS_TABLE_ID && !!process.env.AIRTABLE_CONTACTS_TABLE_ID,
       emailAvailable: email,
       challenge: capture ? issueChallenge(secret!) : null,
     });

@@ -1,3 +1,5 @@
+import { enroll } from "../shared/nurture.js";
+import { syncContact } from "../shared/integrations.js";
 import { createHash } from "node:crypto";
 import { validateSubmission, diagnose, toFields } from "../shared/diagnostic.js";
 import { buildEmail, safeUrl } from "../shared/email-template.js";
@@ -96,6 +98,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
           biggestIssue: input.biggestIssue,
           readiness: input.readiness,
           answers: input.answers,
+          marketingConsent: input.marketingConsent === true,
         }),
       )
       .digest("hex");
@@ -135,10 +138,24 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
           "We could not confirm the save. Retrying uses the same reference.",
       });
   }
+  let followupStatus = "not_requested";
+  if (input.marketingConsent) {
+    try { await enroll(input.email, input.firstName, "business-pressure-test"); followupStatus = "enrolled"; }
+    catch { followupStatus = "pending"; }
+  }
+  let contactStatus = "not_configured";
+  if (process.env.AIRTABLE_CONTACTS_TABLE_ID) {
+    try {
+      const contactId = await syncContact(input.email, `${input.firstName} ${input.lastName}`.trim());
+      const linked = await fetch(endpoint, {method:"PATCH", headers, signal:AbortSignal.timeout(5000), body:JSON.stringify({records:[{id:record.id, fields:{"Contact Record ID":contactId}}]})});
+      if (!linked.ok) throw new Error();
+      contactStatus = "synced";
+    } catch { contactStatus = "pending"; }
+  }
   if (record.fields["Results Email Status"] === "sent")
     return res
       .status(200)
-      .json({ success: true, saved: true, emailStatus: "sent", submissionId });
+      .json({ success: true, saved: true, emailStatus: "sent", contactStatus, followupStatus, submissionId });
   const key = process.env.RESEND_API_KEY,
     from = process.env.RESEND_FROM_EMAIL;
   let emailStatus = "not_configured";
@@ -195,6 +212,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       success: true,
       saved: true,
       emailStatus,
+      contactStatus,
+      followupStatus,
       submissionId,
       results: diagnose(input.answers),
     });

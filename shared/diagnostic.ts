@@ -126,6 +126,7 @@ export interface Submission {
   readiness: string;
   answers: number[];
   consent: boolean;
+  marketingConsent?: boolean;
   website: string;
   challenge: string;
 }
@@ -183,6 +184,7 @@ export function validateSubmission(raw: unknown): Submission {
     readiness,
     answers: b.answers,
     consent: true,
+    marketingConsent: b.marketingConsent === true,
     website: text(b.website ?? "", 200),
     challenge: text(b.challenge, 256, true),
   };
@@ -223,6 +225,7 @@ export function toFields(input: Submission) {
   fields["Raw Payload JSON"] = JSON.stringify({
     appVersion: "maim-v3",
     consent: true,
+    marketingConsent: input.marketingConsent === true,
     readiness: input.readiness,
     answers: input.answers,
     scores: d.scores,

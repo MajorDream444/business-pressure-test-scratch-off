@@ -4,7 +4,19 @@
   "outputDirectory": "dist",
   "functions": {
     "api/submit.ts": {
+      "maxDuration": 60
+    },
+    "api/continuity.ts": {
+      "maxDuration": 60
+    },
+    "api/stripe-webhook.ts": {
+      "maxDuration": 60
+    },
+    "api/shop.ts": {
       "maxDuration": 40
+    },
+    "api/follow-up.ts": {
+      "maxDuration": 60
     }
   },
   "rewrites": [

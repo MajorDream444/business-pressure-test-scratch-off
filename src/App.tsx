@@ -16,6 +16,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 import "./index.css";
+import Continuity from "./Continuity";
+import Shop from "./Shop";
 const booking = (() => {
   try {
     const u = new URL(import.meta.env.VITE_CALENDLY_URL || "");
@@ -44,7 +46,14 @@ type Capability = {
 type SaveState =
   "idle" | "saving" | "saved" | "email_failed" | "email_unavailable" | "error";
 export default function App() {
-  const [view, setView] = useState<"landing" | "quiz" | "results">("landing");
+  const [view, setView] = useState<"landing" | "quiz" | "results" | "continuity">(window.location.hash === "#continuity" ? "continuity" : window.location.hash === "#business" ? "quiz" : "landing");
+  useEffect(() => {
+    const navigate = () => {
+      setView(window.location.hash === "#continuity" ? "continuity" : window.location.hash === "#business" ? "quiz" : "landing");
+    };
+    window.addEventListener("hashchange", navigate);
+    return () => window.removeEventListener("hashchange", navigate);
+  }, []);
   const [index, setIndex] = useState(0),
     [answers, setAnswers] = useState<number[]>(Array(10).fill(-1));
   const [showForm, setShowForm] = useState(false),
@@ -62,6 +71,7 @@ export default function App() {
     biggestIssue: "",
     readiness: READINESS[0],
     consent: false,
+    marketingConsent: false,
     website: "",
   });
   const [submissionId] = useState(() => crypto.randomUUID());
@@ -109,13 +119,15 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(45000),
+        signal: AbortSignal.timeout(55000),
       });
       const body = await response.json();
       if (!response.ok || body.saved !== true)
         throw new Error(
           body.error || "We could not confirm the save. Please try again.",
         );
+      if (body.followupStatus === "pending") setError("Your results are saved, but coaching email enrollment needs attention.");
+      if (body.contactStatus === "pending") setError("Your results are saved, but contact sync still needs attention.");
       setSaveState(
         body.emailStatus === "sent"
           ? "saved"
@@ -143,7 +155,7 @@ export default function App() {
           />
           <span>
             <strong>MAJOR AI MINDSET</strong>
-            <span>Business Pressure Test</span>
+            <span>Clarity & continuity</span>
           </span>
         </a>
         <a
@@ -161,20 +173,20 @@ export default function App() {
             <section className="landing-hero">
               <div className="hero-copy">
                 <h1 ref={heading} tabIndex={-1}>
-                  Find the pressure.
+                  Understand your position.
                   <br />
-                  <span>Build the pathway.</span>
+                  <span>Create more choices.</span>
                 </h1>
                 <p className="hero-description">
-                  See what depends on you, where client flow gets stuck, and
-                  what to build first.
+                  Short assessments to see what depends on you, learn where
+                  pressure builds, and choose one practical next step.
                 </p>
-                <button className="primary" onClick={() => setView("quiz")}>
-                  Start the pressure test <ArrowRight size={20} />
-                </button>
+                <a className="primary" href="#assessments">
+                  Choose your assessment <ArrowRight size={20} />
+                </a>
                 <p className="metadata">
-                  10 questions <span>·</span> About 3 minutes <span>·</span> A
-                  clearer next step
+                  A few minutes <span>·</span> Free results <span>·</span> Your
+                  next move
                 </p>
               </div>
               <div className="orbit" aria-hidden="true">
@@ -188,6 +200,13 @@ export default function App() {
                   <i />
                 </div>
                 <div className="orbit-core">Clarity</div>
+              </div>
+            </section>
+            <section className="assessment-picker" id="assessments" aria-labelledby="assessment-heading">
+              <div className="section-intro"><p className="metadata">Start where you are</p><h2 id="assessment-heading">What would you like to understand?</h2><p>Choose a starting point. Both give you something useful to keep.</p></div>
+              <div className="assessment-grid">
+                <article className="assessment-card"><span className="metadata">01 / Continuity</span><h3>Can your work<br/>give you room to step away?</h3><p>If you were unavailable for two weeks, what would keep working—and what would need another plan?</p><div className="metadata">6 questions · A seven-day action plan</div><a className="primary" href="#continuity">Check my continuity <ArrowRight size={18}/></a></article>
+                <article className="assessment-card"><span className="metadata">02 / Business systems</span><h3>Where is pressure<br/>building in your business?</h3><p>Look at your offer, client flow, follow-up and operating structure. See what to build first.</p><div className="metadata">10 questions · Three pressure signals</div><a className="secondary" href="#business">Start the pressure test <ArrowRight size={18}/></a></article>
               </div>
             </section>
             <section
@@ -224,6 +243,7 @@ export default function App() {
             </p>
           </>
         )}
+        {view === "continuity" && <Continuity onExit={() => { window.location.hash = ""; setView("landing"); }} />}
         {view === "quiz" && (
           <section className="quiz-page">
             <div className="progress-meta">
@@ -278,7 +298,7 @@ export default function App() {
               <button
                 className="secondary"
                 onClick={() =>
-                  index === 0 ? setView("landing") : setIndex(index - 1)
+                  index === 0 ? (window.location.hash = "", setView("landing")) : setIndex(index - 1)
                 }
               >
                 <ArrowLeft size={17} /> Back
@@ -526,6 +546,7 @@ export default function App() {
                         request. This does not subscribe me to a newsletter.
                       </span>
                     </label>
+                    <label className="consent"><input type="checkbox" checked={contact.marketingConsent} onChange={e => changeContact("marketingConsent",e.target.checked)}/><span>Optional: send me three coaching emails over the next week, including an invitation to the paid blueprint. I can unsubscribe anytime.</span></label>
                     <p className="privacy-note">
                       Stored in MAIM’s client records. Email delivery uses our
                       email provider.{" "}
@@ -559,6 +580,7 @@ export default function App() {
                         </p>
                       )}
                     </div>
+                    {saveState !== "error" && error && <p className="save-notice" role="status">{error}</p>}
                     {saveState === "error" && (
                       <p className="error" role="alert">
                         {error} Your answers remain here.
@@ -614,6 +636,7 @@ export default function App() {
             </button>
           </section>
         )}
+        {(view === "landing" || view === "results") && <Shop />}
       </main>
       <footer>
         <p>
