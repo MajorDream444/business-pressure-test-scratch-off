@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import Stripe from 'stripe';
-import { paidOrder,shopReady } from '../shared/commerce';
+import { paidOrder,shopReady,checkoutPolicyReady } from '../shared/commerce';
 import { syncContact } from '../shared/integrations';
 import shop from '../api/shop';
 import webhook from '../api/stripe-webhook';
@@ -42,4 +42,10 @@ test('webhook rejects forged and parsed bodies, and acknowledges a valid unrelat
  r=response();await webhook({method:'POST',body:JSON.parse(payload),headers:{'stripe-signature':signature}},r);assert.equal(r.code,400);
  r=response();await webhook({method:'POST',body:Buffer.from(payload),headers:{'stripe-signature':signature}},r);assert.equal(r.code,200);
  process.env={...env};
+});
+
+test('checkout policy stays gated until approved HTTPS terms and version exist',()=>{
+ process.env.CHECKOUT_TERMS_APPROVED='false';process.env.SHOP_TERMS_URL='https://example.com/terms';process.env.SHOP_AGREEMENT_VERSION='v1';assert.equal(checkoutPolicyReady(),false);
+ process.env.CHECKOUT_TERMS_APPROVED='true';process.env.SHOP_TERMS_URL='http://example.com/terms';assert.equal(checkoutPolicyReady(),false);
+ process.env.SHOP_TERMS_URL='https://example.com/terms';assert.equal(checkoutPolicyReady(),true);process.env={...env};
 });

@@ -1,7 +1,7 @@
 import type { ApiRequest,ApiResponse } from './submit.js';
 import { allowRequest } from './submit.js';
 import { createHash } from 'node:crypto';
-import { OFFER,shopReady,stripeClient,httpsUrl } from '../shared/commerce.js';
+import { OFFER,shopReady,stripeClient,httpsUrl,BLUEPRINT_SCOPE_VERSION } from '../shared/commerce.js';
 export default async function handler(req:ApiRequest,res:ApiResponse) {
  res.setHeader('Cache-Control','no-store');
  if(req.method==='GET') return res.status(200).json({available:!!shopReady(),offer:OFFER});
@@ -18,7 +18,7 @@ export default async function handler(req:ApiRequest,res:ApiResponse) {
   const price=await stripe.prices.retrieve(process.env.STRIPE_BLUEPRINT_PRICE_ID!,{expand:['product']});
   const product=price.product as StripeProduct;
   if(!price.active || price.type!=='one_time' || price.unit_amount!==OFFER.amount || price.currency!==OFFER.currency || !product.active || product.metadata?.sku!==OFFER.sku || price.livemode!==(process.env.STRIPE_MODE==='live')) throw new Error();
-  const session=await stripe.checkout.sessions.create({mode:'payment',line_items:[{price:price.id,quantity:1}],customer_creation:'always',metadata:{sku:OFFER.sku,source:'maim-assessments'},success_url:`${origin}/?checkout=returned`,cancel_url:`${origin}/?checkout=cancelled`,custom_text:{submit:{message:'Includes a 30–45 minute review and a one-page blueprint. Scheduling is arranged after purchase.'}}},{idempotencyKey:'maim-checkout-'+b.requestId});
+  const session=await stripe.checkout.sessions.create({mode:'payment',line_items:[{price:price.id,quantity:1}],customer_creation:'always',metadata:{sku:OFFER.sku,source:'maim-assessments',scope_version:BLUEPRINT_SCOPE_VERSION,agreement_version:process.env.SHOP_AGREEMENT_VERSION!},consent_collection:{terms_of_service:'required'},success_url:`${origin}/?checkout=returned`,cancel_url:`${origin}/?checkout=cancelled`,custom_text:{submit:{message:'Includes a 30–45 minute review and a one-page blueprint. One personal review is included. Implementation, ongoing coaching, and vault work are separately scoped.'}}},{idempotencyKey:'maim-checkout-'+b.requestId});
   if(!httpsUrl(session.url||'')) throw new Error();
   return res.status(200).json({url:session.url});
  }catch{return res.status(502).json({error:'Checkout could not be opened. Please try again.'});}
