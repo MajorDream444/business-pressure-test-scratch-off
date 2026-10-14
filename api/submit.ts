@@ -1,168 +1,221 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Resend } from 'resend';
-import { buildEmail } from './email-template.js';
-
-interface Payload {
-  submissionId?:     string;
-  submittedAt?:      string;
-  appVersion?:       string;
-  firstName?:        string;
-  lastName?:         string;
-  name?:             string;
-  email?:            string;
-  telegramOrPhone?:  string;
-  source?:           string;
-  businessType?:     string;
-  revenueRange?:     string;
-  biggestIssue?:     string;
-  answers?:          Record<string, string>;
-  scores?:           Record<string, number>;
-  totalScore?:       number;
-  scoreBand?:        string;
-  priority?:         string;
-  primaryLeak?:      string;
-  diagnosisSummary?: string;
-  recommendedOffer?: string;
-  nextStep?:         string;
-  leaks?:            string[];
-  nextMoves?:        string[];
+import { googleBookingUrl } from "../shared/google-booking.js";
+import { enroll } from "../shared/nurture.js";
+import { syncContact } from "../shared/integrations.js";
+import { createHash } from "node:crypto";
+import { validateSubmission, diagnose, toFields } from "../shared/diagnostic.js";
+import { buildEmail } from "../shared/email-template.js";
+import { validChallenge } from "../shared/server-protection.js";
+export interface ApiRequest {
+  method?: string;
+  body: unknown;
+  headers: Record<string, string | string[] | undefined>;
 }
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+export interface ApiResponse {
+  status(code: number): ApiResponse;
+  json(value: unknown): unknown;
+  setHeader(name: string, value: string): unknown;
+}
+const requests = new Map<string, { count: number; until: number }>();
+export function allowRequest(key: string, now = Date.now()) {
+  if (requests.size > 10000)
+    for (const [k, v] of requests) if (v.until < now) requests.delete(k);
+  const prior = requests.get(key);
+  if (!prior || prior.until < now) {
+    requests.set(key, { count: 1, until: now + 60000 });
+    return true;
   }
-
-  // Defensive parse — handles pre-parsed object or raw string body
-  const raw = req.body;
-  const body: Payload =
-    typeof raw === 'string'
-      ? (JSON.parse(raw) as Payload)
-      : raw && typeof raw === 'object'
-        ? (raw as Payload)
-        : {};
-
-  console.log('BODY:', JSON.stringify(body, null, 2));
-
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const tableId = process.env.AIRTABLE_TABLE_ID;
-  const pat = process.env.AIRTABLE_PAT;
-
-  if (!baseId || !tableId || !pat) {
-    console.error('[submit] Missing Airtable env vars');
-    return res.status(500).json({ error: 'Server configuration error' });
+  prior.count++;
+  return prior.count <= 6;
+}
+export default async function handler(req: ApiRequest, res: ApiResponse) {
+  res.setHeader("Cache-Control", "no-store");
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method not allowed" });
   }
-
-  const fields: Record<string, string | number> = {
-    // ── Identity ──────────────────────────────────────────────────────────────
-    'Name':              body.name            ?? '',
-    'First Name':        body.firstName       ?? '',
-    'Last Name':         body.lastName        ?? '',
-    'Email':             body.email           ?? '',
-    'Telegram_or_Phone': body.telegramOrPhone ?? '',
-    'Source':            body.source          ?? 'business-pressure-test',
-    'Submitted At':      body.submittedAt     ?? new Date().toISOString(),
-    'App Version':       body.appVersion      ?? 'v2',
-    'Submission ID':     body.submissionId    ?? '',
-
-    // ── Business context ──────────────────────────────────────────────────────
-    'Business Type': body.businessType ?? '',
-    'Revenue Range': body.revenueRange ?? '',
-    'Biggest Issue': body.biggestIssue ?? '',
-
-    // ── Quiz answers ──────────────────────────────────────────────────────────
-    'Q1':  body.answers?.q1  ?? '',
-    'Q2':  body.answers?.q2  ?? '',
-    'Q3':  body.answers?.q3  ?? '',
-    'Q4':  body.answers?.q4  ?? '',
-    'Q5':  body.answers?.q5  ?? '',
-    'Q6':  body.answers?.q6  ?? '',
-    'Q7':  body.answers?.q7  ?? '',
-    'Q8':  body.answers?.q8  ?? '',
-    'Q9':  body.answers?.q9  ?? '',
-    'Q10': body.answers?.q10 ?? '',
-
-    // ── Per-question scores ───────────────────────────────────────────────────
-    'Score Q1':  body.scores?.q1  ?? 0,
-    'Score Q2':  body.scores?.q2  ?? 0,
-    'Score Q3':  body.scores?.q3  ?? 0,
-    'Score Q4':  body.scores?.q4  ?? 0,
-    'Score Q5':  body.scores?.q5  ?? 0,
-    'Score Q6':  body.scores?.q6  ?? 0,
-    'Score Q7':  body.scores?.q7  ?? 0,
-    'Score Q8':  body.scores?.q8  ?? 0,
-    'Score Q9':  body.scores?.q9  ?? 0,
-    'Score Q10': body.scores?.q10 ?? 0,
-
-    // ── Scoring + routing ─────────────────────────────────────────────────────
-    'Score':             body.totalScore       ?? 0,
-    'Total Score':       body.totalScore       ?? 0,
-    'Score Band':        body.scoreBand        ?? '',
-    'Priority':          body.priority         ?? '',
-    'Primary Leak':      body.primaryLeak      ?? '',
-    'Diagnosis Summary': body.diagnosisSummary ?? '',
-    'Recommended Offer': body.recommendedOffer ?? '',
-    'Next Step':         body.nextStep         ?? '',
-
-    // ── Backup ────────────────────────────────────────────────────────────────
-    'Raw Payload JSON': JSON.stringify(body),
-  };
-
-  console.log('AIRTABLE PAYLOAD:', JSON.stringify(fields, null, 2));
-
-  try {
-    const airtableRes = await fetch(
-      `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableId)}`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${pat}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ records: [{ fields }] }),
-      }
-    );
-
-    const responseText = await airtableRes.text();
-
-    if (!airtableRes.ok) {
-      console.error('[submit] Airtable error:', airtableRes.status, responseText);
-      return res.status(502).json({
-        error:  'Failed to save submission',
-        status: airtableRes.status,
-        detail: JSON.parse(responseText),
+  if (process.env.ENABLE_SUBMISSIONS !== "true")
+    return res
+      .status(503)
+      .json({
+        error:
+          "Saving is not available yet. Your results are still on this screen.",
       });
-    }
-
-    console.log('[submit] success:', body.name, body.email, body.totalScore, body.priority);
-
-    // Send results email (fire-and-forget — never blocks the 200 response)
-    const resendKey   = process.env.RESEND_API_KEY;
-    const fromEmail   = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev';
-    const calendlyUrl = process.env.VITE_CALENDLY_URL ?? '#';
-
-    if (resendKey && body.email && body.totalScore !== undefined) {
-      const resend = new Resend(resendKey);
-
-      const emailData = {
-        firstName:        body.firstName        ?? body.name ?? 'there',
-        totalScore:       body.totalScore,
-        scoreBand:        body.scoreBand        ?? '',
-        priority:         body.priority         ?? '',
-        diagnosisSummary: body.diagnosisSummary ?? '',
-        biggestIssue:     body.biggestIssue     ?? '',
-        leaks:            body.leaks            ?? [],
-        nextMoves:        body.nextMoves        ?? [],
-        recommendedOffer: body.recommendedOffer ?? 'Diagnostic Call',
-      };
-
-      const { subject, html } = buildEmail(emailData, calendlyUrl);
-
-      resend.emails.send({ from: fromEmail, to: body.email, subject, html })
-        .then(r => console.log('[email] sent:', r))
-        .catch(e => console.error('[email] error:', e));
-    }
-
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    console.error('[submit] Unexpected error:', err);
-    return res.status(500).json({ error: 'Internal server error', detail: String(err) });
+  const {
+    AIRTABLE_PAT: pat,
+    AIRTABLE_BASE_ID: base,
+    AIRTABLE_TABLE_ID: table,
+  } = process.env;
+  if (!pat || !base || !table)
+    return res
+      .status(503)
+      .json({
+        error: "Saving is temporarily unavailable. Please try again later.",
+      });
+  const origin = String(req.headers.origin ?? ""),
+    host = String(req.headers.host ?? "");
+  try {
+    if (origin && new URL(origin).host !== host)
+      return res
+        .status(403)
+        .json({ error: "Please submit from the pressure test." });
+  } catch {
+    return res.status(403).json({ error: "Invalid request origin." });
   }
+  const ip = String(req.headers["x-forwarded-for"] ?? "unknown").split(",")[0];
+  if (!allowRequest(createHash("sha256").update(ip).digest("hex"))) {
+    res.setHeader("Retry-After", "60");
+    return res
+      .status(429)
+      .json({ error: "Please wait a minute before trying again." });
+  }
+  let input;
+  try {
+    if ((JSON.stringify(req.body) ?? "").length > 16000)
+      return res.status(413).json({ error: "Submission is too large." });
+    input = validateSubmission(
+      typeof req.body === "string" ? JSON.parse(req.body) : req.body,
+    );
+    if (input.website || !validChallenge(input.challenge, pat))
+      return res
+        .status(400)
+        .json({ error: "Please refresh the save form and try again." });
+  } catch {
+    return res
+      .status(400)
+      .json({ error: "Please check your answers and contact details." });
+  }
+  const submissionId =
+    "maim_" +
+    createHash("sha256")
+      .update(
+        JSON.stringify({
+          id: input.submissionId,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          email: input.email,
+          telegramOrPhone: input.telegramOrPhone,
+          businessType: input.businessType,
+          revenueRange: input.revenueRange,
+          biggestIssue: input.biggestIssue,
+          readiness: input.readiness,
+          answers: input.answers,
+          marketingConsent: input.marketingConsent === true,
+        }),
+      )
+      .digest("hex");
+  const fields = toFields(input);
+  fields["Submission ID"] = submissionId;
+  const endpoint = `https://api.airtable.com/v0/${base}/${encodeURIComponent(table)}`;
+  const headers = {
+    Authorization: `Bearer ${pat}`,
+    "Content-Type": "application/json",
+  };
+  let record: { id: string; fields: Record<string, unknown> };
+  try {
+    const saved = await fetch(endpoint, {
+      method: "PATCH",
+      headers,
+      signal: AbortSignal.timeout(10000),
+      body: JSON.stringify({
+        performUpsert: { fieldsToMergeOn: ["Submission ID"] },
+        records: [{ fields }],
+      }),
+    });
+    if (!saved.ok) {
+      console.error("[capture] provider rejected save", saved.status);
+      return res
+        .status(502)
+        .json({ error: "We could not save your results. Please try again." });
+    }
+    const data = await saved.json();
+    record = data.records?.[0];
+    if (!record?.id) throw new Error("Missing saved reference");
+  } catch {
+    console.error("[capture] save unavailable");
+    return res
+      .status(502)
+      .json({
+        error:
+          "We could not confirm the save. Retrying uses the same reference.",
+      });
+  }
+  let followupStatus = "not_requested";
+  if (input.marketingConsent) {
+    try { await enroll(input.email, input.firstName, "business-pressure-test"); followupStatus = "enrolled"; }
+    catch { followupStatus = "pending"; }
+  }
+  let contactStatus = "not_configured";
+  if (process.env.AIRTABLE_CONTACTS_TABLE_ID) {
+    try {
+      const contactId = await syncContact(input.email, `${input.firstName} ${input.lastName}`.trim());
+      const linked = await fetch(endpoint, {method:"PATCH", headers, signal:AbortSignal.timeout(5000), body:JSON.stringify({records:[{id:record.id, fields:{"Contact Record ID":contactId}}]})});
+      if (!linked.ok) throw new Error();
+      contactStatus = "synced";
+    } catch { contactStatus = "pending"; }
+  }
+  if (record.fields["Results Email Status"] === "sent")
+    return res
+      .status(200)
+      .json({ success: true, saved: true, emailStatus: "sent", contactStatus, followupStatus, submissionId });
+  const key = process.env.RESEND_API_KEY,
+    from = process.env.RESEND_FROM_EMAIL;
+  let emailStatus = "not_configured";
+  if (key && from && !from.includes("resend.dev")) {
+    try {
+      const email = buildEmail(input, googleBookingUrl(process.env.VITE_GOOGLE_BOOKING_URL));
+      const sent = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        signal: AbortSignal.timeout(10000),
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "Idempotency-Key": submissionId,
+        },
+        body: JSON.stringify({ from, to: [input.email], reply_to: process.env.RESEND_REPLY_TO || process.env.SHOP_SUPPORT_EMAIL, ...email }),
+      });
+      if (!sent.ok) throw new Error("Provider rejected email");
+      const receipt = await sent.json();
+      if (!receipt.id) throw new Error("Missing email receipt");
+      emailStatus = "sent";
+    } catch {
+      emailStatus = "failed";
+      console.error("[email] results send failed");
+    }
+  }
+  try {
+    const update = await fetch(endpoint, {
+      method: "PATCH",
+      headers,
+      signal: AbortSignal.timeout(5000),
+      body: JSON.stringify({
+        records: [
+          {
+            id: record.id,
+            fields: {
+              "Results Email Status": emailStatus,
+              "Results Email Updated At": new Date().toISOString(),
+              ...(!record.fields["Submitted At"]
+                ? { "Submitted At": new Date().toISOString() }
+                : {}),
+            },
+          },
+        ],
+      }),
+    });
+    if (!update.ok)
+      console.error("[capture] delivery status not persisted", update.status);
+  } catch {
+    console.error("[capture] delivery status unavailable");
+  }
+  return res
+    .status(200)
+    .json({
+      success: true,
+      saved: true,
+      emailStatus,
+      contactStatus,
+      followupStatus,
+      submissionId,
+      results: diagnose(input.answers),
+    });
 }
