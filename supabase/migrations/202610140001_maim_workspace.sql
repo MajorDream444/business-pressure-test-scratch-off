@@ -1,4 +1,4 @@
--- Proposed migration. Not applied to any project. Authenticated reads only;
+-- Applied to the authorized MAIM Ecosystem project on 2026-10-14. Authenticated reads only;
 -- trusted server provisioning/writes must independently enforce tenant scope.
 begin;
 create schema if not exists maim;

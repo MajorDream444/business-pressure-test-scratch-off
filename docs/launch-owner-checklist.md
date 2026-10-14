@@ -30,3 +30,7 @@ Resend delivery webhook requires signature verification and durable event receip
 
 ## Data boundaries
 Stripe handles payment; Airtable owns operational assessment/order/contact records; Google holds appointments/Meet; Resend processes requested emails; Supabase, when approved, owns authenticated workspace membership/private reports and vault entitlement. Do not duplicate all personal data into every service. Human Context, recordings and raw media require separate consent, processor disclosure and retention. Client Clarity OS private clients remain untouched.
+
+## Reconciliation — 14 October 2026, corporate/project handover
+AMA-PAYMENT main corporate handover verified. Seller confirmed as AMA Solutions Corporation; public founder name Major Dream Williams. Delaware address disclosed only as registered office; current tax mailing address/payout verification remain open. No tax ID or bank details added to app code.
+New Supabase project njpdlomvyalxrkluaige (MAIM Ecosystem, us-east-1) directly verified ACTIVE_HEALTHY. Workspace and payment migrations applied: nine empty tables, RLS enabled, no anon reads or client writes; synthetic unmatched-user workspace/report read test passed with transaction rollback. No client records migrated. Preview/development SUPABASE_URL configured; application credentials and sync adapter remain missing. Initial Airtable capture/order path continues to own operational records until a separately tested transition. No claim of a live portal, vault, or payment-to-Supabase flow.
