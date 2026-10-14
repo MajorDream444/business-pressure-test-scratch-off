@@ -1,8 +1,9 @@
+import { googleBookingUrl } from "../shared/google-booking.js";
 import { enroll } from "../shared/nurture.js";
 import { syncContact } from "../shared/integrations.js";
 import { createHash } from "node:crypto";
 import { validateSubmission, diagnose, toFields } from "../shared/diagnostic.js";
-import { buildEmail, safeUrl } from "../shared/email-template.js";
+import { buildEmail } from "../shared/email-template.js";
 import { validChallenge } from "../shared/server-protection.js";
 export interface ApiRequest {
   method?: string;
@@ -161,7 +162,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   let emailStatus = "not_configured";
   if (key && from && !from.includes("resend.dev")) {
     try {
-      const email = buildEmail(input, safeUrl(process.env.VITE_CALENDLY_URL));
+      const email = buildEmail(input, googleBookingUrl(process.env.VITE_GOOGLE_BOOKING_URL));
       const sent = await fetch("https://api.resend.com/emails", {
         method: "POST",
         signal: AbortSignal.timeout(10000),
@@ -170,7 +171,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
           "Content-Type": "application/json",
           "Idempotency-Key": submissionId,
         },
-        body: JSON.stringify({ from, to: [input.email], ...email }),
+        body: JSON.stringify({ from, to: [input.email], reply_to: process.env.RESEND_REPLY_TO || process.env.SHOP_SUPPORT_EMAIL, ...email }),
       });
       if (!sent.ok) throw new Error("Provider rejected email");
       const receipt = await sent.json();

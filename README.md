@@ -37,7 +37,7 @@ Vercel: framework Vite; install `npm ci`; build `npm run build`; output `dist`. 
 
 Required for lead saving: `AIRTABLE_PAT`, `AIRTABLE_BASE_ID`, `AIRTABLE_TABLE_ID`, and the capture feature flag. The PAT needs record read/write access to the base for upsert verification and record operations. Do not grant broader access than needed.
 
-For email: `RESEND_API_KEY` and `RESEND_FROM_EMAIL` with a verified sender. The resend.dev test sender is rejected by this app. Set the real HTTPS booking link in `VITE_CALENDLY_URL` only when ready; missing/invalid links hide the booking action. There is no Gumroad or $100 credit promise in this release.
+For email: `RESEND_API_KEY` and `RESEND_FROM_EMAIL` with a verified sender. The resend.dev test sender is rejected by this app. Set the real HTTPS booking link in `VITE_GOOGLE_BOOKING_URL` only when ready; missing/invalid links hide the booking action. There is no Gumroad or $100 credit promise in this release.
 
 ## Airtable schema and ownership
 
@@ -61,3 +61,5 @@ The home page now offers the original Business Pressure Test and a separate six-
 The optional USD $250 Client System Blueprint uses `/api/shop` and Stripe Checkout; payment sync uses `/api/stripe-webhook` with raw body signature verification. Checkout stays disabled until credentials, webhook, booking and email are configured. No live purchase was tested.
 
 Coaching automation is prepared but paused pending Major's founder interview and approved email copy. It requires separate marketing consent. No scheduler is active. See `docs/deployment-readiness.md` for exact mappings, verification gates and remaining setup.
+
+Launch policies and Google account setup: docs/launch-owner-checklist.md. Native Google Calendar/Meet replaces Calendly. Policies are review drafts; checkout remains gated. Proposed Supabase migration is not applied. Run `npm run launch:check` for a secret-safe configuration report.

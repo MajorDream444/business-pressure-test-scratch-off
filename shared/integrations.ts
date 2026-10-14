@@ -26,7 +26,7 @@ export async function syncContact(email: string, name: string) {
 export async function sendResultEmail(email:string,subject:string,text:string,reference:string) {
  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL.includes('resend.dev')) return 'not_configured';
  try {
-  const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${process.env.RESEND_API_KEY}`,'Content-Type':'application/json','Idempotency-Key':reference},body:JSON.stringify({from:process.env.RESEND_FROM_EMAIL,to:[email],subject,text}),signal:AbortSignal.timeout(10000)});
+  const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${process.env.RESEND_API_KEY}`,'Content-Type':'application/json','Idempotency-Key':reference},body:JSON.stringify({from:process.env.RESEND_FROM_EMAIL,to:[email],reply_to:process.env.RESEND_REPLY_TO||process.env.SHOP_SUPPORT_EMAIL,subject,text}),signal:AbortSignal.timeout(10000)});
   if (!r.ok || !(await r.json()).id) throw new Error();
   return 'sent';
  } catch { return 'failed'; }

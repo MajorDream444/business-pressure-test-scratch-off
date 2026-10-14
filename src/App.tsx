@@ -18,14 +18,8 @@ import {
 import "./index.css";
 import Continuity from "./Continuity";
 import Shop from "./Shop";
-const booking = (() => {
-  try {
-    const u = new URL(import.meta.env.VITE_CALENDLY_URL || "");
-    return u.protocol === "https:" ? u.href : "";
-  } catch {
-    return "";
-  }
-})();
+import {googleBookingUrl} from "../shared/google-booking";
+const booking = googleBookingUrl(import.meta.env.VITE_GOOGLE_BOOKING_URL);
 const hints = [
   "Think about the last few paying clients, not the channel you hope will work.",
   "Imagine taking a real break with no calls, messages, or daily check-ins.",
@@ -643,6 +637,7 @@ export default function App() {
           AI is the tool. <strong>You are the future.</strong>
         </p>
         <span className="metadata">Clarity / Focus / Progress</span>
+        <nav aria-label="Policies"><a href="/terms.html">Terms</a> · <a href="/refunds.html">Refunds</a> · <a href="/privacy.html">Privacy</a> · <a href="/participant-agreement.html">Responsibilities</a></nav>
         <div className="tri-bar">
           <i />
           <i />
