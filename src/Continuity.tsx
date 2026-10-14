@@ -35,8 +35,8 @@ export default function Continuity({ onExit }: { onExit: () => void }) {
       <div><strong>{result.priorities.length}</strong><span>Plans to build or verify</span></div>
       <div><strong>{result.excluded.length}</strong><span>Not applicable</span></div>
     </div>
-    <h2 className="signals-heading">Your first priorities</h2>
-    {result.priorities.length ? <div className="signals">{result.priorities.slice(0,3).map((p,i) => <article className="signal" key={p.id}>
+    <h2 className="signals-heading">Start with one priority</h2>
+    {result.priorities.length ? <div className="signals">{result.priorities.slice(0,1).map((p,i) => <article className="signal" key={p.id}>
       <span className="step-number">0{i+1}</span><div className="signal-reading"><h3>{p.area}</h3><p>{p.answer === 'Unsure' ? 'An unanswered question to verify.' : p.answer === 'Partly ready' ? 'A plan that needs another step.' : 'A dependency without a plan yet.'}</p></div>
       <div className="signal-evidence"><span className="metadata">You selected</span><blockquote>{p.answer}</blockquote><span className="metadata">A useful next move</span><p>{p.answer === 'Unsure' ? 'First check what exists. ' : ''}{p.action}</p></div>
     </article>)}</div> : <p className="question-hint">You described a plan, or marked not applicable, for every area. Rehearse one plan to check whether it works in practice.</p>}
@@ -47,6 +47,7 @@ export default function Continuity({ onExit }: { onExit: () => void }) {
     </section>
     <SaveContinuity answers={answers as ContinuityAnswer[]} action={action} note={note}/>
     <section className="continuity-lesson"><h2>A little structure creates more choice.</h2><p>{LESSON}</p></section>
+    <section className="continuity-lesson"><h2>Start small. Build through practice.</h2><p>Name your biggest dependency. Choose one practical backup. Take one step in the next seven days.</p><p>Your first 30 days are for understanding, planning, and beginning. Use days 31–60 to test and adjust, then days 61–90 to strengthen what works. This is a path for practice, not a promise of transformation by a deadline.</p><p>You make the decisions. AI and automation can support the work as you learn what fits your life.</p></section>
     <details className="answer-review"><summary>Review all six answers</summary>{result.readings.map(r => <div key={r.id}><strong>{r.area}</strong><span>{r.answer}</span></div>)}</details>
     <div className="results-actions"><button className="primary" onClick={download}><Download size={18}/> Download my plan</button><button className="secondary" onClick={() => window.print()}>Print / save PDF</button></div>
     <p role="status" aria-live="polite" className="privacy-note">{downloadStatus}</p>
