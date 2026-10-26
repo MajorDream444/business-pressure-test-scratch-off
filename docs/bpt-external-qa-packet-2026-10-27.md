@@ -7,9 +7,18 @@
 
 Status: **prepared, not executed**
 
-Immutable application candidate: `2891852f80b1015852e6940b07c0ebba6a184e7e`
+Immutable application candidate: `7142207645a78b47215f1bc2e3a736c96f042e65`
 
 That SHA is the only application source eligible for this acceptance run. The later packet-only commit may document the procedure but must not replace the application SHA. Record the SHA and protected-Preview deployment ID before any provider setting is enabled; a mismatch is a stop condition.
+
+Superseded candidate pins `2891852f80b1015852e6940b07c0ebba6a184e7e` and `239af00245916dbaac086b8f5f529067ead2ea4f` remain in history as evidence. They are retired from future acceptance because later concurrent merges changed `api/submit.ts` and `src/App.tsx`; current `main` at `977959dd61523eee077b1353a272dd5f0fb7fc0f` did not compile. The immutable candidate restores the reviewed runtime on current main and passes 33 tests.
+
+Deployment reconciliation at preparation time:
+
+- `239af00245916dbaac086b8f5f529067ead2ea4f` intentionally skipped Vercel and has no exact protected deployment.
+- Protected Preview `dpl_AAZVudXgCmuDav5vxiBVGeJgSwir` (`https://business-pressure-test-ntgl0a5fr-hamal-agi.vercel.app`) is Ready but maps to superseded packet SHA `c8b19cc2c18cc2a5f6cdb5f88e16e048c6d71e6c`, not the immutable candidate.
+- Production `dpl_3At3yzY1aoAwicmWg6F37y6zV3pP` maps to merge SHA `e6c8bc25e0e4d4f9c11c2f77adcf93a02ab6e62d`. Merge/deployment is not provider acceptance or customer readiness.
+- Do not run acceptance unless direct Vercel evidence shows a protected Preview whose Git SHA exactly equals the immutable candidate.
 
 ## Scope boundary
 
@@ -96,6 +105,8 @@ After submission, stop immediately on a second BPT record/contact/provider accep
 - `6cacfd1d0ad60859ef93956444a04ebbd492553c`: `npm test` reported 25/25. This was the complete earlier rewrite before reconciliation guards.
 - `998f44177e5ae5d26f9856223bca264c497cd7cd`: `npm test` reported 29/29. Four tests were added for Airtable role policy and unsafe contact mapping.
 - `2891852f80b1015852e6940b07c0ebba6a184e7e`: `npm run check` reported 31/31. Two tests were added for dependency floors and missing-Origin rejection. The same command also runs TypeScript and the Vite production build.
+- `239af00245916dbaac086b8f5f529067ead2ea4f`: `npm run check` reported 33/33 after adding independent results-email gating and delivery-status persistence evidence.
+- `7142207645a78b47215f1bc2e3a736c96f042e65`: `npm run check` reports 33/33 on current main after restoring the reviewed BPT runtime overwritten by concurrent PR #4. This is the immutable application candidate.
 
 Exact full-suite commands for the immutable candidate:
 
