@@ -1,0 +1,23 @@
+begin;
+create table maim.customers(id uuid primary key default gen_random_uuid(),auth_user_id uuid unique references auth.users(id),stripe_customer_id text unique not null,created_at timestamptz not null default now());
+create table maim.orders(id uuid primary key default gen_random_uuid(),customer_id uuid references maim.customers(id),stripe_checkout_session_id text unique not null,sku text not null,amount_minor bigint not null check(amount_minor>=0),currency text not null check(currency ~ '^[a-z]{3}$'),status text not null check(status in ('pending','paid','failed','partially_refunded','refunded','disputed')),scope_version text not null,agreement_version text not null,created_at timestamptz not null default now());
+create index orders_customer on maim.orders(customer_id);
+create table maim.webhook_events(id uuid primary key default gen_random_uuid(),provider text not null check(provider in ('stripe','resend')),external_event_id text not null,event_type text not null,status text not null default 'received' check(status in ('received','processing','processed','failed')),attempts integer not null default 0,received_at timestamptz not null default now(),processed_at timestamptz,unique(provider,external_event_id));
+create table maim.entitlements(id uuid primary key default gen_random_uuid(),customer_id uuid not null references maim.customers(id),order_id uuid not null references maim.orders(id),sku text not null,status text not null check(status in ('active','paused','revoked')),created_at timestamptz not null default now(),unique(order_id,sku));
+create index entitlements_customer on maim.entitlements(customer_id);
+create table maim.refunds(id uuid primary key default gen_random_uuid(),order_id uuid not null references maim.orders(id),stripe_refund_id text unique not null,amount_minor bigint not null check(amount_minor>0),status text not null,created_at timestamptz not null default now());
+create index refunds_order on maim.refunds(order_id);
+alter table maim.customers enable row level security;
+alter table maim.orders enable row level security;
+alter table maim.webhook_events enable row level security;
+alter table maim.entitlements enable row level security;
+alter table maim.refunds enable row level security;
+create policy customer_self on maim.customers for select to authenticated using(auth_user_id=(select auth.uid()));
+create policy orders_self on maim.orders for select to authenticated using(exists(select 1 from maim.customers c where c.id=customer_id and c.auth_user_id=(select auth.uid())));
+create policy entitlements_self on maim.entitlements for select to authenticated using(exists(select 1 from maim.customers c where c.id=customer_id and c.auth_user_id=(select auth.uid())));
+-- Finance events/refunds have no client grant; all writes server-only.
+grant select on maim.customers,maim.orders,maim.entitlements to authenticated;
+grant usage on schema maim to service_role;
+grant all on all tables in schema maim to service_role;
+revoke all on all tables in schema maim from anon;
+commit;
