@@ -40,95 +40,195 @@ type Capability = {
 type SaveState =
   "idle" | "saving" | "saved" | "email_failed" | "email_unavailable" | "error";
 export default function App() {
-  const [view, setView] = useState<"landing" | "quiz" | "results" | "continuity">(window.location.hash === "#continuity" ? "continuity" : window.location.hash === "#business" ? "quiz" : "landing");
-  useEffect(() => {
-    const navigate = () => {
-      setView(window.location.hash === "#continuity" ? "continuity" : window.location.hash === "#business" ? "quiz" : "landing");
-    };
-    window.addEventListener("hashchange", navigate);
-    return () => window.removeEventListener("hashchange", navigate);
-  }, []);
-  const [index, setIndex] = useState(0),
-    [answers, setAnswers] = useState<number[]>(Array(10).fill(-1));
-  const [showForm, setShowForm] = useState(false),
-    [cap, setCap] = useState<Capability | null>(null),
-    [capError, setCapError] = useState(false);
-  const [saveState, setSaveState] = useState<SaveState>("idle"),
-    [error, setError] = useState("");
-  const [contact, setContact] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    telegramOrPhone: "",
-    businessType: BUSINESS_TYPES[0],
-    revenueRange: REVENUES[0],
-    biggestIssue: "",
-    readiness: READINESS[0],
-    consent: false,
-    marketingConsent: false,
-    website: "",
-  });
-  const [submissionId] = useState(() => crypto.randomUUID());
-  const heading = useRef<HTMLHeadingElement>(null),
-    capRequest = useRef(0),
-    previousView = useRef(view);
-  useEffect(() => {
-    if (previousView.current !== view) {
-      window.scrollTo({ top: 0 });
-      previousView.current = view;
-    }
-    heading.current?.focus();
-  }, [view, index]);
-  async function refreshCapability() {
-    const request = ++capRequest.current;
-    setCapError(false);
-    setCap(null);
-    try {
-      const r = await fetch("/api/challenge", {
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!r.ok) throw new Error();
-      const v: Capability = await r.json();
-      if (request === capRequest.current) setCap(v);
-    } catch {
-      if (request === capRequest.current) setCapError(true);
-    }
-  }
-  function changeContact(key: string, value: string | boolean) {
-    setContact((c) => ({ ...c, [key]: value }));
-  }
-  async function save(event: FormEvent) {
-    event.preventDefault();
-    if (saveState === "saving" || !cap?.challenge) return;
-    setSaveState("saving");
-    setError("");
-    try {
-      const payload: Submission = {
-        ...contact,
-        submissionId,
-        answers,
-        challenge: cap.challenge,
-      };
-      const response = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(55000),
-      });
-      const body = await response.json();
-      if (!response.ok || body.saved !== true)
-        throw new Error(
-          body.error || "We could not confirm the save. Please try again.",
-        );
-      if(body.emailStatusPersisted===false)setError("Your results are saved, but the email-status receipt could not be recorded. Provider acceptance is not inbox receipt.");
-      if (body.followupStatus === "pending") setError("Your results are saved, but coaching email enrollment needs attention.");
-      if (body.contactStatus === "pending") setError("Your results are saved, but contact sync still needs attention.");
-      setSaveState(
-        body.emailStatus === "sent"
-          ? "saved"
-          : body.emailStatus === "failed"
-            ? "email_failed"
-            : "email_unavailable",
+  const [step, setStep] = useState(0);
+  const [dir,  setDir]  = useState(1);
+
+  // Lead data
+  const [firstName,    setFirstName]    = useState('');
+  const [lastName,     setLastName]     = useState('');
+  const [email,        setEmail]        = useState('');
+  const [contact,      setContact]      = useState('');
+  const [bizType,      setBizType]      = useState('');
+  const [revenue,      setRevenue]      = useState('');
+  const [biggestIssue, setBiggestIssue] = useState('');
+
+  // Quiz
+  const [answers,     setAnswers]     = useState<Record<string, { label: string; score: number }>>({});
+  const [highlighted, setHighlighted] = useState<string | null>(null);
+
+  // Results
+  const [score, setScore] = useState(0);
+
+  const navigate = (target: number) => {
+    setDir(target > step ? 1 : -1);
+    setStep(target);
+    setHighlighted(null);
+  };
+
+  const goNext = () => navigate(step + 1);
+  const goPrev = () => navigate(step - 1);
+
+  const showProgress = step >= 1 && step <= LAST_QUIZ_STEP;
+  const progressPct  = showProgress ? Math.round((step / PROGRESS_DENOM) * 100) : 0;
+
+  const handleQuizAnswer = (
+    qId: string,
+    option: { label: string; score: number }
+  ) => {
+    if (highlighted) return;
+    setHighlighted(option.label);
+
+    const newAnswers = { ...answers, [qId]: option };
+    setAnswers(newAnswers);
+
+    setTimeout(() => {
+      if (step === LAST_QUIZ_STEP) {
+        const total      = Object.values(newAnswers).reduce((s, a) => s + a.score, 0);
+        const finalScore = Math.round(total);
+        setScore(finalScore);
+        const finalBand = getBand(finalScore);
+
+        // Build per-question answer + score maps
+        const answerLabels: Record<string, string> = {};
+        const answerScores: Record<string, number> = {};
+        QUESTIONS.forEach((q, i) => {
+          const key = `q${i + 1}`;
+          answerLabels[key] = newAnswers[q.id]?.label ?? '';
+          answerScores[key]  = newAnswers[q.id]?.score ?? 0;
+        });
+
+        const payload = {
+          submissionId:      `bpt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          submittedAt:       new Date().toISOString(),
+          appVersion:        'v2',
+          firstName,
+          lastName,
+          name:              `${firstName} ${lastName}`.trim(),
+          email,
+          telegramOrPhone:   contact,
+          source:            'business-pressure-test',
+          businessType:      bizType,
+          revenueRange:      revenue,
+          biggestIssue,
+          answers:           answerLabels,
+          scores:            answerScores,
+          totalScore:        finalScore,
+          scoreBand:         getScoreBand(finalScore),
+          priority:          getPriority(finalScore),
+          primaryLeak:       LEAK_MAP[finalBand.key] ?? 'Lead Flow',
+          diagnosisSummary:  finalBand.diagnosis,
+          recommendedOffer:  getRecommendedOffer(finalScore),
+          nextStep:          finalBand.next_moves[0] ?? '',
+          leaks:             finalBand.leaks,
+          nextMoves:         finalBand.next_moves,
+        };
+
+        // Fire-and-forget — never blocks UX
+        fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).catch(() => {/* silent */});
+
+        navigate(RESULTS_STEP);
+      } else {
+        goNext();
+      }
+    }, 320);
+  };
+
+  const band        = getBand(score);
+  const calendlyUrl = (import.meta.env.VITE_CALENDLY_URL as string) || '#';
+  const gumroadUrl  = (import.meta.env.VITE_GUMROAD_URL  as string) || '#';
+
+  // ── Step renderer ───────────────────────────────────────────────────────────
+
+  const renderStep = () => {
+    if (step === 0) return <LandingScreen onStart={goNext} />;
+
+    if (step === 1) return (
+      <InputScreen key="firstName"
+        question="What's your first name?"
+        placeholder="First name"
+        value={firstName} type="text" inputMode="text"
+        autoCapitalize="words" autoComplete="given-name"
+        onChange={setFirstName} onNext={goNext}
+        canProceed={firstName.trim().length > 0}
+      />
+    );
+
+    if (step === 2) return (
+      <InputScreen key="lastName"
+        question="And your last name?"
+        placeholder="Last name"
+        value={lastName} type="text" inputMode="text"
+        autoCapitalize="words" autoComplete="family-name"
+        onChange={setLastName} onNext={goNext}
+        canProceed={lastName.trim().length > 0}
+      />
+    );
+
+    if (step === 3) return (
+      <InputScreen key="email"
+        question="What's your email address?"
+        placeholder="you@example.com"
+        value={email} type="email" inputMode="email"
+        autoCapitalize="none" autoComplete="email"
+        onChange={setEmail} onNext={goNext}
+        canProceed={email.includes('@') && email.includes('.')}
+      />
+    );
+
+    if (step === 4) return (
+      <InputScreen key="contact"
+        question="Telegram username or phone number?"
+        placeholder="@handle  or  +1 555 000 0000"
+        value={contact} type="text" inputMode="text"
+        autoCapitalize="none" autoComplete="off"
+        onChange={setContact} onNext={goNext}
+        canProceed={contact.trim().length > 2}
+        hint="We'll send your results and credit here."
+      />
+    );
+
+    if (step === 5) return (
+      <OptionScreen key="bizType"
+        question="What type of business do you run?"
+        options={BIZ_TYPES} selected={bizType}
+        onSelect={v => { setBizType(v); setTimeout(goNext, 220); }}
+      />
+    );
+
+    if (step === 6) return (
+      <OptionScreen key="revenue"
+        question="What's your current monthly revenue?"
+        options={REVENUE_RANGES} selected={revenue}
+        onSelect={v => { setRevenue(v); setTimeout(goNext, 220); }}
+      />
+    );
+
+    if (step === 7) return (
+      <InputScreen key="biggestIssue"
+        question="What's your biggest business challenge right now?"
+        placeholder="Be specific — this helps us prepare for your call"
+        value={biggestIssue} type="text" inputMode="text"
+        autoCapitalize="sentences" autoComplete="off"
+        onChange={setBiggestIssue} onNext={goNext}
+        canProceed={true}
+        multiline
+      />
+    );
+
+    if (step >= QUIZ_OFFSET && step <= LAST_QUIZ_STEP) {
+      const q = QUESTIONS[step - QUIZ_OFFSET];
+      return (
+        <QuizScreen key={q.id}
+          question={q.question}
+          options={q.options}
+          highlighted={highlighted}
+          currentAnswer={answers[q.id]?.label ?? null}
+          onSelect={opt => handleQuizAnswer(q.id, opt)}
+        />
       );
     } catch (e) {
       setSaveState("error");
