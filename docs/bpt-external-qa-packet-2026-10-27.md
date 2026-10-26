@@ -15,10 +15,11 @@ Superseded candidate pins `2891852f80b1015852e6940b07c0ebba6a184e7e` and `239af0
 
 Deployment reconciliation at preparation time:
 
+- Immutable-candidate protected Preview `dpl_EC4kxnth1htcBsU97Rhxp5B9sBUB` (`https://business-pressure-test-b9xfd5c9t-hamal-agi.vercel.app`) is Ready and direct Vercel metadata maps it exactly to `7142207645a78b47215f1bc2e3a736c96f042e65`. An unauthenticated request is redirected to Vercel Authentication; protection is present. This identifies the eligible environment but does not authorize or execute QA.
 - `239af00245916dbaac086b8f5f529067ead2ea4f` intentionally skipped Vercel and has no exact protected deployment.
 - Protected Preview `dpl_AAZVudXgCmuDav5vxiBVGeJgSwir` (`https://business-pressure-test-ntgl0a5fr-hamal-agi.vercel.app`) is Ready but maps to superseded packet SHA `c8b19cc2c18cc2a5f6cdb5f88e16e048c6d71e6c`, not the immutable candidate.
 - Production `dpl_3At3yzY1aoAwicmWg6F37y6zV3pP` maps to merge SHA `e6c8bc25e0e4d4f9c11c2f77adcf93a02ab6e62d`. Merge/deployment is not provider acceptance or customer readiness.
-- Do not run acceptance unless direct Vercel evidence shows a protected Preview whose Git SHA exactly equals the immutable candidate.
+- Do not run acceptance unless the exact protected Preview above remains Ready, protected, and mapped to the immutable candidate at the separately authorized execution time.
 
 ## Scope boundary
 
