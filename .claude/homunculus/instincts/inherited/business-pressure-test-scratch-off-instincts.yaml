@@ -1,0 +1,353 @@
+# Instincts generated from https://github.com/MajorDream444/business-pressure-test-scratch-off
+# Generated: 2026-04-23T04:14:47.813Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: business-pressure-test-scratch-off-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Commit Length
+
+## Action
+
+Write moderate-length commit messages (~59 characters)
+
+## Evidence
+
+- Average commit message length: 59 chars
+- Based on 1 commits
+
+---
+id: business-pressure-test-scratch-off-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: business-pressure-test-scratch-off-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Export Style
+
+## Action
+
+Prefer mixed exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: mixed
+
+---
+id: business-pressure-test-scratch-off-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: business-pressure-test-scratch-off-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct File Naming
+
+## Action
+
+Name the file using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.files
+
+---
+id: business-pressure-test-scratch-off-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Function Naming
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: business-pressure-test-scratch-off-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: business-pressure-test-scratch-off-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: business-pressure-test-scratch-off-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Import Style
+
+## Action
+
+Use either named or default imports as appropriate (mixed style)
+
+## Evidence
+
+- Pattern in importStyle: mixed
+
+---
+id: business-pressure-test-scratch-off-instinct-export-style
+trigger: "When exporting modules or functions"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Export Style
+
+## Action
+
+Use either named or default exports as appropriate (mixed style)
+
+## Evidence
+
+- Pattern in exportStyle: mixed
+
+---
+id: business-pressure-test-scratch-off-instinct-commit-format
+trigger: "When writing a commit message"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Commit Format
+
+## Action
+
+Write a freeform commit message without a required prefix
+
+## Evidence
+
+- Pattern in commits.type: freeform
+- Example: 'Upgrade to production-ready Business Pressure Test mini app'
+
+---
+id: business-pressure-test-scratch-off-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Commit Length
+
+## Action
+
+Keep the commit message concise, around 59 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength: 59
+
+---
+id: business-pressure-test-scratch-off-instinct-try-catch-error-handling
+trigger: "When handling errors in code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Try Catch Error Handling
+
+## Action
+
+Use try-catch blocks for error handling
+
+## Evidence
+
+- Pattern in errorHandling.style: try-catch
+
+---
+id: business-pressure-test-scratch-off-instinct-no-custom-error-classes
+trigger: "When considering custom error classes"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct No Custom Error Classes
+
+## Action
+
+Do not implement custom error classes
+
+## Evidence
+
+- Pattern in errorHandling.customErrorClasses: false
+
+---
+id: business-pressure-test-scratch-off-instinct-no-error-boundaries
+trigger: "When considering React error boundaries"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct No Error Boundaries
+
+## Action
+
+Do not implement error boundaries
+
+## Evidence
+
+- Pattern in errorHandling.errorBoundaries: false
+
+---
+id: business-pressure-test-scratch-off-instinct-no-global-error-handler
+trigger: "When considering a global error handler"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct No Global Error Handler
+
+## Action
+
+Do not implement a global error handler
+
+## Evidence
+
+- Pattern in errorHandling.globalHandler: false
+
+---
+id: business-pressure-test-scratch-off-instinct-test-location
+trigger: "When adding new tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Test Location
+
+## Action
+
+Place test files in a separate directory from source files
+
+## Evidence
+
+- Pattern in architecture.testLocation: separate
+
+---
+id: business-pressure-test-scratch-off-instinct-test-pattern-absent
+trigger: "When writing tests"
+confidence: 0.3
+domain: testing
+source: repo-analysis
+source_repo: MajorDream444/business-pressure-test-scratch-off
+---
+
+# Business Pressure Test Scratch Off Instinct Test Pattern Absent
+
+## Action
+
+No specific test pattern detected; follow project conventions or propose a new pattern
+
+## Evidence
+
+- No explicit test patterns or workflows detected
+
