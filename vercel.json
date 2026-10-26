@@ -1,10 +1,56 @@
 {
+  "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "functions": {
+    "api/submit.ts": {
+      "maxDuration": 60
+    },
+    "api/continuity.ts": {
+      "maxDuration": 60
+    },
+    "api/stripe-webhook.ts": {
+      "maxDuration": 60
+    },
+    "api/shop.ts": {
+      "maxDuration": 40
+    },
+    "api/follow-up.ts": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "maim/deployment-ready": false
+    }
+  }
 }

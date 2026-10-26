@@ -1,102 +1,44 @@
-import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft } from 'lucide-react';
-import { QUESTIONS, BANDS } from './constants';
-import type { Band } from './types';
-
-// ── Lead-capture option lists ─────────────────────────────────────────────────
-
-const BIZ_TYPES = [
-  'Freelancing / Consulting',
-  'Coaching / Training',
-  'Agency / Service Business',
-  'E-commerce / Products',
-  'SaaS / Tech',
-  'Other',
+import { useEffect, useRef, useState } from "react";
+import {
+  QUESTIONS,
+  diagnose,
+  BUSINESS_TYPES,
+  REVENUES,
+  READINESS,
+} from "../shared/diagnostic";
+import type { FormEvent, CSSProperties } from "react";
+import type { Submission } from "../shared/diagnostic";
+import {
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Download,
+  RotateCcw,
+} from "lucide-react";
+import "./index.css";
+import Continuity from "./Continuity";
+import Shop from "./Shop";
+import {googleBookingUrl} from "../shared/google-booking";
+const booking = googleBookingUrl(import.meta.env.VITE_GOOGLE_BOOKING_URL);
+const hints = [
+  "Think about the last few paying clients, not the channel you hope will work.",
+  "Imagine taking a real break with no calls, messages, or daily check-ins.",
+  "Think about how easily someone can understand what they can buy.",
+  "Look at your recent weeks, rather than your best week.",
+  "Consider what happens after someone shows interest.",
+  "Think about client information, delivery, and commitments.",
+  "Consider whether you can connect paid work to specific offers or channels.",
+  "Think about repeatable tasks, not just the tools you own.",
+  "Choose the answer that reflects your current visibility.",
+  "Consider whether delivery would stay consistent if enquiries increased.",
 ];
-
-const REVENUE_RANGES = [
-  'Pre-revenue',
-  'Under $1k / month',
-  '$1k – $5k / month',
-  '$5k – $15k / month',
-  '$15k – $50k / month',
-  '$50k+ / month',
-];
-
-// ── Step index constants ──────────────────────────────────────────────────────
-// 0  = landing
-// 1  = firstName
-// 2  = lastName
-// 3  = email
-// 4  = contact
-// 5  = bizType
-// 6  = revenue
-// 7  = biggestIssue
-// 8–17 = quiz questions 0–9
-// 18 = results
-// 19 = cta
-
-const QUIZ_OFFSET   = 8;
-const LAST_QUIZ_STEP = QUIZ_OFFSET + QUESTIONS.length - 1; // 17
-const RESULTS_STEP  = LAST_QUIZ_STEP + 1;                  // 18
-const CTA_STEP      = RESULTS_STEP + 1;                    // 19
-const PROGRESS_DENOM = LAST_QUIZ_STEP;                     // 17
-
-// ── Derived-field helpers ─────────────────────────────────────────────────────
-
-function getBand(score: number): Band {
-  return BANDS.find(b => score >= b.min && score <= b.max) ?? BANDS[0];
-}
-
-function getScoreColor(score: number): string {
-  if (score >= 76) return '#4ade80';
-  if (score >= 51) return '#facc15';
-  if (score >= 26) return '#fb923c';
-  return '#f87171';
-}
-
-function getScoreBand(score: number): string {
-  if (score >= 76) return 'Strong';
-  if (score >= 51) return 'Functional';
-  if (score >= 26) return 'Leaking';
-  return 'Critical';
-}
-
-function getPriority(score: number): string {
-  if (score <= 30) return 'HOT';
-  if (score <= 60) return 'WARM';
-  return 'COLD';
-}
-
-function getRecommendedOffer(score: number): string {
-  if (score >= 76) return 'Retainer';
-  if (score >= 51) return 'System Build';
-  return 'Diagnostic Call';
-}
-
-const LEAK_MAP: Record<string, string> = {
-  you_are_the_system:        'Lead Flow',
-  inconsistent_unstable:     'Offer',
-  functional_but_capped:     'Conversion',
-  structured_ready_to_scale: 'Operations',
+type Capability = {
+  captureAvailable: boolean;
+  emailAvailable: boolean;
+  challenge: string | null;
 };
-
-// ── Animation ─────────────────────────────────────────────────────────────────
-
-const slideVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? '55%' : '-55%', opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit:  (dir: number) => ({ x: dir > 0 ? '-55%' : '55%', opacity: 0 }),
-};
-
-const slideTrans = {
-  duration: 0.28,
-  ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
-};
-
-// ── Root component ────────────────────────────────────────────────────────────
-
+type SaveState =
+  "idle" | "saving" | "saved" | "email_failed" | "email_unavailable" | "error";
 export default function App() {
   const [step, setStep] = useState(0);
   const [dir,  setDir]  = useState(1);
@@ -288,316 +230,521 @@ export default function App() {
           onSelect={opt => handleQuizAnswer(q.id, opt)}
         />
       );
+    } catch (e) {
+      setSaveState("error");
+      setError(e instanceof Error ? e.message : "Please try again.");
+      await refreshCapability();
     }
-
-    if (step === RESULTS_STEP) return (
-      <ResultsScreen
-        name={firstName}
-        score={score}
-        band={band}
-        onCta={() => navigate(CTA_STEP)}
-      />
-    );
-
-    if (step === CTA_STEP) return (
-      <CtaScreen
-        name={firstName}
-        calendlyUrl={calendlyUrl}
-        gumroadUrl={gumroadUrl}
-      />
-    );
-
-    return null;
-  };
-
-  const showBack = step > 0 && step < RESULTS_STEP;
-  const quizNum  =
-    step >= QUIZ_OFFSET && step <= LAST_QUIZ_STEP
-      ? step - QUIZ_OFFSET + 1
-      : null;
-
+  }
+  const result = view === "results" ? diagnose(answers) : null;
+  const q = QUESTIONS[index];
   return (
-    <div className="app-root">
-      {showProgress && (
-        <div className="progress-track">
-          <motion.div
-            className="progress-fill"
-            animate={{ width: `${progressPct}%` }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
+    <div className="app-shell">
+      <header className="site-header">
+        <a className="brand" href="/" aria-label="Major AI Mindset home">
+          <img
+            src="/maim-mark.png"
+            alt="MAIM gold crown seal"
+            width="52"
+            height="52"
           />
-        </div>
-      )}
-
-      {showBack && (
-        <button className="back-btn" onClick={goPrev} aria-label="Go back">
-          <ChevronLeft size={22} />
-        </button>
-      )}
-
-      {quizNum !== null && (
-        <div className="quiz-counter">
-          {quizNum} / {QUESTIONS.length}
-        </div>
-      )}
-
-      <AnimatePresence mode="wait" custom={dir}>
-        <motion.div
-          key={step}
-          custom={dir}
-          variants={slideVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={slideTrans}
-          className="page-wrapper"
+          <span>
+            <strong>MAJOR AI MINDSET</strong>
+            <span>Clarity & continuity</span>
+          </span>
+        </a>
+        <a
+          className="ecosystem-link"
+          href="https://github.com/MajorDream444/Major-AI-OS"
+          target="_blank"
+          rel="noreferrer"
         >
-          {renderStep()}
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ── Screen components ─────────────────────────────────────────────────────────
-
-function LandingScreen({ onStart }: { onStart: () => void }) {
-  return (
-    <div className="screen screen-center">
-      <div className="label-gold">Business Pressure Test</div>
-      <h1 className="headline">
-        If you stopped working for 2 weeks…{' '}
-        <span className="text-gold">would your business still run?</span>
-      </h1>
-      <p className="subtext">
-        10 questions. 2 minutes. Find out if you own a business — or if your business owns you.
-      </p>
-      <div className="credit-pill">
-        <span>🎁</span>
-        <span>You've unlocked a $100 Build Credit</span>
-      </div>
-      <button onClick={onStart} className="btn-gold btn-lg">
-        Start the Test →
-      </button>
-    </div>
-  );
-}
-
-interface InputScreenProps {
-  question: string;
-  placeholder: string;
-  value: string;
-  type: string;
-  inputMode: React.HTMLAttributes<HTMLInputElement>['inputMode'];
-  autoCapitalize: string;
-  autoComplete: string;
-  onChange: (v: string) => void;
-  onNext: () => void;
-  canProceed: boolean;
-  hint?: string;
-  multiline?: boolean;
-}
-
-function InputScreen({
-  question, placeholder, value, type, inputMode, autoCapitalize,
-  autoComplete, onChange, onNext, canProceed, hint, multiline,
-}: InputScreenProps) {
-  const inputRef    = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      inputRef.current?.focus();
-      textareaRef.current?.focus();
-    }, 120);
-    return () => clearTimeout(t);
-  }, []);
-
-  return (
-    <div className="screen screen-form">
-      <h2 className="question-text">{question}</h2>
-      {hint && <p className="hint-text">{hint}</p>}
-
-      {multiline ? (
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="gold-input gold-textarea"
-          autoCapitalize={autoCapitalize}
-          autoCorrect="off"
-          spellCheck={false}
-          rows={4}
-        />
-      ) : (
-        <input
-          ref={inputRef}
-          type={type}
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && canProceed && onNext()}
-          placeholder={placeholder}
-          className="gold-input"
-          autoComplete={autoComplete}
-          autoCorrect="off"
-          autoCapitalize={autoCapitalize}
-          spellCheck={false}
-          inputMode={inputMode}
-        />
-      )}
-
-      <button onClick={onNext} disabled={!canProceed} className="btn-gold">
-        Continue →
-      </button>
-    </div>
-  );
-}
-
-interface OptionScreenProps {
-  question: string;
-  options: string[];
-  selected: string;
-  onSelect: (v: string) => void;
-}
-
-function OptionScreen({ question, options, selected, onSelect }: OptionScreenProps) {
-  return (
-    <div className="screen screen-form">
-      <h2 className="question-text">{question}</h2>
-      <div className="option-list">
-        {options.map(opt => (
-          <button
-            key={opt}
-            onClick={() => onSelect(opt)}
-            className={`option-card${selected === opt ? ' option-card-active' : ''}`}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface QuizScreenProps {
-  question: string;
-  options: { label: string; score: number }[];
-  highlighted: string | null;
-  currentAnswer: string | null;
-  onSelect: (opt: { label: string; score: number }) => void;
-}
-
-function QuizScreen({ question, options, highlighted, currentAnswer, onSelect }: QuizScreenProps) {
-  return (
-    <div className="screen screen-form">
-      <h2 className="question-text">{question}</h2>
-      <div className="option-list">
-        {options.map(opt => {
-          const active = highlighted === opt.label || currentAnswer === opt.label;
-          return (
-            <button
-              key={opt.label}
-              onClick={() => onSelect(opt)}
-              className={`option-card${active ? ' option-card-active' : ''}`}
+          The MAIM ecosystem <ArrowRight size={16} />
+        </a>
+      </header>
+      <main>
+        {view === "landing" && (
+          <>
+            <section className="landing-hero">
+              <div className="hero-copy">
+                <h1 ref={heading} tabIndex={-1}>
+                  Understand your position.
+                  <br />
+                  <span>Create more choices.</span>
+                </h1>
+                <p className="hero-description">
+                  Short assessments to see what depends on you, learn where
+                  pressure builds, and choose one practical next step.
+                </p>
+                <a className="primary" href="#assessments">
+                  Choose your assessment <ArrowRight size={20} />
+                </a>
+                <p className="metadata">
+                  A few minutes <span>·</span> Free results <span>·</span> Your
+                  next move
+                </p>
+              </div>
+              <div className="orbit" aria-hidden="true">
+                <div className="orbit-ring outer">
+                  <i />
+                </div>
+                <div className="orbit-ring middle">
+                  <i />
+                </div>
+                <div className="orbit-ring inner">
+                  <i />
+                </div>
+                <div className="orbit-core">Clarity</div>
+              </div>
+            </section>
+            <section className="assessment-picker" id="assessments" aria-labelledby="assessment-heading">
+              <div className="section-intro"><p className="metadata">Start where you are</p><h2 id="assessment-heading">What would you like to understand?</h2><p>Choose a starting point. Both give you something useful to keep.</p></div>
+              <div className="assessment-grid">
+                <article className="assessment-card"><span className="metadata">01 / Continuity</span><h3>Can your work<br/>give you room to step away?</h3><p>If you were unavailable for two weeks, what would keep working—and what would need another plan?</p><div className="metadata">6 questions · A seven-day action plan</div><a className="primary" href="#continuity">Check my continuity <ArrowRight size={18}/></a></article>
+                <article className="assessment-card"><span className="metadata">02 / Business systems</span><h3>Where is pressure<br/>building in your business?</h3><p>Look at your offer, client flow, follow-up and operating structure. See what to build first.</p><div className="metadata">10 questions · Three pressure signals</div><a className="secondary" href="#business">Start the pressure test <ArrowRight size={18}/></a></article>
+              </div>
+            </section>
+            <section
+              className="how-it-works"
+              aria-label="How the pressure test works"
             >
-              {opt.label}
+              {[
+                [
+                  "01",
+                  "Answer honestly",
+                  "A clear picture of how your business works today.",
+                ],
+                [
+                  "02",
+                  "See your signals",
+                  "Understand where pressure builds, using your own answers.",
+                ],
+                [
+                  "03",
+                  "Choose one next move",
+                  "Leave with a focused action you can put to work.",
+                ],
+              ].map(([n, title, body]) => (
+                <div key={n}>
+                  <span className="step-number">{n}</span>
+                  <h2>{title}</h2>
+                  <p>{body}</p>
+                </div>
+              ))}
+            </section>
+            <p className="quiet-note">
+              For creators, coaches, founders, and people building from where
+              they are. No email needed to see your results.
+            </p>
+          </>
+        )}
+        {view === "continuity" && <Continuity onExit={() => { window.location.hash = ""; setView("landing"); }} />}
+        {view === "quiz" && (
+          <section className="quiz-page">
+            <div className="progress-meta">
+              <span>
+                Question {index + 1} of {QUESTIONS.length}
+              </span>
+              <span>{Math.round((index / 10) * 100)}% complete</span>
+            </div>
+            <div
+              className="progress-track"
+              role="progressbar"
+              aria-label="Questions completed"
+              aria-valuemin={0}
+              aria-valuemax={10}
+              aria-valuenow={index}
+            >
+              <div style={{ width: `${index * 10}%` }} />
+            </div>
+            <h1 ref={heading} tabIndex={-1}>
+              {q.question}
+            </h1>
+            <p className="question-hint">{hints[index]}</p>
+            <fieldset className="answer-list">
+              <legend className="sr-only">
+                Choose the answer that describes your business today.
+              </legend>
+              {q.options.map((option, i) => (
+                <label
+                  key={option.label}
+                  className={`answer-row ${answers[index] === i ? "selected" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name={q.id}
+                    value={i}
+                    checked={answers[index] === i}
+                    onChange={() =>
+                      setAnswers((a) =>
+                        a.map((old, k) => (k === index ? i : old)),
+                      )
+                    }
+                  />
+                  <span className="answer-index">0{i + 1}</span>
+                  <span className="answer-label">{option.label}</span>
+                  <span className="answer-check">
+                    {answers[index] === i && <Check size={16} />}
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+            <div className="quiz-actions">
+              <button
+                className="secondary"
+                onClick={() =>
+                  index === 0 ? (window.location.hash = "", setView("landing")) : setIndex(index - 1)
+                }
+              >
+                <ArrowLeft size={17} /> Back
+              </button>
+              <button
+                className="primary"
+                disabled={answers[index] === -1}
+                onClick={() =>
+                  index === 9 ? setView("results") : setIndex(index + 1)
+                }
+              >
+                {index === 9 ? "See my results" : "Next question"}{" "}
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          </section>
+        )}
+        {result && (
+          <section className="results-page">
+            <div className="results-intro">
+              <div>
+                <h1 ref={heading} tabIndex={-1}>
+                  Your next move
+                  <br />
+                  <span>starts here.</span>
+                </h1>
+                <h2 className="result-band">{result.band.title}</h2>
+                <p>{result.diagnosisSummary}</p>
+              </div>
+              <div
+                className="score-dial"
+                style={
+                  {
+                    "--score": `${result.totalScore * 3.6}deg`,
+                  } as CSSProperties
+                }
+              >
+                <div>
+                  <strong>{result.totalScore}</strong>
+                  <span>/ 100</span>
+                </div>
+              </div>
+            </div>
+            <p className="results-context">
+              Your score reflects the operating structure you described. It is a
+              starting map, not a prediction of revenue or a guarantee of
+              readiness to scale.
+            </p>
+            <h2 className="signals-heading">Your first pressure signals</h2>
+            <div className="signals">
+              {result.signals.map((signal, i) => (
+                <article className="signal" key={i}>
+                  <span className="step-number">0{i + 1}</span>
+                  <div className="signal-reading">
+                    <h3>{signal.category}</h3>
+                    <p>{signal.summary}</p>
+                  </div>
+                  <div className="signal-evidence">
+                    <span className="metadata">You said</span>
+                    <blockquote>“{signal.evidence}”</blockquote>
+                    <span className="metadata">Your next move</span>
+                    <p>{signal.action}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="results-actions">
+              <button
+                className="primary"
+                onClick={() => {
+                  setShowForm(true);
+                  void refreshCapability();
+                  setTimeout(
+                    () =>
+                      document
+                        .getElementById("save-results")
+                        ?.scrollIntoView({ behavior: "smooth" }),
+                    50,
+                  );
+                }}
+              >
+                Save my results <ArrowRight size={18} />
+              </button>
+              <button className="secondary" onClick={() => window.print()}>
+                <Download size={17} /> Print / save PDF
+              </button>
+            </div>
+            {showForm && (
+              <section className="save-section" id="save-results">
+                <h2>Keep your map. Choose your next move.</h2>
+                <p>
+                  Save your results with Major AI Mindset and share what kind of
+                  support you want.
+                </p>
+                {!cap && !capError && (
+                  <p role="status">Checking availability…</p>
+                )}
+                {capError && (
+                  <div role="alert">
+                    <p>
+                      We could not open the save form. Your results are still
+                      available above.
+                    </p>
+                    <button
+                      className="secondary"
+                      onClick={() => void refreshCapability()}
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+                {cap && !cap.captureAvailable && (
+                  <div className="save-notice" role="status">
+                    <p>
+                      Saving is not available yet. You can keep your results
+                      with Print / save PDF.
+                    </p>
+                  </div>
+                )}
+                {cap?.captureAvailable && (
+                  <form onSubmit={save}>
+                    <div className="form-grid">
+                      <label>
+                        First name
+                        <input
+                          required
+                          autoComplete="given-name"
+                          maxLength={80}
+                          value={contact.firstName}
+                          onChange={(e) =>
+                            changeContact("firstName", e.target.value)
+                          }
+                        />
+                      </label>
+                      <label>
+                        Last name <span>(optional)</span>
+                        <input
+                          autoComplete="family-name"
+                          maxLength={80}
+                          value={contact.lastName}
+                          onChange={(e) =>
+                            changeContact("lastName", e.target.value)
+                          }
+                        />
+                      </label>
+                      <label>
+                        Email
+                        <input
+                          required
+                          type="email"
+                          autoComplete="email"
+                          maxLength={254}
+                          value={contact.email}
+                          onChange={(e) =>
+                            changeContact("email", e.target.value)
+                          }
+                        />
+                      </label>
+                      <label>
+                        WhatsApp / Telegram <span>(optional)</span>
+                        <input
+                          autoComplete="tel"
+                          maxLength={120}
+                          value={contact.telegramOrPhone}
+                          onChange={(e) =>
+                            changeContact("telegramOrPhone", e.target.value)
+                          }
+                        />
+                      </label>
+                      <label>
+                        Your work
+                        <select
+                          value={contact.businessType}
+                          onChange={(e) =>
+                            changeContact("businessType", e.target.value)
+                          }
+                        >
+                          {BUSINESS_TYPES.map((v) => (
+                            <option key={v}>{v}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        Monthly revenue
+                        <select
+                          value={contact.revenueRange}
+                          onChange={(e) =>
+                            changeContact("revenueRange", e.target.value)
+                          }
+                        >
+                          {REVENUES.map((v) => (
+                            <option key={v}>{v}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <label>
+                      What would you most like to change?{" "}
+                      <span>(optional)</span>
+                      <textarea
+                        rows={3}
+                        maxLength={1200}
+                        value={contact.biggestIssue}
+                        onChange={(e) =>
+                          changeContact("biggestIssue", e.target.value)
+                        }
+                      />
+                    </label>
+                    <label>
+                      Where are you right now?
+                      <select
+                        value={contact.readiness}
+                        onChange={(e) =>
+                          changeContact("readiness", e.target.value)
+                        }
+                      >
+                        {READINESS.map((v) => (
+                          <option key={v}>{v}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="honeypot" aria-hidden="true">
+                      Website
+                      <input
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={contact.website}
+                        onChange={(e) =>
+                          changeContact("website", e.target.value)
+                        }
+                      />
+                    </label>
+                    <label className="consent">
+                      <input
+                        type="checkbox"
+                        required
+                        checked={contact.consent}
+                        onChange={(e) =>
+                          changeContact("consent", e.target.checked)
+                        }
+                      />
+                      <span>
+                        I agree to MAIM storing these answers and contact
+                        details to provide my results and respond to this
+                        request. This does not subscribe me to a newsletter.
+                      </span>
+                    </label>
+                    <label className="consent"><input type="checkbox" checked={contact.marketingConsent} onChange={e => changeContact("marketingConsent",e.target.checked)}/><span>Optional: send me three coaching emails over the next week, including an invitation to the paid blueprint. I can unsubscribe anytime.</span></label>
+                    <p className="privacy-note">
+                      Stored in MAIM’s client records. Email delivery uses our
+                      email provider.{" "}
+                      <a href="/privacy.html" target="_blank" rel="noreferrer">
+                        How we handle your data
+                      </a>
+                    </p>
+                    {!cap.emailAvailable && (
+                      <p className="save-notice">
+                        You can save your map, but results email is currently
+                        unavailable. Keep a PDF copy too.
+                      </p>
+                    )}
+                    <div role="status" aria-live="polite">
+                      {saveState === "saved" && (
+                        <p className="success">
+                          Your results are saved and the email provider accepted
+                          your results email. Check your inbox and spam folder.
+                        </p>
+                      )}
+                      {saveState === "email_failed" && (
+                        <p className="save-notice">
+                          Your results are saved, but the email could not be
+                          sent. Retry the email below, or keep a PDF copy.
+                        </p>
+                      )}
+                      {saveState === "email_unavailable" && (
+                        <p className="success">
+                          Your results are saved. Email is not available yet;
+                          keep a PDF copy.
+                        </p>
+                      )}
+                    </div>
+                    {saveState !== "error" && error && <p className="save-notice" role="status">{error}</p>}
+                    {saveState === "error" && (
+                      <p className="error" role="alert">
+                        {error} Your answers remain here.
+                      </p>
+                    )}
+                    {!["saved", "email_unavailable"].includes(saveState) && (
+                      <button
+                        className="primary"
+                        type="submit"
+                        disabled={saveState === "saving" || !cap.challenge}
+                      >
+                        {saveState === "saving"
+                          ? "Saving your results…"
+                          : saveState === "email_failed"
+                            ? "Retry results email"
+                            : saveState === "error"
+                              ? "Retry save"
+                              : "Save my map"}{" "}
+                        <ArrowRight size={17} />
+                      </button>
+                    )}
+                  </form>
+                )}
+              </section>
+            )}
+            {booking && (
+              <div className="booking">
+                <h2>Turn the signal into a clear plan.</h2>
+                <p>
+                  A conversation to review your results and choose what to build
+                  first.
+                </p>
+                <a
+                  className="secondary"
+                  href={booking}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Discuss my next move <ArrowRight size={17} />
+                </a>
+              </div>
+            )}
+            <button
+              className="text-button"
+              onClick={() => {
+                setIndex(0);
+                setView("quiz");
+                setShowForm(false);
+                setSaveState("idle");
+              }}
+            >
+              <RotateCcw size={16} /> Review my answers
             </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-interface ResultsScreenProps {
-  name: string;
-  score: number;
-  band: Band;
-  onCta: () => void;
-}
-
-function ResultsScreen({ name, score, band, onCta }: ResultsScreenProps) {
-  const scoreColor = getScoreColor(score);
-  return (
-    <div className="screen screen-form">
-      <div className="credit-banner">
-        <span>🎁</span>
-        <span>You've unlocked a $100 Build Credit</span>
-      </div>
-
-      <div className="score-block">
-        {name && <p className="score-label">{name}'s score</p>}
-        <div className="score-number" style={{ color: scoreColor }}>{score}</div>
-        <div className="score-denom">out of 100</div>
-      </div>
-
-      <div className="band-card">
-        <div className="band-title">{band.title}</div>
-        <p className="band-diagnosis">{band.diagnosis}</p>
-
-        <div className="band-section">
-          <div className="band-section-label">Pressure points</div>
-          {band.leaks.map(l => (
-            <div key={l} className="band-item">
-              <span className="icon-red">↓</span>{l}
-            </div>
-          ))}
+          </section>
+        )}
+        {(view === "landing" || view === "results") && <Shop />}
+      </main>
+      <footer>
+        <p>
+          AI is the tool. <strong>You are the future.</strong>
+        </p>
+        <span className="metadata">Clarity / Focus / Progress</span>
+        <nav aria-label="Policies"><a href="/terms.html">Terms</a> · <a href="/refunds.html">Refunds</a> · <a href="/privacy.html">Privacy</a> · <a href="/participant-agreement.html">Responsibilities</a></nav>
+        <div className="tri-bar">
+          <i />
+          <i />
+          <i />
         </div>
-
-        <div className="band-section">
-          <div className="band-section-label">Next moves</div>
-          {band.next_moves.map(m => (
-            <div key={m} className="band-item">
-              <span className="icon-gold">→</span>{m}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <button onClick={onCta} className="btn-gold btn-lg">
-        See how to fix this →
-      </button>
-    </div>
-  );
-}
-
-interface CtaScreenProps {
-  name: string;
-  calendlyUrl: string;
-  gumroadUrl: string;
-}
-
-function CtaScreen({ name, calendlyUrl, gumroadUrl }: CtaScreenProps) {
-  return (
-    <div className="screen screen-center">
-      <div className="label-gold">Your next step</div>
-      <h2 className="headline headline-sm">
-        {name ? `${name}, apply` : 'Apply'} your{' '}
-        <span className="text-gold">$100 Build Credit</span>
-      </h2>
-      <p className="subtext">Your credit is reserved. Choose how you want to move next.</p>
-
-      <div className="cta-cards">
-        <a href={calendlyUrl} target="_blank" rel="noopener noreferrer"
-          className="cta-card cta-card-primary">
-          <div className="cta-card-title cta-card-title-gold">Book a Strategy Call →</div>
-          <div className="cta-card-body">
-            45 minutes. We map your exact pressure points and build a fix plan.
-          </div>
-          <div className="cta-card-note cta-card-note-gold">$100 credit applied automatically</div>
-        </a>
-
-        <a href={gumroadUrl} target="_blank" rel="noopener noreferrer"
-          className="cta-card cta-card-secondary">
-          <div className="cta-card-title">Get the Build Playbook →</div>
-          <div className="cta-card-body">
-            The exact framework to fix the leaks found in your results.
-          </div>
-          <div className="cta-card-note">Use credit code at checkout</div>
-        </a>
-      </div>
-
-      <p className="footer-note">Business Pressure Test · {new Date().getFullYear()}</p>
+      </footer>
     </div>
   );
 }

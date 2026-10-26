@@ -1,8 +1,10 @@
 node_modules
 dist
-data
-.env
-.env.local
+data/
+.env*
+!.env.example
+env/
+.vercel/
 .DS_Store
-.herenow/
-*.code-workspace
+playwright-report/
+test-results/

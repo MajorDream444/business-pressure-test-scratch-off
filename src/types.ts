@@ -2,13 +2,11 @@ export interface Option {
   label: string;
   score: number;
 }
-
 export interface Question {
   id: string;
   question: string;
   options: Option[];
 }
-
 export interface Band {
   key: string;
   min: number;
@@ -17,12 +15,4 @@ export interface Band {
   diagnosis: string;
   leaks: string[];
   next_moves: string[];
-}
-
-export interface SubmitPayload {
-  name: string;
-  email: string;
-  telegramOrPhone: string;
-  score: number;
-  notes: string;
 }
