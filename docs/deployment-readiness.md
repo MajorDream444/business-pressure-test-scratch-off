@@ -24,6 +24,8 @@ Airtable AMA MOB OS V2 appJ1Vuz0rz8a2izs:
 
 New table/price mappings configured for preview/development only. Feature flags disabled. No production variables or domains changed.
 
+The mapping is now enforced in code: `tbl1pPhCa6bx3ST3E` is the MAIM Follow-up Queue and is rejected if configured as Contacts, lead capture, assessment responses, or orders. Contacts remain Client Profiles `tblWA2OJMcMrOtDkE`. The launch check reports role validity without printing table values or credentials.
+
 ## Still needed to activate integrations
 The Vercel project had no AIRTABLE_PAT, RESEND_API_KEY or verified RESEND_FROM_EMAIL at inspection. No Stripe secret or webhook signing secret is configured by this work. Owner must enter secrets directly into Vercel Settings → Environment Variables; do not put them in chat or git.
 
@@ -36,6 +38,8 @@ For protected preview testing: AIRTABLE_PAT with record read/write for this base
 5. Complete a test payment; verify one order, contact sync and actual scheduling email. Replay event and check no duplicate row or reset of fulfillment state. Unpaid sessions cannot fulfill.
 6. Review scheduling capacity, cancellations/refunds and tax configuration before offering the live service. The integration does not automatically process refunds, disputes or delivery of the human blueprint; reconcile these in Stripe and the fulfillment queue. Confirm a receipt/confirmation contact process.
 7. For public capture, configure shared rate limiting or reviewed Vercel Firewall controls. Instance throttles alone are insufficient.
+
+One bounded protected-preview procedure is specified in `docs/bpt-external-qa-packet-2026-10-27.md`. It is a test plan, not evidence that external QA ran.
 
 ## Coaching automation intentionally paused
 Major asked to be interviewed before email copy is written. APPROVED_COACHING_EMAILS is empty; nurtureReady therefore returns false even if the feature flag is enabled. No existing contacts were enrolled or emailed.

@@ -1,3 +1,5 @@
+import { contactsTableReady } from './table-policy.js';
+
 export function captureReady() {
  return process.env.ENABLE_SUBMISSIONS === 'true' && !!process.env.AIRTABLE_PAT && !!process.env.AIRTABLE_BASE_ID;
 }
@@ -14,7 +16,7 @@ export async function upsert(table: string, key: string, fields: Record<string, 
 }
 export async function syncContact(email: string, name: string) {
  const table = process.env.AIRTABLE_CONTACTS_TABLE_ID;
- if (!table) throw new Error('Contacts not configured');
+ if (!table || !contactsTableReady()) throw new Error('Contacts table mapping is not safe');
  const formula = `LOWER({Email})=${JSON.stringify(email.toLowerCase())}`;
  const found = await airtable(`${table}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=2`);
  if (found.records?.length > 1) throw new Error('Duplicate contacts require review');

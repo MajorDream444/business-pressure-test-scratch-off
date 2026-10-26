@@ -34,6 +34,13 @@ test('contact sync preserves existing human-owned profiles and flags ambiguous d
  await assert.rejects(syncContact('person@example.com','New name'));
  process.env={...env};global.fetch=fetchOriginal;
 });
+test('contact sync rejects the Follow-up Queue mapping before any provider request',async()=>{
+ process.env.AIRTABLE_PAT='fake';process.env.AIRTABLE_BASE_ID='appTest';process.env.AIRTABLE_CONTACTS_TABLE_ID='tbl1pPhCa6bx3ST3E';process.env.AIRTABLE_FOLLOWUP_TABLE_ID='tbl1pPhCa6bx3ST3E';
+ let calls=0;global.fetch=async()=>{calls++;throw new Error('must not call');};
+ await assert.rejects(syncContact('person@example.com','Test Person'),/mapping is not safe/);
+ assert.equal(calls,0);
+ process.env={...env};global.fetch=fetchOriginal;
+});
 test('webhook rejects forged and parsed bodies, and acknowledges a valid unrelated event without a write',async()=>{
  process.env.STRIPE_SECRET_KEY='sk_test_fake';process.env.STRIPE_WEBHOOK_SECRET='whsec_test';process.env.AIRTABLE_PAT='fake';process.env.AIRTABLE_ORDERS_TABLE_ID='tblTest';process.env.AIRTABLE_CONTACTS_TABLE_ID='tblContacts';
  const payload=JSON.stringify({id:'evt_test',type:'customer.created',data:{object:{id:'cus_test'}}});

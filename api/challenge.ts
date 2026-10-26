@@ -1,5 +1,6 @@
 import type { ApiRequest, ApiResponse } from "./submit.js";
 import { issueChallenge } from "../shared/server-protection.js";
+import { contactsTableReady } from "../shared/table-policy.js";
 export default function handler(req: ApiRequest, res: ApiResponse) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET")
@@ -19,7 +20,7 @@ export default function handler(req: ApiRequest, res: ApiResponse) {
     .status(200)
     .json({
       captureAvailable: capture,
-      continuityAvailable: capture && !!process.env.AIRTABLE_ASSESSMENTS_TABLE_ID && !!process.env.AIRTABLE_CONTACTS_TABLE_ID,
+      continuityAvailable: capture && !!process.env.AIRTABLE_ASSESSMENTS_TABLE_ID && contactsTableReady(),
       emailAvailable: email,
       challenge: capture ? issueChallenge(secret!) : null,
     });
