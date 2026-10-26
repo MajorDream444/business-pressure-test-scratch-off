@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import {
   MAIM_FOLLOWUP_QUEUE_TABLE_ID,
   contactsTableReady,
+  leadCaptureTableReady,
+  assessmentsTableReady,
+  ordersTableReady,
   followupTableReady,
   tableRoleIssues,
 } from "../shared/table-policy";
@@ -18,6 +21,9 @@ const safe = {
 test("authoritative Airtable roles accept Contacts and Follow-up Queue only in their own slots", () => {
   assert.deepEqual(tableRoleIssues(safe), []);
   assert.equal(contactsTableReady(safe), true);
+  assert.equal(leadCaptureTableReady(safe), true);
+  assert.equal(assessmentsTableReady(safe), true);
+  assert.equal(ordersTableReady(safe), true);
   assert.equal(followupTableReady(safe), true);
 });
 

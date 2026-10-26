@@ -6,13 +6,14 @@ import { validChallenge } from '../shared/server-protection.js';
 import { CHOICES, CONTINUITY_VERSION, continuityResult, continuityReport } from '../shared/continuity.js';
 import type { ContinuityAnswer } from '../shared/continuity.js';
 import { captureReady, upsert, syncContact, sendResultEmail } from '../shared/integrations.js';
+import {assessmentsTableReady,contactsTableReady} from '../shared/table-policy.js';
 export default async function handler(req:ApiRequest,res:ApiResponse) {
  res.setHeader('Cache-Control','no-store');
  if(req.method!=='POST'){res.setHeader('Allow','POST');return res.status(405).json({error:'Method not allowed'});}
- if(!captureReady() || !process.env.AIRTABLE_ASSESSMENTS_TABLE_ID || !process.env.AIRTABLE_CONTACTS_TABLE_ID) return res.status(503).json({error:'Saving is not available yet. Download your plan instead.'});
+ if(!captureReady() || !assessmentsTableReady() || !contactsTableReady()) return res.status(503).json({error:'Saving is not available yet. Download your plan instead.'});
  let b:Record<string,unknown>;
  try {
-  if(String(req.headers.origin||'') && new URL(String(req.headers.origin)).host !== String(req.headers.host)) throw new Error();
+  if(!req.headers.origin || !req.headers.host || new URL(String(req.headers.origin)).host !== String(req.headers.host)) throw new Error();
   if(JSON.stringify(req.body).length>10000) throw new Error();
   b=typeof req.body==='string'?JSON.parse(req.body):req.body;
   if(!b || b.consent!==true || b.website || !validChallenge(String(b.challenge||''),process.env.AIRTABLE_PAT!)) throw new Error();

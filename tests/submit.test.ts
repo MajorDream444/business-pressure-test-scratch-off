@@ -169,6 +169,28 @@ test("disabled capture, honeypot and invalid answers cannot write records", asyn
     assert.equal(r.calls.length, 0);
   }
 });
+test("a missing Origin is rejected before any provider write", async () => {
+  const old = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+  const original = globalThis.fetch;
+  Object.assign(process.env, {
+    ENABLE_SUBMISSIONS: "true",
+    AIRTABLE_PAT: "mock-secret",
+    AIRTABLE_BASE_ID: "appTest",
+    AIRTABLE_TABLE_ID: "tblTest",
+  });
+  let calls = 0;
+  globalThis.fetch = (async () => { calls++; throw new Error("must not call"); }) as typeof fetch;
+  let status = 200;
+  const res: ApiResponse = {status(code){status=code;return this;},json(v){return v;},setHeader(){}};
+  try {
+    await handler({method:"POST",body:payload(),headers:{host:"localhost:3000","x-forwarded-for":crypto.randomUUID()}},res);
+    assert.equal(status,403);
+    assert.equal(calls,0);
+  } finally {
+    globalThis.fetch=original;
+    for(const k of keys) old[k]===undefined?delete process.env[k]:(process.env[k]=old[k]);
+  }
+});
 test("instance-level throttle rejects bursts and resets after a minute", () => {
   for (let i = 0; i < 6; i++) assert.ok(allowRequest("rate-test", 100));
   assert.ok(!allowRequest("rate-test", 101));

@@ -3,11 +3,12 @@ import type { IncomingMessage } from 'node:http';
 import type { ApiRequest,ApiResponse } from './submit.js';
 import { OFFER,paidOrder,stripeClient,httpsUrl } from '../shared/commerce.js';
 import { airtable,upsert,syncContact,sendResultEmail } from '../shared/integrations.js';
+import {contactsTableReady,ordersTableReady} from '../shared/table-policy.js';
 export const config={api:{bodyParser:false}};
 export default async function handler(req:ApiRequest & Partial<IncomingMessage>,res:ApiResponse) {
  res.setHeader('Cache-Control','no-store');
  if(req.method!=='POST'){res.setHeader('Allow','POST');return res.status(405).json({error:'Method not allowed'});}
- if(!process.env.STRIPE_WEBHOOK_SECRET || !process.env.STRIPE_SECRET_KEY || !process.env.AIRTABLE_ORDERS_TABLE_ID || !process.env.AIRTABLE_PAT || !process.env.AIRTABLE_CONTACTS_TABLE_ID) return res.status(503).json({error:'Payment sync unavailable'});
+ if(!process.env.STRIPE_WEBHOOK_SECRET || !process.env.STRIPE_SECRET_KEY || !process.env.AIRTABLE_PAT || !ordersTableReady() || !contactsTableReady()) return res.status(503).json({error:'Payment sync unavailable'});
  let event:Stripe.Event;
  try {
   let raw:Buffer;

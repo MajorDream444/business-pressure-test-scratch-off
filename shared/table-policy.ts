@@ -35,6 +35,18 @@ export function contactsTableReady(env: TableEnvironment = process.env): boolean
   return Boolean(env.AIRTABLE_CONTACTS_TABLE_ID) && tableRoleIssues(env).length === 0;
 }
 
+export function leadCaptureTableReady(env: TableEnvironment = process.env): boolean {
+  return Boolean(env.AIRTABLE_TABLE_ID) && tableRoleIssues(env).length === 0;
+}
+
+export function assessmentsTableReady(env: TableEnvironment = process.env): boolean {
+  return Boolean(env.AIRTABLE_ASSESSMENTS_TABLE_ID) && tableRoleIssues(env).length === 0;
+}
+
+export function ordersTableReady(env: TableEnvironment = process.env): boolean {
+  return Boolean(env.AIRTABLE_ORDERS_TABLE_ID) && tableRoleIssues(env).length === 0;
+}
+
 export function followupTableReady(env: TableEnvironment = process.env): boolean {
   return (
     env.AIRTABLE_FOLLOWUP_TABLE_ID === MAIM_FOLLOWUP_QUEUE_TABLE_ID &&

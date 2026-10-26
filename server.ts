@@ -39,6 +39,6 @@ const vite = await createServer({
   appType: "spa",
 });
 app.use(vite.middlewares);
-app.listen(3000, "0.0.0.0", () =>
+app.listen(3000, "127.0.0.1", () =>
   console.log("MAIM pressure test: http://localhost:3000"),
 );

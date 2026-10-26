@@ -1,6 +1,7 @@
 import { googleBookingUrl } from "../shared/google-booking.js";
 import { enroll } from "../shared/nurture.js";
-import { syncContact } from "../shared/integrations.js";
+import { captureReady, syncContact } from "../shared/integrations.js";
+import { leadCaptureTableReady } from "../shared/table-policy.js";
 import { createHash } from "node:crypto";
 import { validateSubmission, diagnose, toFields } from "../shared/diagnostic.js";
 import { buildEmail } from "../shared/email-template.js";
@@ -33,7 +34,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
-  if (process.env.ENABLE_SUBMISSIONS !== "true")
+  if (!captureReady() || !leadCaptureTableReady())
     return res
       .status(503)
       .json({
@@ -54,7 +55,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const origin = String(req.headers.origin ?? ""),
     host = String(req.headers.host ?? "");
   try {
-    if (origin && new URL(origin).host !== host)
+    if (!origin || !host || new URL(origin).host !== host)
       return res
         .status(403)
         .json({ error: "Please submit from the pressure test." });
