@@ -1,59 +1,114 @@
-# Business Pressure Test external-QA packet
+# Business Pressure Test protected-Preview acceptance packet
 
 Status: **prepared, not executed**
-Scope: one protected-preview assessment save and requested transactional result email. This packet does not test checkout, Academy, Pillar Scroll, coaching nurture, production, or publishing.
 
-QA pin: use only the exact PR #5 head SHA recorded under **External QA pin** in the reviewed pull-request description. The operator must record that SHA and the Vercel deployment ID before enabling capture; any mismatch stops the run.
+Immutable application candidate: `2891852f80b1015852e6940b07c0ebba6a184e7e`
 
-## Controlled environment
+That SHA is the only application source eligible for this acceptance run. The later packet-only commit may document the procedure but must not replace the application SHA. Record the SHA and protected-Preview deployment ID before any provider setting is enabled; a mismatch is a stop condition.
 
-- Vercel project: HAMAL AGI / `business-pressure-test`.
-- Target: a protected Preview deployment of the reviewed PR commit, never Production.
-- Flags: `ENABLE_SUBMISSIONS=true`; `ENABLE_CHECKOUT=false`; `ENABLE_NURTURE=false`.
-- Airtable base: AMA MOB OS V2.
-- Table roles: lead capture `tblYf3kEIWr0FxX2i`; Contacts / Client Profiles `tblWA2OJMcMrOtDkE`; Follow-up Queue `tbl1pPhCa6bx3ST3E`.
-- The Follow-up Queue must not appear in `AIRTABLE_CONTACTS_TABLE_ID`, `AIRTABLE_TABLE_ID`, `AIRTABLE_ASSESSMENTS_TABLE_ID`, or `AIRTABLE_ORDERS_TABLE_ID`. Run `npm run launch:check` before enabling the Preview flag.
-- Resend: verified `majoraimindset.com` transactional sender; provider key entered privately in Vercel Preview scope.
+## Scope boundary
 
-## Synthetic participant
+This packet covers BPT save provenance only: one consented BPT result, its stable Submission ID, one disposable contact link, and an optional provider-test email acceptance receipt. It does **not** cover actual inbox delivery, continuity, nurture, Academy sign-in, Academy paid-seat concurrency, Pillar Scroll, Stripe checkout, payment, refund, dispute, entitlement, revocation, booking, production, publishing, or customer messaging.
 
-- Name: `MAIM BPT QA 2026-10-27`
-- Recipient: a new plus-address or alias in one founder-approved, privately controlled adult QA inbox, supplied to the operator as `BPT_QA_RECIPIENT`. It must not already exist in Client Profiles. The private address is intentionally excluded from public Git.
-- Phone/Telegram: blank.
-- Business type: `Freelancing / Consulting`.
-- Revenue range: `Pre-revenue`.
-- Readiness: `Exploring my options`.
-- Biggest issue: `Synthetic QA only — verify one saved diagnostic and requested result email.`
-- Answers: use the first listed option for Q1–Q10.
-- Save consent: checked. Optional coaching consent: **unchecked**.
+## Origins
 
-Do not proceed until the exact controlled recipient has been privately resolved. Do not substitute a customer, client, mailing list, disposable public inbox, or invented address.
+- Local verification origin: `http://127.0.0.1:3000`, using fixtures/mocks only and no provider credentials.
+- Acceptance origin: the private HTTPS URL of the protected Preview for the immutable SHA. Store it privately in `APP_ORIGIN`; do not put the URL in Git.
+- Production origins are forbidden. A redirect, alias, or environment resolving to Production stops the run.
 
-## Expected records and events
+## Disposable Preview mapping
 
-1. Browser loads `/api/challenge`; capability says capture available and returns a short-lived challenge.
-2. Initial POST to `/api/submit` returns `saved:true`, a `maim_…` submission reference, `contactStatus:synced`, `followupStatus:not_requested`, and `emailStatus:sent` (provider acceptance only).
-3. Airtable lead capture contains exactly **one** row for the returned Submission ID, all ten answers, server-derived scores/signals, consent evidence, and a Contact Record ID.
-4. Client Profiles contains exactly **one new** normalized-email QA contact linked from that assessment. If a matching contact exists before the run, stop and choose a fresh controlled alias.
-5. MAIM Follow-up Queue creates **zero** rows because coaching consent is unchecked.
-6. Resend records exactly **one** accepted result email with the Submission ID as idempotency key; the controlled inbox receives exactly **one** message and its links are reviewed without booking.
-7. Repeating the identical POST once through the retry control produces a second successful API receipt while retaining exactly **one** assessment, **one** contact, **one** accepted Resend message and **one** inbox message.
-8. No Stripe Session, order, payment, booking, Academy enrollment, Pillar Scroll entitlement, external message beyond the requested QA result, or production record is created.
+Use a new QA-only Airtable base and QA-only tables, created and removed under owner approval. Record private resource IDs in the operator evidence, never in Git. The exact role mapping is expressed only by environment-variable name:
 
-## Evidence to retain
+| Environment variable | Disposable role | Maximum effect |
+| --- | --- | --- |
+| `AIRTABLE_BASE_ID` | QA-only base | contains only this run's fixtures |
+| `AIRTABLE_TABLE_ID` | QA-only BPT result table | one record |
+| `AIRTABLE_CONTACTS_TABLE_ID` | QA-only contact table | one contact |
+| `AIRTABLE_PAT` | least-privilege token for the two QA tables | read/write only those tables |
+| `RESEND_API_KEY` | Preview-scoped sending credential | one provider-test acceptance |
+| `RESEND_FROM_EMAIL` | verified transactional sender | no mailbox access |
+| `RESEND_REPLY_TO` | private controlled reply route | no test replies |
+| `APP_ORIGIN` | exact protected-Preview origin | one origin only |
 
-- Reviewed Git commit and protected Preview deployment ID.
-- Two redacted API response receipts: initial save and one identical retry.
-- One assessment record ID and one Client Profiles contact record ID, plus a field-level PASS/BLOCKED checklist; no answers or recipient address in Git.
-- One Resend message ID plus one separate inbox-receipt timestamp. Provider acceptance and inbox receipt are reported separately.
-- Before/after count receipt: assessments `0 → 1 → 1`; QA contacts `0 → 1 → 1`; Follow-up Queue `0 → 0 → 0`; MAIM Orders `0 → 0 → 0`; Stripe events `0`; bookings `0`.
-- One configuration receipt showing capture enabled only for the bounded window, checkout/nurture false, and the table-role check passing. Values and secrets stay private.
-- `npm run launch:check` output containing setting names/status only.
+Set `ENABLE_SUBMISSIONS=true`, `ENABLE_CHECKOUT=false`, and `ENABLE_NURTURE=false` only in the protected Preview. Leave `AIRTABLE_ASSESSMENTS_TABLE_ID`, `AIRTABLE_ORDERS_TABLE_ID`, `AIRTABLE_FOLLOWUP_TABLE_ID`, Stripe variables, Supabase variables, and scheduling variables unset. No segment, membership, order, entitlement, or production table is mapped.
 
-## Cleanup
+Proof that existing production integrations remain untouched requires all of the following before the run: Preview-only environment scope; QA-only Airtable token/base/tables; no production resource identifier in the operator's private mapping; checkout and nurture false; forbidden variables unset; and baseline/final production counts or audit timestamps unchanged. This repository change itself made no provider call. If isolation cannot be proved, do not run the packet.
 
-After evidence review, disable `ENABLE_SUBMISSIONS` in Preview and redeploy the same reviewed commit. Retain the redacted evidence. With owner-approved cleanup, delete exactly **two Airtable records**: the one assessment record and the one newly created QA contact, both by captured record ID. Delete **zero** Follow-up Queue rows and **zero** order rows. Retain the one Resend provider receipt and inbox evidence; do not attempt to erase provider audit logs. Confirm post-cleanup counts return to zero for the exact QA Submission ID and recipient. Never use a broad name/email deletion or touch a pre-existing contact.
+## Fixtures and limits
+
+Use a unique private `RUN_ID` and derive every fixture label from it. Store the exact values privately.
+
+- Participant: synthetic adult QA identity, never a customer or existing contact.
+- Save consent: true.
+- Optional coaching/marketing consent: false.
+- Answers: fixed Q1–Q10 fixture documented in the private run sheet.
+- Honeypot: empty.
+- Submission attempts: exactly two—initial and one identical idempotency retry.
+- BPT records: maximum one.
+- Contacts: maximum one.
+- Follow-up memberships/segments: exactly zero.
+- Result-email provider acceptances: maximum one.
+- Actual inbox messages: zero in this packet.
+- Orders, Stripe objects/events, bookings, enrollments, entitlements, continuity records, Academy records, and Pillar Scroll records: exactly zero.
+
+For the email branch, use a Resend provider test address privately supplied for this run. A Resend test-address response is **simulated/provider testing only**; it is not evidence of inbox delivery, recipient ownership, deliverability, or customer messaging. Actual inbox-delivery evidence requires a separately and privately approved adult-controlled inbox and a separate authorization; it remains unexecuted.
+
+## Consent and suppression cases
+
+1. Local fixture: `consent=false` must return validation failure and produce zero fetch/provider calls.
+2. Local fixture: missing or cross-origin `Origin` must fail before any provider call.
+3. Protected Preview: `consent=true` and marketing consent false may create the bounded save/contact/email-test effects above.
+4. Suppression: marketing consent false plus `ENABLE_NURTURE=false` and no `AIRTABLE_FOLLOWUP_TABLE_ID` must yield `followupStatus:not_requested` and zero membership/segment writes.
+5. The retry must retain the same Submission ID, one BPT record, one contact, and at most one provider acceptance.
+
+Purchase, unsubscribe, prior-customer, refund, dispute, and revocation suppression are outside this BPT save-provenance packet and remain release-gated.
+
+## Procedure and evidence
+
+1. Confirm the Preview is protected and built from the immutable SHA; retain the deployment ID and source receipt.
+2. Confirm the private environment receipt contains only the allowed variable names above, with flags and forbidden-variable absence. Do not retain values in Git.
+3. Record zero baseline counts for the private `RUN_ID` in both disposable tables and zero relevant production audit/count changes.
+4. Load `/api/challenge`; retain the redacted capability receipt.
+5. Submit once; retain a redacted response containing `saved:true`, the Submission ID, `contactStatus:synced`, `followupStatus:not_requested`, and the provider-test `emailStatus`.
+6. Retry the identical payload once; retain the second redacted response and verify the same Submission ID.
+7. Retain exact private fixture IDs: one BPT Airtable record ID, one contact record ID, and, if accepted, one Resend provider receipt ID. Do not retain the address, answers, tokens, URLs, or resource IDs in Git.
+8. Verify final counts: BPT `0 → 1 → 1`; contact `0 → 1 → 1`; memberships/segments `0`; provider acceptances `0 → at most 1 → at most 1`; every excluded resource `0`.
+9. Disable submissions in Preview before cleanup.
+
+## Fixture-ID cleanup
+
+Using only the two captured Airtable record IDs, delete exactly one BPT record and one contact record from the disposable QA tables. Never delete by broad name/email query. Delete zero memberships, orders, or production records. Confirm both `RUN_ID` counts return to zero, then revoke the QA-only Airtable token and remove the disposable QA base/tables according to owner policy. Retain redacted provider/audit receipts; do not attempt to erase provider audit logs.
 
 ## Stop conditions
 
-Stop without submission if the recipient is unresolved, the Preview is not protected, launch check reports any table-role conflict, the sender is unverified, the configured Contacts table differs from Client Profiles, or any flag would enable checkout/nurture/Production. After submission, stop on the first unexpected write, duplicate, customer-visible claim, or cross-journey event.
+Stop before submission if the SHA or deployment ID differs; Preview protection is absent; the private recipient/test identity is unresolved; any resource is not disposable; the token can access production; a production ID appears in the mapping; any forbidden variable is set; checkout/nurture is enabled; the origin is not the exact protected Preview; launch/table-role checks fail; or baseline counts are nonzero.
+
+After submission, stop immediately on a second BPT record/contact/provider acceptance; any membership, segment, order, Stripe, booking, Academy, entitlement, continuity, Pillar Scroll, production or customer event; any unapproved external message; an unstable Submission ID; or inability to clean up by the exact fixture IDs.
+
+## Suite provenance
+
+- `6cacfd1d0ad60859ef93956444a04ebbd492553c`: `npm test` reported 25/25. This was the complete earlier rewrite before reconciliation guards.
+- `998f44177e5ae5d26f9856223bca264c497cd7cd`: `npm test` reported 29/29. Four tests were added for Airtable role policy and unsafe contact mapping.
+- `2891852f80b1015852e6940b07c0ebba6a184e7e`: `npm run check` reported 31/31. Two tests were added for dependency floors and missing-Origin rejection. The same command also runs TypeScript and the Vite production build.
+
+Exact full-suite commands for the immutable candidate:
+
+```sh
+npm ci
+npm run lint
+npm test
+npm run build
+npm run check
+npm audit --json
+npm ls body-parser qs esbuild express vite --all
+git diff --check
+```
+
+Focused subsets used during development are filters over the same test files and are not substitutes for 31/31:
+
+```sh
+node --import tsx --test tests/table-policy.test.ts
+node --import tsx --test tests/submit.test.ts
+node --import tsx --test tests/dependency-policy.test.ts
+```
