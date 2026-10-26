@@ -1,3 +1,8 @@
+> Reconciliation: this PR's broader acceptance packet is distinct from the
+> limited BPT-save/reservation-provenance packet in Major-AI-OS
+> `docs/qa/MAIM_FUNNEL_TEST_PACKET_2026-10-27.md`. Neither is executed or approved.
+> Follow immutable candidate pins and keep simulation separate from inbox receipt.
+
 # Business Pressure Test protected-Preview acceptance packet
 
 Status: **prepared, not executed**

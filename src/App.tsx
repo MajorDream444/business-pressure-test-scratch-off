@@ -120,6 +120,7 @@ export default function App() {
         throw new Error(
           body.error || "We could not confirm the save. Please try again.",
         );
+      if(body.emailStatusPersisted===false)setError("Your results are saved, but the email-status receipt could not be recorded. Provider acceptance is not inbox receipt.");
       if (body.followupStatus === "pending") setError("Your results are saved, but coaching email enrollment needs attention.");
       if (body.contactStatus === "pending") setError("Your results are saved, but contact sync still needs attention.");
       setSaveState(

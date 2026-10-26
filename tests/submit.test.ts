@@ -28,6 +28,7 @@ const keys = [
   "AIRTABLE_TABLE_ID",
   "RESEND_API_KEY",
   "RESEND_FROM_EMAIL",
+  "ENABLE_RESULTS_EMAIL",
 ];
 async function run(
   body: unknown,
@@ -36,6 +37,8 @@ async function run(
     failEmail = false,
     duplicate = false,
     disabled = false,
+    emailDisabled = false,
+    failStatus = false,
   } = {},
 ) {
   const old = Object.fromEntries(keys.map((k) => [k, process.env[k]])),
@@ -47,6 +50,7 @@ async function run(
     AIRTABLE_TABLE_ID: "tblTest",
     RESEND_API_KEY: "mock-key",
     RESEND_FROM_EMAIL: "MAIM <results@example.com>",
+    ENABLE_RESULTS_EMAIL: emailDisabled?"false":"true",
   });
   const calls: {
     url: string;
@@ -57,9 +61,11 @@ async function run(
     const u = String(url);
     calls.push({
       url: u,
-      body: JSON.parse(String(init?.body)),
+      body: init?.body?JSON.parse(String(init.body)):{},
       headers: init?.headers as Record<string, string>,
     });
+    if(!init?.method)return Response.json({records:duplicate?[{id:'rec123',fields:{'Results Email Status':'sent','Raw Payload JSON':'{"delivery":{"providerId":"mail-original"}}'}}]:[]});
+    if(calls.length===4&&failStatus)return Response.json({error:'private details'},{status:500});
     if (u.includes("resend"))
       return new Response(
         JSON.stringify(
@@ -67,7 +73,7 @@ async function run(
         ),
         { status: failEmail ? 500 : 200 },
       );
-    if (calls.length === 1 && failSave)
+    if (calls.length === 2 && failSave)
       return new Response('{"error":"private provider details"}', {
         status: 422,
       });
@@ -123,7 +129,7 @@ const payload = () => ({
 test("rejected Airtable write returns safe retry error and never emails", async () => {
   const r = await run(payload(), { failSave: true });
   assert.equal(r.status, 502);
-  assert.equal(r.calls.length, 1);
+  assert.equal(r.calls.length, 2);
   assert.ok(!JSON.stringify(r.value).includes("private provider"));
 });
 test("awaited email failure preserves saved state and marks retriable failure", async () => {
@@ -132,7 +138,7 @@ test("awaited email failure preserves saved state and marks retriable failure", 
   assert.equal(r.value.saved, true);
   assert.equal(r.value.emailStatus, "failed");
   assert.equal(
-    r.calls[2].body.records[0].fields["Results Email Status"],
+    r.calls[3].body.records[0].fields["Results Email Status"],
     "failed",
   );
 });
@@ -141,14 +147,14 @@ test("upsert and email use stable references across retries", async () => {
     b = await run(payload());
   assert.equal(a.value.emailStatus, "sent");
   assert.equal(
-    a.calls[0].body.records[0].fields["Submission ID"],
-    b.calls[0].body.records[0].fields["Submission ID"],
+    a.calls[1].body.records[0].fields["Submission ID"],
+    b.calls[1].body.records[0].fields["Submission ID"],
   );
-  assert.deepEqual(a.calls[0].body.performUpsert, {
+  assert.deepEqual(a.calls[1].body.performUpsert, {
     fieldsToMergeOn: ["Submission ID"],
   });
-  assert.equal(a.calls[1].headers["Idempotency-Key"], a.value.submissionId);
-  assert.equal(a.calls[2].body.records[0].fields.Notes, undefined);
+  assert.equal(a.calls[2].headers["Idempotency-Key"], a.value.submissionId);
+  assert.equal(a.calls[3].body.records[0].fields.Notes, undefined);
 });
 test("already-sent record skips repeat email", async () => {
   const r = await run(payload(), { duplicate: true });
@@ -196,3 +202,6 @@ test("instance-level throttle rejects bursts and resets after a minute", () => {
   assert.ok(!allowRequest("rate-test", 101));
   assert.ok(allowRequest("rate-test", 60200));
 });
+
+test('results email requires its own flag even when credentials exist',async()=>{const r=await run(payload(),{emailDisabled:true});assert.equal(r.value.saved,true);assert.ok(!r.calls.some(c=>c.url.includes('resend')));});
+test('provider acceptance and delivery-status persistence are separate evidence',async()=>{const r=await run(payload(),{failStatus:true});assert.equal(r.value.emailStatus,'sent');assert.equal(r.value.emailStatusPersisted,false);});

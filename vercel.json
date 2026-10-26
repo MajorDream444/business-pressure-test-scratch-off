@@ -47,5 +47,10 @@
         }
       ]
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "maim/deployment-ready": false
+    }
+  }
 }

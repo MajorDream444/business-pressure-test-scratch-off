@@ -111,8 +111,16 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     Authorization: `Bearer ${pat}`,
     "Content-Type": "application/json",
   };
-  let record: { id: string; fields: Record<string, unknown> };
+  let record: { id: string; createdTime?:string; fields: Record<string, unknown> };
   try {
+    const prior=await fetch(`${endpoint}?maxRecords=2&filterByFormula=${encodeURIComponent(`{Submission ID}="${submissionId}"`)}`,{headers,signal:AbortSignal.timeout(10000)});
+    if(!prior.ok)throw new Error('Lookup unavailable');
+    const matches=(await prior.json()).records;
+    if(!Array.isArray(matches)||matches.length>1)throw new Error('Submission reference requires review');
+    const existing=matches[0];
+    if(existing?.fields?.['Results Email Status']==='sent')return res.status(200).json({saved:true,success:true,emailStatus:'sent',emailStatusPersisted:true,submissionId});
+    if(typeof existing?.fields?.['Raw Payload JSON']==='string')fields['Raw Payload JSON']=existing.fields['Raw Payload JSON'];
+    fields['Submitted At']=existing?.fields?.['Submitted At']||new Date().toISOString();
     const saved = await fetch(endpoint, {
       method: "PATCH",
       headers,
@@ -161,7 +169,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const key = process.env.RESEND_API_KEY,
     from = process.env.RESEND_FROM_EMAIL;
   let emailStatus = "not_configured";
-  if (key && from && !from.includes("resend.dev")) {
+  let providerId:string|null=null;
+  if (process.env.ENABLE_RESULTS_EMAIL==='true' && key && from && !from.includes("resend.dev")) {
     try {
       const email = buildEmail(input, googleBookingUrl(process.env.VITE_GOOGLE_BOOKING_URL));
       const sent = await fetch("https://api.resend.com/emails", {
@@ -177,12 +186,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       if (!sent.ok) throw new Error("Provider rejected email");
       const receipt = await sent.json();
       if (!receipt.id) throw new Error("Missing email receipt");
-      emailStatus = "sent";
+      emailStatus = "sent";providerId=receipt.id;
     } catch {
       emailStatus = "failed";
       console.error("[email] results send failed");
     }
   }
+  let emailStatusPersisted=false;
   try {
     const update = await fetch(endpoint, {
       method: "PATCH",
@@ -194,6 +204,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
             id: record.id,
             fields: {
               "Results Email Status": emailStatus,
+              "Raw Payload JSON": JSON.stringify({...JSON.parse(String(fields['Raw Payload JSON'])),consentNoticeVersion:'bpt-results-2026-10-27',consentReceivedAt:record.createdTime||fields['Submitted At'],delivery:{status:emailStatus,providerId}}),
               "Results Email Updated At": new Date().toISOString(),
               ...(!record.fields["Submitted At"]
                 ? { "Submitted At": new Date().toISOString() }
@@ -203,6 +214,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         ],
       }),
     });
+    emailStatusPersisted=update.ok;
     if (!update.ok)
       console.error("[capture] delivery status not persisted", update.status);
   } catch {
@@ -214,6 +226,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       success: true,
       saved: true,
       emailStatus,
+      emailStatusPersisted,
       contactStatus,
       followupStatus,
       submissionId,

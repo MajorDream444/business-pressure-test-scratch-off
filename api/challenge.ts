@@ -9,6 +9,7 @@ export default function handler(req: ApiRequest, res: ApiResponse) {
   const secret = process.env.AIRTABLE_PAT;
   const capture = captureReady() && leadCaptureTableReady();
   const email =
+    process.env.ENABLE_RESULTS_EMAIL==='true' &&
     !!process.env.RESEND_API_KEY &&
     !!process.env.RESEND_FROM_EMAIL &&
     !process.env.RESEND_FROM_EMAIL.includes("resend.dev");
