@@ -1,30 +1,15 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { buildEmail } from './email-template.js';
-
-interface Payload {
-  submissionId?:     string;
-  submittedAt?:      string;
-  appVersion?:       string;
-  firstName?:        string;
-  lastName?:         string;
-  name?:             string;
-  email?:            string;
-  telegramOrPhone?:  string;
-  source?:           string;
-  businessType?:     string;
-  revenueRange?:     string;
-  biggestIssue?:     string;
-  answers?:          Record<string, string>;
-  scores?:           Record<string, number>;
-  totalScore?:       number;
-  scoreBand?:        string;
-  priority?:         string;
-  primaryLeak?:      string;
-  diagnosisSummary?: string;
-  recommendedOffer?: string;
-  nextStep?:         string;
-  leaks?:            string[];
-  nextMoves?:        string[];
+import { googleBookingUrl } from "../shared/google-booking.js";
+import { enroll } from "../shared/nurture.js";
+import { captureReady, syncContact } from "../shared/integrations.js";
+import { leadCaptureTableReady } from "../shared/table-policy.js";
+import { createHash } from "node:crypto";
+import { validateSubmission, diagnose, toFields } from "../shared/diagnostic.js";
+import { buildEmail } from "../shared/email-template.js";
+import { validChallenge } from "../shared/server-protection.js";
+export interface ApiRequest {
+  method?: string;
+  body: unknown;
+  headers: Record<string, string | string[] | undefined>;
 }
 export interface ApiResponse {
   status(code: number): ApiResponse;
@@ -206,43 +191,6 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       emailStatus = "failed";
       console.error("[email] results send failed");
     }
-
-    console.log('[submit] success:', body.name, body.email, body.totalScore, body.priority);
-
-    // Send results email (fire-and-forget — never blocks the 200 response)
-    const resendKey     = process.env.RESEND_API_KEY;
-    const fromEmail     = process.env.RESEND_FROM_EMAIL ?? 'Business Pressure Test <results@businesspressuretest.com>';
-    const calendlyUrl   = process.env.VITE_CALENDLY_URL ?? '#';
-
-    if (resendKey && body.email && body.totalScore !== undefined) {
-      const emailData = {
-        firstName:        body.firstName        ?? body.name ?? 'there',
-        totalScore:       body.totalScore,
-        scoreBand:        body.scoreBand        ?? '',
-        priority:         body.priority         ?? '',
-        diagnosisSummary: body.diagnosisSummary ?? '',
-        biggestIssue:     body.biggestIssue     ?? '',
-        leaks:            body.leaks            ?? [],
-        nextMoves:        body.nextMoves        ?? [],
-        recommendedOffer: body.recommendedOffer ?? 'Diagnostic Call',
-      };
-
-      const { subject, html } = buildEmail(emailData, calendlyUrl);
-
-      fetch('https://api.resend.com/emails', {
-        method:  'POST',
-        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ from: fromEmail, to: [body.email], subject, html }),
-      })
-        .then(r => r.json())
-        .then(r => console.log('[email] sent:', r))
-        .catch(e => console.error('[email] error:', e));
-    }
-
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    console.error('[submit] Unexpected error:', err);
-    return res.status(500).json({ error: 'Internal server error', detail: String(err) });
   }
   let emailStatusPersisted=false;
   try {
